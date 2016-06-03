@@ -24,7 +24,7 @@ PackageName=treewriter
 
 IncludeDirs = /usr/include/root
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)/include
-IncludeDirs+= ${BUILD_HOME}/gemdaq-testing/gemreadout/include
+IncludeDirs+= ${BUILD_HOME}/${GEM_OS_PROJECT}/gemreadout/include
 INC=$(IncludeDirs:%=-I%)
 
 SRC=$(BUILD_HOME)/$(Project)/$(Package)/src/common
