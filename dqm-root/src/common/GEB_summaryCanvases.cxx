@@ -1,40 +1,42 @@
-#include <sstream>
-#include <iostream>
-#include <fstream>
-#include <iomanip>
+// #include <sstream>
+// #include <iostream>
+// #include <fstream>
+// #include <iomanip>
 
-#if !defined(__CINT__) || defined(__MAKECINT__)
-#include "TProfile.h"
-#include "TLegend.h"
-#include "TROOT.h"
-#include "TVirtualPad.h"
-#include "TLine.h"
-#include "TCanvas.h"
-#include "TPostScript.h"
-#include "THStack.h"
-#include "TH1.h"
-#include "TH2.h"
-#include "TF1.h"
-#include "TAxis.h"
-#include "TGaxis.h"
-#include "TMath.h"
-#include "TROOT.h"
-#include "TStyle.h"
-#include "TGraph.h"
-#include "TGraphAsymmErrors.h"
-#include "TObject.h"
-#include "TH1.h"
-#include "TH1F.h"
-#include <TFile.h>
-#include "TPaveStats.h"
-#include <math.h>
-#include "TBufferJSON.h"
+// #if !defined(__CINT__) || defined(__MAKECINT__)
+// #include "TProfile.h"
+// #include "TLegend.h"
+// #include "TROOT.h"
+// #include "TVirtualPad.h"
+// #include "TLine.h"
+// #include "TCanvas.h"
+// #include "TPostScript.h"
+// #include "THStack.h"
+// #include "TH1.h"
+// #include "TH2.h"
+// #include "TF1.h"
+// #include "TAxis.h"
+// #include "TGaxis.h"
+// #include "TMath.h"
+// #include "TROOT.h"
+// #include "TStyle.h"
+// #include "TGraph.h"
+// #include "TGraphAsymmErrors.h"
+// #include "TObject.h"
+// #include "TH1.h"
+// #include "TH1F.h"
+// #include <TFile.h>
+// #include "TPaveStats.h"
+// #include <math.h>
+// #include "TBufferJSON.h"
 
-#include <iostream>
+// #include <iostream>
 
-//using namespace std;
+// //#include "plotter.cxx"
+// //#include "gtprinter.cxx"
+// //using namespace std;
 
-#endif
+// #endif
 
 
 void fillGEBCanvases()
@@ -141,7 +143,7 @@ void fillGEBClusterSizeCanvas()
   gStyle->SetOptStat(0000);
 }
 
-void printClusterMultCanvas()
+void fillGEBClusterMultCanvas()
 {
   gStyle->SetOptStat("emr");
   std::stringstream ss;

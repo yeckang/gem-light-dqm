@@ -1,4 +1,4 @@
-#define DEBUG 0
+//#define DEBUG 0
 #include <iomanip> 
 #include <iostream>
 #include <fstream>
@@ -38,8 +38,8 @@
 #include <math.h>
 
 #include "plotter.cxx"
-#include "dqmCanvases.cxx"
-#include "GEB_summaryCanvases.cxx"
+//#include "dqmCanvases.cxx"
+//#include "GEB_summaryCanvases.cxx"
 
 using namespace std;
 

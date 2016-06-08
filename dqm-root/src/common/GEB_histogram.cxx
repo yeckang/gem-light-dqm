@@ -6,7 +6,7 @@
 #include "TH1.h"
 #define NETA 8
 #include "gem/readout/GEMslotContents.h"
-#include "plotter.cxx"
+//#include "plotter.cxx"
 //!A class that creates histograms for GEB data
 class GEB_histogram: public Hardware_histogram
 {
@@ -48,10 +48,10 @@ class GEB_histogram: public Hardware_histogram
       TotalFlag  = new TH1F("TotalFlag", "Control Flags", 15,  0x0 , 0xf);
       TotalCRC   = new TH1F("TotalCRC", "CRC Mismatches", 0xffff,-32768,32768);
 
-      Integrity_canvas = newCanvas("GEBIntegrity","Integrity plots",3,2,2400,1200);
-      Occupancy_canvas = newCanvas("GEBOccupancy","Occupancy plots",3,3,1800,1800);
-      ClusterSize_canvas = newCanvas("GEBClusterSize","Cluster size plots",3,3,1800,1800);
-      ClusterMult_canvas = newCanvas("GEBClusterMult","Cluster multiplicity plots",3,3,1800,1800);
+      Integrity_canvas = newCanvas("GEBIntegrity",3,2,2400,1200);
+      Occupancy_canvas = newCanvas("GEBOccupancy",3,3,1800,1800);
+      ClusterSize_canvas = newCanvas("GEBClusterSize",3,3,1800,1800);
+      ClusterMult_canvas = newCanvas("GEBClusterMult",3,3,1800,1800);
     }
 
 
@@ -150,11 +150,11 @@ class GEB_histogram: public Hardware_histogram
     for(int vfat_index=0;vfat_index<vfat_histograms.size();vfat_index++)
       {
   	VFAT_histogram current_vfatH = vfat_histograms[vfat_index];
-	Totalb1010->Add(current_vfatH->getb1010());
-	Totalb1100->Add(current_vfatH->getb1100());
-	Totalb1110->Add(current_vfatH->getb1110());
-	TotalFlag ->Add(current_vfatH->getFlag());
-	TotalCRC  ->Add(current_vfatH->getCRC());
+	Totalb1010->Add(current_vfatH.getb1010());
+	Totalb1100->Add(current_vfatH.getb1100());
+	Totalb1110->Add(current_vfatH.getb1110());
+	TotalFlag ->Add(current_vfatH.getFlag());
+	TotalCRC  ->Add(current_vfatH.getCRC());
       }
 
     fillGEBCanvases();

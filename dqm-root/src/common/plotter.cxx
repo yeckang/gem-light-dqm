@@ -2,6 +2,7 @@
  * A collection of simple ROOT macros.
  *
  * N. Amapane, G. Cerminara, M. Dalchenko
+ * R. King
  */
 #define DEBUG 1
 
@@ -646,6 +647,22 @@ void layerAll(vector<vector<TH1*>> hs, vector<TString> inames)
 }
 
 
+void gtprintCanvas(TCanvas* canvas, TString opathName)
+{
+
+  canvas->Print(opathName+".jpg","jpg");
+  canvas->Print(opathName+".png","png");
+
+  //Create JSON file
+  ofstream jsonfile;
+  jsonfile.open(opathName+".json");
+  TString json = TBufferJSON::ConvertToJSON(canvas);
+  jsonfile << json;
+  jsonfile.close();
+
+}
+
+
 void gtprint(TH1 *h, TString name, TString opath)
 {
   TCanvas *cv = newCanvas(name);			
@@ -676,22 +693,7 @@ void gtprint(TH1 *h, TString name, TString opath)
 
   gROOT->ProcessLine(".!mkdir -p "+opath+"/");
 
-  gtprintCanvas(cv, opath+name)
-
-}
-
-void gtprintCanvas(TCanvas* canvas, TString opathName)
-{
-
-  canvas->Print(opathName+".jpg","jpg");
-  canvas->Print(opathName+".png","png");
-
-  //Create JSON file
-  ofstream jsonfile;
-  jsonfile.open(opathName+".json");
-  TString json = TBufferJSON::ConvertToJSON(h);
-  jsonfile << json;
-  jsonfile.close();
+  gtprintCanvas(cv, opath+name);
 
 }
 
@@ -745,7 +747,7 @@ void gemTreePrint(TDirectory *source, TString outPath, bool first)
       if (cl->InheritsFrom("TCanvas")) {
 	if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing canvas... " << std::endl;
 	TString fullPath = newPath + key->GetName();
-	TCanvas *c = (TH1*)key->ReadObj();
+	TCanvas *c = (TCanvas*)key->ReadObj();
 	gtprintCanvas(c,fullPath);
       }
      

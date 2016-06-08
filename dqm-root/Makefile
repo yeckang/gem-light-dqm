@@ -29,7 +29,7 @@ IncludeDirs+= $(BUILD_HOME)/$(Project)
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)/include
 IncludeDirs+= $(BUILD_HOME)/$(Project)/gemtreewriter/include
-IncludeDirs+= ${BUILD_HOME}/gemdaq-testing/gemreadout/include
+IncludeDirs+= ${BUILD_HOME}/cmsgemos/gemreadout/include
 INC=$(IncludeDirs:%=-I%)
 
 SRC=$(BUILD_HOME)/$(Project)/$(Package)/src/common
