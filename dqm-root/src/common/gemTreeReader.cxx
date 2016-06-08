@@ -334,7 +334,16 @@ private:
                   std::cout << "VFAT Not found\n";
               }
             } /* END VFAT LOOP */
-            
+	    // Fill Summary Histograms
+	    if(gebH_ != geb_map.end()) {
+	      v_vfatH = v_gebH[gebH_->second].vfatsH();
+              v_gebH[gebH_->second].fillSummaryCanvases(v_vfatH);
+            }
+            else {
+                std::cout << "GEB Not found\n";
+                continue;
+            }
+	    
           } /* END GEB LOOP */
           a_c++;
         } /* END AMC LOOP */
