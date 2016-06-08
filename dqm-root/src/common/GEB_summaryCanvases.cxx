@@ -37,23 +37,29 @@
 #endif
 
 
-void printDQMCanvases(TString summaryPath)
+void printGEBCanvases(TString canvasPath)
 {
   gROOT->SetBatch(kTRUE);
-  printIntegrityCanvas(summaryPath);
-  printOccupancyCanvas(summaryPath);
-  printClusterSizeCanvas(summaryPath);
-  printClusterMultCanvas(summaryPath);
+  printGEBIntegrityCanvas(canvasPath);
+  printGEBOccupancyCanvas(canvasPath);
+  printGEBClusterSizeCanvas(canvasPath);
+  printGEBClusterMultCanvas(canvasPath);
 }
-void printIntegrityCanvas(TString summaryPath)
+
+void printGEBIntegrityCanvas(TString canvasPath)
 {
   TGaxis::SetMaxDigits(3);
   gStyle->SetOptStat(0000);
-  TString integrity_plots[7] = {"Control Bit 1010", "Control Bit 1100", "Control Bit 1110", "Flag", "VFAT Slot Number", "N_{VFAT} Per Event", "CRC difference"};
-  TCanvas *integrity = newCanvas("Integrity plots", 4, 2, 2400,1200);
-  THStack *stack;
-
+  TString integrity_plots[7] = {"Control Bit 1010", "Control Bit 1100",
+				"Control Bit 1110", "Flag", "VFAT Slot Number",
+				"N_{VFAT} Per Event", "CRC difference"};
+  TCanvas *integrity = newCanvas("GEBIntegrity","Integrity plots", 4, 2, 2400,1200);
+  
   integrity->cd(1);
+  
+  
+      
+  
   stack = stackH1(integrity_plots[0], hi1010[0], hi1010[2], 4, 2);
   stack->Draw();
   //gPad->SetLogy();
@@ -102,32 +108,10 @@ void printIntegrityCanvas(TString summaryPath)
   TString json = TBufferJSON::ConvertToJSON(integrity);
   jsonfile << json;
   jsonfile.close();
+}
 
-  //integrity->Draw();
-  //integrity->Update();
-  //integrity->WaitPrimitive();
-}
-THStack *stackH1(TString title, TH1 * h1, TH1 * h2, int cl1, int cl2, bool scale=false)
-{
-  THStack *t_stack = new THStack(title,title);
-  h1->SetLineColor(cl1);
-  h2->SetLineColor(cl1);
-  if (scale) {
-    h1->Scale(1/hiVFAT[0]->GetEntries());
-    h2->Scale(1/hiVFAT[0]->GetEntries());
-    TString tmp_label = h1->GetYaxis()->GetTitle();
-    tmp_label += " per event";
-    h1->GetYaxis()->SetTitle(tmp_label);
-  }
-  t_stack->Add(h1);
-  t_stack->Add(h2);
-  t_stack->Draw();
-  t_stack->GetXaxis()->SetTitle(h1->GetXaxis()->GetTitle());
-  t_stack->GetYaxis()->SetTitle(h1->GetYaxis()->GetTitle());
-  t_stack->GetYaxis()->SetTitleOffset(1.5);
-  return t_stack;
-}
-void printOccupancyCanvas(TString summaryPath)
+
+void printGEBOccupancyCanvas(TString summaryPath)
 {
   TCanvas *occupancy = newCanvas("Occupancy plots", 3, 3, 1800,1800);
   occupancy->cd(1);
@@ -194,80 +178,42 @@ void printOccupancyCanvas(TString summaryPath)
   //occupancy->WaitPrimitive();
 }
 
-void printClusterSizeCanvas(TString summaryPath)
+
+void printGEBClusterSizeCanvas(TString summaryPath)
 {
   gStyle->SetOptStat("emr");
-  TCanvas *clusterSize = newCanvas("Cluster size plots", 3, 3, 1800,1800);
+  TCanvas *clusterSize_canvas = newCanvas("Cluster size plots", 3, 3, 1800,1800);
   std::stringstream ss;
-  clusterSize->cd(1);
-  hiClusterSize[0]->GetYaxis()->SetTitle("Number of entries");
-  hiClusterSize[0]->GetXaxis()->SetTitle("Cluster size");
-  hiClusterSize[0]->SetTitle("Integrated over pseudorapidity");
-  hiClusterSize[0]->Draw();
+  clusterSize_canvas->cd(1);
+  ClusterSize->GetYaxis()->SetTitle("Number of entries");
+  ClusterSize->GetXaxis()->SetTitle("Cluster size");
+  ClusterSize->SetTitle("Integrated over pseudorapidity");
+  ClusterSize->Draw();
   gPad->SetLogy();
   for (int p_i = 1; p_i < NETA+1; p_i++)
   {
-    clusterSize->cd(p_i+1);
+    clusterSize_canvas->cd(p_i+1);
     std::string title = "eta_";
     ss.str(std::string());
     ss << 9-p_i;
     title+=ss.str();
-    hiClusterSizeEta[0][NETA-p_i]->GetYaxis()->SetTitle("Number of entries");
-    hiClusterSizeEta[0][NETA-p_i]->GetXaxis()->SetTitle("Cluster size");
-    hiClusterSizeEta[0][NETA-p_i]->SetTitle(title.c_str());
-    hiClusterSizeEta[0][NETA-p_i]->Draw();
+    ClusterSizeEta[NETA-p_i]->GetYaxis()->SetTitle("Number of entries");
+    ClusterSizeEta[NETA-p_i]->GetXaxis()->SetTitle("Cluster size");
+    ClusterSizeEta[NETA-p_i]->SetTitle(title.c_str());
+    ClusterSizeEta[NETA-p_i]->Draw();
     gPad->SetLogy();
   }
-  //clusterSize->Print("clusterSize.png","png");
-  //clusterSize->Print("clusterSize.pdf","pdf");
+  //clusterSize_canvas->Print("clusterSize_canvas.png","png");
+  //clusterSize_canvas->Print("clusterSize_canvas.pdf","pdf");
 
   ofstream jsonfile;
   jsonfile.open(summaryPath+"clusterSize.json");
-  TString json = TBufferJSON::ConvertToJSON(clusterSize);
+  TString json = TBufferJSON::ConvertToJSON(clusterSize_canvas);
   jsonfile << json;
   jsonfile.close();
 
-  //clusterSize->Draw();
-  //clusterSize->Update();
-  //clusterSize->WaitPrimitive();
-  gStyle->SetOptStat(0000);
-}
-
-void printClusterMultCanvas()
-{
-  gStyle->SetOptStat("emr");
-  TCanvas *clusterMult = newCanvas("Cluster multiplicity plots", 3, 3, 1800,1800);
-  std::stringstream ss;
-  clusterMult->cd(1);
-  hiClusterMult[0]->GetYaxis()->SetTitle("Number of entries");
-  hiClusterMult[0]->GetXaxis()->SetTitle("Cluster multiplicity");
-  hiClusterMult[0]->SetTitle("Integrated over pseudorapidity");
-  hiClusterMult[0]->Draw();
-  gPad->SetLogy();
-  for (int p_i = 1; p_i < NETA+1; p_i++)
-  {
-    clusterMult->cd(p_i+1);
-    std::string title = "eta_";
-    ss.str(std::string());
-    ss << 9-p_i;
-    title+=ss.str();
-    hiClusterMultEta[0][NETA-p_i]->GetYaxis()->SetTitle("Number of entries");
-    hiClusterMultEta[0][NETA-p_i]->GetXaxis()->SetTitle("Cluster multiplicity");
-    hiClusterMultEta[0][NETA-p_i]->SetTitle(title.c_str());
-    hiClusterMultEta[0][NETA-p_i]->Draw();
-    gPad->SetLogy();
-  }
-  //clusterMult->Print("clusterMult.png","png");
-  //clusterMult->Print("clusterMult.pdf","pdf");
-
-  ofstream jsonfile;
-  jsonfile.open(summaryPath+"clusterMult.json");
-  TString json = TBufferJSON::ConvertToJSON(clusterMult);
-  jsonfile << json;
-  jsonfile.close();
-
-  //clusterMult->Draw();
-  //clusterMult->Update();
-  //clusterMult->WaitPrimitive();
+  //clusterSize_canvas->Draw();
+  //clusterSize_canvas->Update();
+  //clusterSize_canvas->WaitPrimitive();
   gStyle->SetOptStat(0000);
 }

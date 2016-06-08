@@ -126,6 +126,15 @@ class VFAT_histogram: public Hardware_histogram
         thresholdScanChip->Fill(deltaV);
       }
     }
+
+  TH1F* getb1010() { return b1010; }
+  TH1F* getb1100() { return b1100; }
+  TH1F* getb1110() { return b1110; }
+  TH1F* getFlag()  { return Flag; }
+
+
+
+  
   private:
     TH1F* b1010;            ///<Histogram for control bit 1010
     TH1F* BC;               ///<Histogram for Bunch Crossing Number

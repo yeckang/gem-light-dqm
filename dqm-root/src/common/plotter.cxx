@@ -648,7 +648,6 @@ void layerAll(vector<vector<TH1*>> hs, vector<TString> inames)
 
 void gtprint(TH1 *h, TString name, TString opath)
 {
-  
   TCanvas *cv = newCanvas(name);			
   cv->cd(1);
   int max=h->GetBinContent(h->GetMaximumBin());
@@ -677,13 +676,19 @@ void gtprint(TH1 *h, TString name, TString opath)
 
   gROOT->ProcessLine(".!mkdir -p "+opath+"/");
 
-  cv->Print(opath+name+".jpg","jpg");
-  cv->Print(opath+name+".png","png");
-  //cv->Print(opath+name+".pdf","pdf");
+  gtprintCanvas(cv, opath+name)
+
+}
+
+void gtprintCanvas(TCanvas* canvas, TString opathName)
+{
+
+  canvas->Print(opathName+".jpg","jpg");
+  canvas->Print(opathName+".png","png");
 
   //Create JSON file
   ofstream jsonfile;
-  jsonfile.open(opath+name+".json");
+  jsonfile.open(opathName+".json");
   TString json = TBufferJSON::ConvertToJSON(h);
   jsonfile << json;
   jsonfile.close();
@@ -700,7 +705,7 @@ void gemTreePrint(TDirectory *source, TString outPath, bool first)
     if(DEBUG) std::cout<<"[gemTreePrint]"<< "newPath: " << newPath << std::endl;
     gROOT->ProcessLine(".!mkdir -p "+newPath);
   }
-  else  newPath = outPath;
+  else newPath = outPath;
 
   //Retrieve histograms from current directory
   vector<TH1*> hs;
@@ -732,10 +737,18 @@ void gemTreePrint(TDirectory *source, TString outPath, bool first)
       }
       //Print if key is a histogram
       if (cl->InheritsFrom("TH1")) {
-	if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing... " << std::endl;
+	if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing histogram... " << std::endl;
 	TH1 *h = (TH1*)key->ReadObj();
 	gtprint(h,key->GetName(),newPath);
       }
+      //Print summary canvases
+      if (cl->InheritsFrom("TCanvas")) {
+	if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing canvas... " << std::endl;
+	TString fullPath = newPath + key->GetName();
+	TCanvas *c = (TH1*)key->ReadObj();
+	gtprintCanvas(c,fullPath);
+      }
+     
     }
   return;
 }

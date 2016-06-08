@@ -15,7 +15,8 @@ class GEB_histogram: public Hardware_histogram
 
     //!Books histograms for GEB data
     /*!
-     Books histograms for the following data: Zero Suppresion flags, GLIB input ID, VFAT word count (header), Errors and Warnings (Thirteen Flags, InFIFO underflow flag, Stuck data flag), OH CRC, VFAT word count (trailer)
+     Books histograms for the following data: Zero Suppresion flags, GLIB input ID, VFAT word count (header), 
+     Errors and Warnings (Thirteen Flags, InFIFO underflow flag, Stuck data flag), OH CRC, VFAT word count (trailer)
      */
     void bookHistograms()
     {
@@ -40,12 +41,18 @@ class GEB_histogram: public Hardware_histogram
         ClusterSizeEta  [ie] = new TH1I(("ClusterSize"+std::to_string(static_cast <long long> (ie))).c_str(), "Cluster size", 384,  0, 384 );
       }
       SlotN   = new TH1I("VFATSlots", "VFAT Slots", 24,  0, 24);
+      Totalb1010 = new TH1I("Totalb1010", "Control Bits", 15,  0x0 , 0xf);
+      Totalb1100 = new TH1I("Totalb1100", "Control Bits", 15,  0x0 , 0xf);
+      Totalb1110 = new TH1I("Totalb1110", "Control Bits", 15,  0x0 , 0xf);
+      TotalFlag  = new TH1I("TotalFlag", "Control Flags", 15,  0x0 , 0xf);
+      TotalCRC   = new TH1I("TotalCRC", "CRC Mismatches", 0xffff,-32768,32768);
     }
 
 
     //!Fills histograms for GEB data
     /*!
-     Fills the histograms for the following data: Zero Suppresion flags, GLIB input ID, VFAT word count (header), Errors and Warnings (Thirteen Flags, InFIFO underflow flag, Stuck data flag), OH CRC, VFAT word count (trailer)
+     Fills the histograms for the following data: Zero Suppresion flags, GLIB input ID, VFAT word count (header), 
+     Errors and Warnings (Thirteen Flags, InFIFO underflow flag, Stuck data flag), OH CRC, VFAT word count (trailer)
      */
 
     void fillHistograms(GEBdata * geb){
@@ -128,8 +135,23 @@ class GEB_histogram: public Hardware_histogram
         ClusterMultEta[NETA-1-ieta->first]->Fill(ncleta);   
       }
       ClusterMult->Fill(ncl);
+
+      fillSummaryHistograms(m_vfatsH);
     }
 
+  void fillSummaryHistograms(vector<VFAT_histogram> vfat_histograms)
+  {
+    for(int vfat_index=0;vfat_index<vfat_histograms.size();vfat_index++)
+      {
+  	VFAT_histogram current_vfatH = vfat_histograms[vfat_index];
+	Totalb1010->Add(current_vfatH->getb1010());
+	Totalb1100->Add(current_vfatH->getb1100());
+	Totalb1110->Add(current_vfatH->getb1110());
+	TotalFlag ->Add(current_vfatH->getFlag());     
+      }
+  }
+
+  
     //!Adds a VFAT_histogram object to the m_vfatH vector
     void addVFATH(VFAT_histogram vfatH){m_vfatsH.push_back(vfatH);}
     //!Returns the m_vfatsH vector
@@ -146,12 +168,19 @@ class GEB_histogram: public Hardware_histogram
     TH2I* BeamProfile;                       ///<Histogram for 2D BeamProfile
     TH1I* ClusterMult;                       ///<Histogram for GEB cluster multiplicity
     TH1I* ClusterSize;                       ///<Histogram for GEB cluster size
-    TH1I* ClusterMultEta[NETA];                       ///<Histogram for GEB eta cluster multiplicity
-    TH1I* ClusterSizeEta[NETA];                       ///<Histogram for GEB eta cluster size
-    TH1I* SlotN;                          ///<Histogram for VFAT slots
+    TH1I* ClusterMultEta[NETA];              ///<Histogram for GEB eta cluster multiplicity
+    TH1I* ClusterSizeEta[NETA];              ///<Histogram for GEB eta cluster size
+    TH1I* SlotN;                             ///<Histogram for VFAT slots
+  TH1I* Totalb1010;			     // Add all vfat control bit histograms
+  TH1I* Totalb1100;
+  TH1I* Totalb1110;
+  TH1I* TotalFlag;
+
+  
+  
     std::map<int, GEMStripCollection> allstrips;
     //VFATdata * m_vfat;
-    std::vector<VFATdata> v_vfat;       ///Vector of VFATdata
+    std::vector<VFATdata> v_vfat;            ///Vector of VFATdata
     int m_sn;
     int m_strip_map[128];
 };

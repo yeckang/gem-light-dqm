@@ -90,11 +90,6 @@ private:
   TFile *ofile;   ///<Output File, assigned in the constructor, where all the histograms will go
   std::string ofilename;  ///<Name of output file, same as input file, but is .analyzed.root instead of .raw.root
 
-  //std::vector<TDirectory*> AMC13dir;  //unused  
-  //std::vector<TDirectory*> AMCdir;    //unused
-  //std::vector<TDirectory*> GEBdir;    //unused
-  //std::vector<TDirectory*> VFATdir;   //unused
-
   vector<AMC13Event> v_amc13;    ///<Vector of AMC13Event
   vector<AMCdata> v_amc;         ///<Vector of AMCdata
   vector<GEBdata> v_geb;         ///<Vector of GEBdata
