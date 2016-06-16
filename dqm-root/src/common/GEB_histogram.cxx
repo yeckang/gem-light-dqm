@@ -6,6 +6,7 @@
 #include "TH1.h"
 #define NETA 8
 #include "gem/readout/GEMslotContents.h"
+//#include "plotter.cxx"
 //!A class that creates histograms for GEB data
 class GEB_histogram: public Hardware_histogram
 {
@@ -15,7 +16,8 @@ class GEB_histogram: public Hardware_histogram
 
     //!Books histograms for GEB data
     /*!
-     Books histograms for the following data: Zero Suppresion flags, GLIB input ID, VFAT word count (header), Errors and Warnings (Thirteen Flags, InFIFO underflow flag, Stuck data flag), OH CRC, VFAT word count (trailer)
+     Books histograms for the following data: Zero Suppresion flags, GLIB input ID, VFAT word count (header), 
+     Errors and Warnings (Thirteen Flags, InFIFO underflow flag, Stuck data flag), OH CRC, VFAT word count (trailer)
      */
     void bookHistograms()
     {
@@ -40,12 +42,23 @@ class GEB_histogram: public Hardware_histogram
         ClusterSizeEta  [ie] = new TH1I(("ClusterSize"+std::to_string(static_cast <long long> (ie))).c_str(), "Cluster size", 384,  0, 384 );
       }
       SlotN   = new TH1I("VFATSlots", "VFAT Slots", 24,  0, 24);
+      Totalb1010 = new TH1F("Totalb1010", "Control Bit 1010", 15,  0x0 , 0xf);
+      Totalb1100 = new TH1F("Totalb1100", "Control Bit 1100", 15,  0x0 , 0xf);
+      Totalb1110 = new TH1F("Totalb1110", "Control Bit 1110", 15,  0x0 , 0xf);
+      TotalFlag  = new TH1F("TotalFlag", "Control Flags", 15,  0x0 , 0xf);
+      TotalCRC   = new TH1F("TotalCRC", "CRC Mismatches", 0xffff,-32768,32768);
+
+      Integrity_canvas = newCanvas("GEBIntegrity",3,2,2400,1200);
+      Occupancy_canvas = newCanvas("GEBOccupancy",3,3,1800,1800);
+      ClusterSize_canvas = newCanvas("GEBClusterSize",3,3,1800,1800);
+      ClusterMult_canvas = newCanvas("GEBClusterMult",3,3,1800,1800);
     }
 
 
     //!Fills histograms for GEB data
     /*!
-     Fills the histograms for the following data: Zero Suppresion flags, GLIB input ID, VFAT word count (header), Errors and Warnings (Thirteen Flags, InFIFO underflow flag, Stuck data flag), OH CRC, VFAT word count (trailer)
+     Fills the histograms for the following data: Zero Suppresion flags, GLIB input ID, VFAT word count (header), 
+     Errors and Warnings (Thirteen Flags, InFIFO underflow flag, Stuck data flag), OH CRC, VFAT word count (trailer)
      */
 
     void fillHistograms(GEBdata * geb){
@@ -130,6 +143,27 @@ class GEB_histogram: public Hardware_histogram
       ClusterMult->Fill(ncl);
     }
 
+  #include "GEB_summaryCanvases.cxx"
+  
+  void fillSummaryCanvases(vector<VFAT_histogram> vfat_histograms)
+  {
+    for(int vfat_index=0;vfat_index<vfat_histograms.size();vfat_index++)
+      {
+  	VFAT_histogram current_vfatH = vfat_histograms[vfat_index];
+	Totalb1010->Add(current_vfatH.getb1010());
+	Totalb1100->Add(current_vfatH.getb1100());
+	Totalb1110->Add(current_vfatH.getb1110());
+	TotalFlag ->Add(current_vfatH.getFlag());
+	TotalCRC  ->Add(current_vfatH.getCRC());
+      }
+
+    fillGEBCanvases();
+  }
+
+  
+
+  
+  
     //!Adds a VFAT_histogram object to the m_vfatH vector
     void addVFATH(VFAT_histogram vfatH){m_vfatsH.push_back(vfatH);}
     //!Returns the m_vfatsH vector
@@ -146,12 +180,23 @@ class GEB_histogram: public Hardware_histogram
     TH2I* BeamProfile;                       ///<Histogram for 2D BeamProfile
     TH1I* ClusterMult;                       ///<Histogram for GEB cluster multiplicity
     TH1I* ClusterSize;                       ///<Histogram for GEB cluster size
-    TH1I* ClusterMultEta[NETA];                       ///<Histogram for GEB eta cluster multiplicity
-    TH1I* ClusterSizeEta[NETA];                       ///<Histogram for GEB eta cluster size
-    TH1I* SlotN;                          ///<Histogram for VFAT slots
+    TH1I* ClusterMultEta[NETA];              ///<Histogram for GEB eta cluster multiplicity
+    TH1I* ClusterSizeEta[NETA];              ///<Histogram for GEB eta cluster size
+    TH1I* SlotN;                             ///<Histogram for VFAT slots
+  TH1F* Totalb1010;			     // Add all vfat control bit histograms
+  TH1F* Totalb1100;
+  TH1F* Totalb1110;
+  TH1F* TotalFlag;
+  TH1F* TotalCRC;
+  TCanvas* Integrity_canvas;
+  TCanvas* Occupancy_canvas;
+  TCanvas* ClusterSize_canvas;
+  TCanvas* ClusterMult_canvas;
+  
+  
     std::map<int, GEMStripCollection> allstrips;
     //VFATdata * m_vfat;
-    std::vector<VFATdata> v_vfat;       ///Vector of VFATdata
+    std::vector<VFATdata> v_vfat;            ///Vector of VFATdata
     int m_sn;
     int m_strip_map[128];
 };

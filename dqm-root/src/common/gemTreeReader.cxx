@@ -90,11 +90,6 @@ private:
   TFile *ofile;   ///<Output File, assigned in the constructor, where all the histograms will go
   std::string ofilename;  ///<Name of output file, same as input file, but is .analyzed.root instead of .raw.root
 
-  //std::vector<TDirectory*> AMC13dir;  //unused  
-  //std::vector<TDirectory*> AMCdir;    //unused
-  //std::vector<TDirectory*> GEBdir;    //unused
-  //std::vector<TDirectory*> VFATdir;   //unused
-
   vector<AMC13Event> v_amc13;    ///<Vector of AMC13Event
   vector<AMCdata> v_amc;         ///<Vector of AMCdata
   vector<GEBdata> v_geb;         ///<Vector of GEBdata
@@ -130,13 +125,13 @@ private:
       branch->GetEntry(120);
       v_amc13 = event->amc13s();
       for(auto a13 = v_amc13.begin(); a13!= v_amc13.end(); a13++){
-	      v_amc = a13->amcs();
-	      for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
-	        v_geb = a->gebs();
-	        for(auto g=v_geb.begin(); g!=v_geb.end();g++){
-	          v_vfat=g->vfats();
-	        }
-	      }
+        v_amc = a13->amcs();
+        for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
+          v_geb = a->gebs();
+          for(auto g=v_geb.begin(); g!=v_geb.end();g++){
+            v_vfat=g->vfats();
+          }
+        }
       }
       if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of TTree entries: " << nentries << "\n";
       if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of AMC13s: " << v_amc13.size()<< "\n";
@@ -313,8 +308,8 @@ private:
               v_vfatH = v_gebH[gebH_->second].vfatsH();
             }
             else {
-                std::cout << "GEB Not found\n";
-                continue;
+              std::cout << "GEB Not found\n";
+              continue;
             }
             /* LOOP THROUGH VFATs */
             for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
@@ -336,10 +331,19 @@ private:
                 }
               }
               else {
-                  std::cout << "VFAT Not found\n";
+                std::cout << "VFAT Not found\n";
               }
             } /* END VFAT LOOP */
-            
+	    // Fill Summary Histograms
+	    if(gebH_ != geb_map.end()) {
+	      v_vfatH = v_gebH[gebH_->second].vfatsH();
+              v_gebH[gebH_->second].fillSummaryCanvases(v_vfatH);
+            }
+            else {
+              std::cout << "GEB Not found\n";
+              continue;
+            }
+	    
           } /* END GEB LOOP */
           a_c++;
         } /* END AMC LOOP */

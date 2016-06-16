@@ -57,7 +57,7 @@ class VFAT_histogram: public Hardware_histogram
   void fillHistograms(VFATdata * vfat, bool final){
       setVFATBlockWords(vfat); 
       int crc_diff = vfat->crc()-checkCRC(vfatBlockWords);
-      crc_difference->Fill(crc_diff);  
+      if (crc_diff != 0) crc_difference->Fill(crc_diff);  
       b1010->Fill(vfat->b1010());
       b1100->Fill(vfat->b1100());
       b1110->Fill(vfat->b1110());
@@ -126,6 +126,15 @@ class VFAT_histogram: public Hardware_histogram
         thresholdScanChip->Fill(deltaV);
       }
     }
+
+  TH1F* getb1010() { return b1010; }
+  TH1F* getb1100() { return b1100; }
+  TH1F* getb1110() { return b1110; }
+  TH1F* getFlag()  { return Flag; }
+  TH1F* getCRC()   { return crc_difference; }
+
+
+  
   private:
     TH1F* b1010;            ///<Histogram for control bit 1010
     TH1F* BC;               ///<Histogram for Bunch Crossing Number
