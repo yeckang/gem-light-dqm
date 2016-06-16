@@ -44,24 +44,24 @@ all:
 #	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/printAll.cxx $(LIB)/libEvent.so -o $(BIN)/printer
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/gtprinter.cxx $(LIB)/libEvent.so -o $(BIN)/gtprinter
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dummyMain.cxx $(LIB)/libEvent.so -o $(BIN)/dqm
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/main.cxx $(LIB)/libEvent.so -o $(BIN)/rundqm
+#	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/main.cxx $(LIB)/libEvent.so -o $(BIN)/rundqm
 	$(LS) $(BIN)
 
 dqm:  	#CURRENT VERSION
 	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dummyMain.cxx $(LIB)/libEvent.so -o $(BIN)/dqm
 
-rundqm:
-	mkdir -p $(BIN)
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/main.cxx $(LIB)/libEvent.so -o $(BIN)/rundqm
+# rundqm:
+# 	mkdir -p $(BIN)
+# 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/main.cxx $(LIB)/libEvent.so -o $(BIN)/rundqm
 
 merger:
 	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/mergeCleanTrees.cxx $(LIB)/libEvent.so -o $(BIN)/treemerge
-reader:
-	mkdir -p $(BIN)
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/treeReaderExample.cxx $(LIB)/libEvent.so -o $(BIN)/reader
-	$(LS) $(BIN)
+# reader:
+# 	mkdir -p $(BIN)
+# 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/treeReaderExample.cxx $(LIB)/libEvent.so -o $(BIN)/reader
+# 	$(LS) $(BIN)
 
 layer:
 	mkdir -p $(BIN)
