@@ -46,7 +46,6 @@
 #include <memory>
 #include <unordered_map>
 
-#include "gem/datachecker/GEMDataChecker.h"
 #include "gem/readout/GEMslotContents.h"
 #include "GEMClusterization/GEMStrip.h"
 #include "GEMClusterization/GEMStripCollection.h"
