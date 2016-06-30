@@ -25,6 +25,7 @@ ShortPackage=dqm-root
 PackageName=dqm-root
 
 IncludeDirs = /usr/include/root
+IncludeDirs+= /usr/local/include/root
 IncludeDirs+= $(BUILD_HOME)/$(Project)
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)/include
