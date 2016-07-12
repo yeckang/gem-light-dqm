@@ -91,13 +91,16 @@ public:
       this->getChipIDFromID(220);
       this->getChipIDFromID(1281);
 
+      this->getVFATDBID("AMC-9","GTX-1",17);
+
+
+      // if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Booking histograms" << std::endl;   
+      // this->bookAllHistograms();
+      // this->fillAllHistograms();
     }
     else
       std::cout << "Could not connect to DB!!" << std::endl;
 
-    // if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Booking histograms" << std::endl;   
-    // this->bookAllHistograms();
-    // this->fillAllHistograms();
   }
   ~treeReader(){}
 
@@ -174,36 +177,22 @@ private:
     std::string    setup = "teststand";
     std::string   period = "2016T";
     std::string location = "TIF";
-
     std::string lastRunNumberQuery = "SELECT Number FROM ldqm_db_run WHERE Station LIKE '";
     lastRunNumberQuery += location;
     lastRunNumberQuery += "' ORDER BY id DESC LIMIT 1;";
-    // WARN("GEMSupervisor::updateRunNumber, current run number is: " << m_runNumber.toString());
-    // if (DEBUG) std::cout << "[connect]: Current run number is: " << m_runNumber.toString() << std::endl;
     const char * query = lastRunNumberQuery.c_str();
     
     try {
-      // m_runNumber.value_ = p_gemDBHelper->query(lastRunNumberQuery);
-
       int rv = mysql_query(Database,query);
-      
-      // unsigned int gem::utils::db::GEMDatabaseUtils::query(const std::string& query)
-      // {
-      //   int rv = mysql_query(db,query.c_str());
-
       if (rv)
-        // ERROR("MySQL query error: " << std::string(mysql_error(db)));
         std::cout << "MySQL query error: " << std::string(mysql_error(Database)) << std::endl;
       else
-        // INFO("MySQL query success: " << query);
         if(DEBUG) std::cout << "[getRunNumber]: MySQL query success: " << lastRunNumberQuery << std::endl;
 
       MYSQL_RES* res = mysql_use_result(Database);
       MYSQL_ROW  row = mysql_fetch_row(res);
       if (row == 0) {
         std::string errMsg = "[getRunNumber]: Query result " + lastRunNumberQuery + " empty";
-        // ERROR("GEMDatabaseUtils::query " << errMsg);
-        // XCEPT_RAISE(gem::utils::exception::DBEmptyQueryResult, errMsg);
         std::cout <<"[getRunNumber]: " << errMsg << std::endl;
       }
       unsigned int retval = strtoul(row[0],0,0);
@@ -211,21 +200,9 @@ private:
       
       if (DEBUG) std::cout << "[getRunNumber]: New run number is: " << retval << std::endl;
       return retval;
-
-    // catch (gem::utils::exception::DBEmptyQueryResult& e) {
-      
-    //   WARN("GEMSupervisor::updateRunNumber caught gem::utils::DBEmptyQueryResult " << e.what());
-    //   // m_runNumber.value_ = 0;
-    // } catch (xcept::Exception& e) {
-    //   ERROR("GEMSupervisor::updateRunNumber caught std::exception " << e.what());
     } catch (std::exception& e) {
       std::cout << "[getRunNumber]: caught std::exception " << e.what() << std::endl;
-      // ERROR("GEMSupervisor::updateRunNumber caught std::exception " << e.what());
     }
-
-    // INFO("GEMSupervisor::updateRunNumber, run number from database is : " << m_runNumber.toString());
-    //parse and increment by 1, if it is a new station, start at 1
-    //m_runNumber.value_ += 1;
   }
 
   unsigned int getChipIDFromID(unsigned int db_id)
@@ -256,9 +233,121 @@ private:
     }
   }
 
-  
+  unsigned int getVFATDBID(std::string AMCboardid, std::string GEBchamberid, int slot) {
+
+    std::string AMCdbidQuery  = "SELECT id FROM ldqm_db_amc WHERE BoardID LIKE '";
+    AMCdbidQuery += AMCboardid;
+    AMCdbidQuery += "'";
+    int AMCdbid = atoi(simpleDBQuery(AMCdbidQuery));
+    std::cout << "AMCdbid: " << AMCdbid << std::endl;
+
+    std::string GEBdbidsQuery  = "SELECT geb_id FROM ldqm_db_amc_gebs WHERE amc_id LIKE ";
+    GEBdbidsQuery += std::to_string((long long int)AMCdbid);
+    vector<char*> GEBdbids = manyDBQuery(GEBdbidsQuery);
+
+    int correctGEBID = 0;
+    for (int id = 0; id < GEBdbids.size(); id++) {
+      int currentGEBid = atoi(GEBdbids[id]);
+      cout << "GEBdbids: " << currentGEBid << endl;
+      std::string GEBchambermatchQuery = "SELECT ChamberID FROM ldqm_db_geb WHERE id LIKE ";
+      GEBchambermatchQuery += std::to_string((long long int)atoi(GEBdbids[id]));
+      char* dbchamberid = simpleDBQuery(GEBchambermatchQuery);
+      std::string chamberiddb = dbchamberid;
+      if (chamberiddb.compare(GEBchamberid)) {
+        std::cout << "Located correct GEB: " << chamberiddb << std::endl;
+        correctGEBID = currentGEBid;
+        break;
+      }
+    }
+
+    if (correctGEBID==0) {
+      std::cout << "Could not locate correct GEB" << std::endl;
+      return 0;
+    }
+
+    std::cout << correctGEBID << std::endl;
+    
+    std::string GEBVFATsQuery = "SELECT vfat_id FROM ldqm_db_geb_vfats WHERE geb_id LIKE ";
+    GEBVFATsQuery += std::to_string((long long int)correctGEBID);
+    vector<char*> correctGEBVFATs = manyDBQuery(GEBVFATsQuery);
+
+    int correctVFATID = 0;
+    for (int vf=0; vf<correctGEBVFATs.size();vf++) {
+      int currentVFATID = atoi(correctGEBVFATs[vf]);
+      std::cout << currentVFATID << std::endl;
+
+      std::string VFATSlotQuery = "SELECT Slot FROM ldqm_db_vfat WHERE id LIKE ";
+      VFATSlotQuery += std::to_string((long long int)currentVFATID);
+      int currentSlot = atoi(simpleDBQuery(VFATSlotQuery));
+      if (currentSlot == slot) {
+        correctVFATID = currentVFATID;
+        break;
+      }   
+    }
+
+    if (correctVFATID != 0) {
+      int ChipID = strtol(simpleDBQuery("SELECT ChipID FROM ldqm_db_vfat WHERE id LIKE "+std::to_string((long long int)correctVFATID)),NULL,16);
+      std::cout << std::hex << ChipID << std::endl;
+      return ChipID;
+    }
+  }
+
+  vector<char*> manyDBQuery(std::string m_Query)
+  {
+    vector<char*> result;
+    const char * manyQuery = m_Query.c_str();
+
+    int qresult = mysql_query(Database,manyQuery);
+    if (qresult) {
+      std::cout << "MySQL query error: " << std::string(mysql_error(Database)) << std::endl;
+      return result;
+    }
+    else
+      if(DEBUG) std::cout << "MySQL query success: " << manyQuery << std::endl;
+
+    MYSQL_RES* res = mysql_use_result(Database);
+    MYSQL_ROW row;
+
+    while (((row=mysql_fetch_row(res)) !=NULL))
+      {
+        result.push_back(row[0]);
+      }
+
+    mysql_free_result(res);
+
+    return result;
+  }
 
   
+  //Queries that should return a single value
+  char* simpleDBQuery(std::string m_Query)
+  {
+    const char * query = m_Query.c_str();
+    try {
+      int rv = mysql_query(Database,query);
+      if (rv) {
+        std::cout << "MySQL query error: " << std::string(mysql_error(Database)) << std::endl;
+        return NULL;
+      }
+      else
+        if(DEBUG) std::cout << "MySQL query success: " << m_Query << std::endl;
+      MYSQL_RES* res = mysql_use_result(Database);
+      MYSQL_ROW  row = mysql_fetch_row(res);
+      if (row == 0) {
+        std::cout << "Query result " << m_Query << " empty" << std::endl;
+        return NULL;
+      }
+      char* retval = row[0];
+      mysql_free_result(res);
+      return retval;
+    } catch (std::exception& e) {
+      std::cout << "simpleDBQuery caught std::exception " << e.what() << std::endl;
+    }
+    
+
+
+
+  }
   
   //!Fetches data from AMC13, AMC, GEB, and VFAT and puts them into vectors
   void fetchHardware()
@@ -272,13 +361,13 @@ private:
       branch->GetEntry(0);
       v_amc13 = event->amc13s();
       for(auto a13 = v_amc13.begin(); a13!= v_amc13.end(); a13++){
-	      v_amc = a13->amcs();
-	      for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
-	        v_geb = a->gebs();
-	        for(auto g=v_geb.begin(); g!=v_geb.end();g++){
-	          v_vfat=g->vfats();
-	        }
-	      }
+        v_amc = a13->amcs();
+        for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
+          v_geb = a->gebs();
+          for(auto g=v_geb.begin(); g!=v_geb.end();g++){
+            v_vfat=g->vfats();
+          }
+        }
       }
       if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of TTree entries: " << nentries << "\n";
       if (DEBUG) std::cout<< "[gemTreeReader]: " << "Number of AMC13s: " << v_amc13.size()<< "\n";
@@ -332,6 +421,12 @@ private:
         sprintf(aslot_ch, "%d", aslot);
         strcat(diramc,"AMC-");
         strcat(diramc, aslot_ch);
+
+        std::string AMCID = diramc;
+        
+        
+
+
         if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC Directory " << diramc << " created" << std::endl;
         m_amcH = new AMC_histogram(ofilename, gDirectory->mkdir(diramc), aslot_ch);
         m_amcH->bookHistograms();
@@ -375,6 +470,10 @@ private:
             int t_chipID = slotInfo_->GEBChipIdFromSlot(i);
             //int vslot = slotInfo_->GEBslotIndex(v->ChipID());  //converts Chip ID into VFAT slot number
             int vslot = slotInfo_->GEBslotIndex(t_chipID);
+
+            
+
+
             sprintf(vslot_ch, "%d", vslot);
             strcat(dirvfat,"VFAT-");
             strcat(dirvfat, vslot_ch);
@@ -387,8 +486,8 @@ private:
               const char* it = str.c_str();
               strcat(dirvfat,it);
             }
- 
             vfat_useddirs.push_back(dirvfat);
+
             int vID = t_chipID;
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: VFAT chip ID " << std::hex << vID << std::dec << std::endl;
             char vID_ch[10];
@@ -471,8 +570,8 @@ private:
               v_vfatH = v_gebH[gebH_->second].vfatsH();
             }
             else {
-                std::cout << "GEB Not found\n";
-                continue;
+              std::cout << "GEB Not found\n";
+              continue;
             }
             /* LOOP THROUGH VFATs */
             for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
@@ -494,8 +593,8 @@ private:
                 }
               }
               else {
-                  std::cout << "VFAT Not found\n";
-                  std::cout << "Chip ID " << vID_ch <<"\n";
+                std::cout << "VFAT Not found\n";
+                std::cout << "Chip ID " << vID_ch <<"\n";
               }
             } /* END VFAT LOOP */
             
