@@ -91,12 +91,11 @@ public:
       this->getChipIDFromID(220);
       this->getChipIDFromID(1281);
 
-      this->getVFATDBID("AMC-9","GTX-1",17);
+      // this->getVFATDBID("AMC-9","GTX-1",17);
 
-
-      // if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Booking histograms" << std::endl;   
-      // this->bookAllHistograms();
-      // this->fillAllHistograms();
+      if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Booking histograms" << std::endl;   
+      this->bookAllHistograms();
+      this->fillAllHistograms();
     }
     else
       std::cout << "Could not connect to DB!!" << std::endl;
@@ -233,18 +232,20 @@ private:
     }
   }
 
-  unsigned int getVFATDBID(std::string AMCboardid, std::string GEBchamberid, int slot) {
+  unsigned int getVFATChipID(std::string AMCboardid, std::string GEBchamberid, int slot) {
 
     std::string AMCdbidQuery  = "SELECT id FROM ldqm_db_amc WHERE BoardID LIKE '";
     AMCdbidQuery += AMCboardid;
     AMCdbidQuery += "'";
     int AMCdbid = atoi(simpleDBQuery(AMCdbidQuery));
+    if (!AMCdbid)
+      return 0;
     std::cout << "AMCdbid: " << AMCdbid << std::endl;
 
     std::string GEBdbidsQuery  = "SELECT geb_id FROM ldqm_db_amc_gebs WHERE amc_id LIKE ";
     GEBdbidsQuery += std::to_string((long long int)AMCdbid);
     vector<char*> GEBdbids = manyDBQuery(GEBdbidsQuery);
-
+    
     int correctGEBID = 0;
     for (int id = 0; id < GEBdbids.size(); id++) {
       int currentGEBid = atoi(GEBdbids[id]);
@@ -295,12 +296,13 @@ private:
   vector<char*> manyDBQuery(std::string m_Query)
   {
     vector<char*> result;
+    vector<char*> null_return{"0"};
     const char * manyQuery = m_Query.c_str();
 
     int qresult = mysql_query(Database,manyQuery);
     if (qresult) {
       std::cout << "MySQL query error: " << std::string(mysql_error(Database)) << std::endl;
-      return result;
+      return null_return;
     }
     else
       if(DEBUG) std::cout << "MySQL query success: " << manyQuery << std::endl;
@@ -322,12 +324,13 @@ private:
   //Queries that should return a single value
   char* simpleDBQuery(std::string m_Query)
   {
+    char * null_return = "0";
     const char * query = m_Query.c_str();
     try {
       int rv = mysql_query(Database,query);
       if (rv) {
         std::cout << "MySQL query error: " << std::string(mysql_error(Database)) << std::endl;
-        return NULL;
+        return null_return;
       }
       else
         if(DEBUG) std::cout << "MySQL query success: " << m_Query << std::endl;
@@ -335,7 +338,7 @@ private:
       MYSQL_ROW  row = mysql_fetch_row(res);
       if (row == 0) {
         std::cout << "Query result " << m_Query << " empty" << std::endl;
-        return NULL;
+        return null_return;
       }
       char* retval = row[0];
       mysql_free_result(res);
@@ -445,11 +448,7 @@ private:
           sprintf(g_ch, "%d", g_inputID);
           strcat(dirgeb,"GTX-");
           strcat(dirgeb,g_ch);
-          //char buff[10];
-          //buff[0] = '\0';
-          //strcpy(buff, aslot_ch);
-          //strcat(buff,g_ch);
-          //strcpy(g_ch, buff);
+
           geb_map.insert(std::make_pair(g_ch, g_c));
           if (DEBUG) std::cout << std::dec << "[gemTreeReader]: GEB Directory " << dirgeb << " created" << std::endl;
           //GEB HISTOGRAMS HERE
@@ -457,6 +456,8 @@ private:
           m_gebH->bookHistograms();
           if (DEBUG) std::cout << std::dec << "[gemTreeReader]: AMC GEBs size " << m_amcH->gebsH().size() << std::endl;
 
+          std::string GEBID = dirgeb;
+          
           v_c=0;
 
           /* LOOP THROUGH VFATs */
@@ -466,14 +467,17 @@ private:
             dirvfat[0]='\0';    
             char vslot_ch[24];   //char used to put VFAT number into directory name
             vslot_ch[0] = '\0';
-            std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents("slot_table.csv"));     
-            int t_chipID = slotInfo_->GEBChipIdFromSlot(i);
-            //int vslot = slotInfo_->GEBslotIndex(v->ChipID());  //converts Chip ID into VFAT slot number
-            int vslot = slotInfo_->GEBslotIndex(t_chipID);
 
             
+            // std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents("slot_table.csv"));     
+            // int t_chipID = slotInfo_->GEBChipIdFromSlot(i);
+            // //int vslot = slotInfo_->GEBslotIndex(v->ChipID());  //converts Chip ID into VFAT slot number
+            // int vslot = slotInfo_->GEBslotIndex(t_chipID);
 
+            int t_chipID = getVFATChipID(AMCID,GEBID,i);
+            int vslot = i;
 
+            
             sprintf(vslot_ch, "%d", vslot);
             strcat(dirvfat,"VFAT-");
             strcat(dirvfat, vslot_ch);
