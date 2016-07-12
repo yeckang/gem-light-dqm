@@ -1,6 +1,11 @@
-#define DEBUG 0
+#define DEBUG 1
 #define NVFAT 24
 #define NETA 8
+
+#define PORT 3306
+#include <mysql/mysql.h>
+#include <Python.h>
+
 #include <iomanip> 
 #include <iostream>
 #include <fstream>
@@ -78,9 +83,21 @@ public:
     if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fetching hardware" << std::endl;   
     this->fetchHardware();
 
-    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Booking histograms" << std::endl;   
-    this->bookAllHistograms();
-    this->fillAllHistograms();
+    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Connecting to database on port " << PORT << std::endl;
+    bool DBConnected = this->connectDB();
+    if (DBConnected) {
+      std::cout << "[gemTreeReader]: Connected to database, getting run number." << std::endl;
+      unsigned int runNum = this->getRunNumber();
+      this->getChipIDFromID(220);
+      this->getChipIDFromID(1281);
+
+    }
+    else
+      std::cout << "Could not connect to DB!!" << std::endl;
+
+    // if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Booking histograms" << std::endl;   
+    // this->bookAllHistograms();
+    // this->fillAllHistograms();
   }
   ~treeReader(){}
 
@@ -117,6 +134,132 @@ private:
   int m_deltaV;
   int m_Latency;
 
+  MYSQL *Database;
+
+  
+  bool connectDB()
+  {
+
+    // p_gemDBHelper = std::make_shared<gem::utils::db::GEMDatabaseUtils>("gem904daq01.cern.ch",3306,"gemdaq","gemdaq");
+
+    /** NECESSARY?? **/
+    
+    // Py_Initialize();
+    // PyRun_SimpleString("from query import configure_db\n"
+    //                    "configure_db()\n");
+    // // DEBUG("GEMDatabaseUtils::configure_db");
+    // Py_Finalize();
+
+    Database = mysql_init(0);
+
+    if (mysql_real_connect(Database,"gem904daq01.cern.ch","gemdaq","gemdaq","ldqm_db",PORT,0,CLIENT_COMPRESS) == 0) {
+      std::string message("Error connecting to database '");
+      // message += database;
+      message += "' : ";
+      message += mysql_error(Database);
+      Database = 0;
+      std::cout << message << std::endl;
+      // ERROR(message);
+      //XCEPT_RAISE(gem::exception::ConfigurationDatabaseException,message);
+      return false;
+    }
+    return true;
+
+  }
+
+
+  unsigned int getRunNumber()
+  {
+  
+    std::string    setup = "teststand";
+    std::string   period = "2016T";
+    std::string location = "TIF";
+
+    std::string lastRunNumberQuery = "SELECT Number FROM ldqm_db_run WHERE Station LIKE '";
+    lastRunNumberQuery += location;
+    lastRunNumberQuery += "' ORDER BY id DESC LIMIT 1;";
+    // WARN("GEMSupervisor::updateRunNumber, current run number is: " << m_runNumber.toString());
+    // if (DEBUG) std::cout << "[connect]: Current run number is: " << m_runNumber.toString() << std::endl;
+    const char * query = lastRunNumberQuery.c_str();
+    
+    try {
+      // m_runNumber.value_ = p_gemDBHelper->query(lastRunNumberQuery);
+
+      int rv = mysql_query(Database,query);
+      
+      // unsigned int gem::utils::db::GEMDatabaseUtils::query(const std::string& query)
+      // {
+      //   int rv = mysql_query(db,query.c_str());
+
+      if (rv)
+        // ERROR("MySQL query error: " << std::string(mysql_error(db)));
+        std::cout << "MySQL query error: " << std::string(mysql_error(Database)) << std::endl;
+      else
+        // INFO("MySQL query success: " << query);
+        if(DEBUG) std::cout << "[getRunNumber]: MySQL query success: " << lastRunNumberQuery << std::endl;
+
+      MYSQL_RES* res = mysql_use_result(Database);
+      MYSQL_ROW  row = mysql_fetch_row(res);
+      if (row == 0) {
+        std::string errMsg = "[getRunNumber]: Query result " + lastRunNumberQuery + " empty";
+        // ERROR("GEMDatabaseUtils::query " << errMsg);
+        // XCEPT_RAISE(gem::utils::exception::DBEmptyQueryResult, errMsg);
+        std::cout <<"[getRunNumber]: " << errMsg << std::endl;
+      }
+      unsigned int retval = strtoul(row[0],0,0);
+      mysql_free_result(res);
+      
+      if (DEBUG) std::cout << "[getRunNumber]: New run number is: " << retval << std::endl;
+      return retval;
+
+    // catch (gem::utils::exception::DBEmptyQueryResult& e) {
+      
+    //   WARN("GEMSupervisor::updateRunNumber caught gem::utils::DBEmptyQueryResult " << e.what());
+    //   // m_runNumber.value_ = 0;
+    // } catch (xcept::Exception& e) {
+    //   ERROR("GEMSupervisor::updateRunNumber caught std::exception " << e.what());
+    } catch (std::exception& e) {
+      std::cout << "[getRunNumber]: caught std::exception " << e.what() << std::endl;
+      // ERROR("GEMSupervisor::updateRunNumber caught std::exception " << e.what());
+    }
+
+    // INFO("GEMSupervisor::updateRunNumber, run number from database is : " << m_runNumber.toString());
+    //parse and increment by 1, if it is a new station, start at 1
+    //m_runNumber.value_ += 1;
+  }
+
+  unsigned int getChipIDFromID(unsigned int db_id)
+  {
+    std::string m_Query = "SELECT ChipID FROM ldqm_db_vfat WHERE id LIKE ";
+    m_Query += std::to_string((long long int)db_id);
+    const char * query = m_Query.c_str();
+    try {
+      int rv = mysql_query(Database,query);
+      if (rv)
+        std::cout << "MySQL query error: " << std::string(mysql_error(Database)) << std::endl;
+      else
+        if(DEBUG) std::cout << "[getChipIDFromID]: MySQL query success: " << m_Query << std::endl;
+      MYSQL_RES* res = mysql_use_result(Database);
+      MYSQL_ROW  row = mysql_fetch_row(res);
+      if (row == 0) {
+        std::string errMsg = "[getChipIDFromID]: Query result " + m_Query + " empty";
+        std::cout << errMsg << std::endl;
+        return NULL;
+      }
+      unsigned int retval = strtoul(row[0],0,0);
+      mysql_free_result(res);
+      
+      if (DEBUG) std::cout << "[getChipIDFromID]: ChipID is: " << std::hex << retval << std::dec << std::endl;
+      return retval;
+    } catch (std::exception& e) {
+      std::cout << "[getChipIDFromID]: caught std::exception " << e.what() << std::endl;
+    }
+  }
+
+  
+
+  
+  
   //!Fetches data from AMC13, AMC, GEB, and VFAT and puts them into vectors
   void fetchHardware()
   {
@@ -156,7 +299,9 @@ private:
     int a_c=0;      //counter through AMCs
     int g_c=0;      //counter through GEBs
     int v_c=0;      //counter through VFATs
-
+    
+    std::vector<string> vfat_useddirs;
+    
     /* LOOP THROUGH AMC13s */
     for(auto a13 = v_amc13.begin(); a13!=v_amc13.end(); a13++){
       v_amc = a13->amcs();
@@ -224,7 +369,7 @@ private:
           for(int i=0; i<24; i++){
             char dirvfat[30];   //filename for VFAT directory
             dirvfat[0]='\0';    
-            char vslot_ch[2];   //char used to put VFAT number into directory name
+            char vslot_ch[24];   //char used to put VFAT number into directory name
             vslot_ch[0] = '\0';
             std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents("slot_table.csv"));     
             int t_chipID = slotInfo_->GEBChipIdFromSlot(i);
@@ -233,6 +378,17 @@ private:
             sprintf(vslot_ch, "%d", vslot);
             strcat(dirvfat,"VFAT-");
             strcat(dirvfat, vslot_ch);
+            
+            // Make sure not to attempt to create directory that already exists (segfaults)            
+            if (std::find(vfat_useddirs.begin(),vfat_useddirs.end(), dirvfat) != vfat_useddirs.end()) {
+              std::cout << "[bookAllHistograms]: Repeated VFAT slot, check slot tables!" << std::endl;
+              strcat(dirvfat,"-");
+              string str = std::to_string((long long int)i);
+              const char* it = str.c_str();
+              strcat(dirvfat,it);
+            }
+ 
+            vfat_useddirs.push_back(dirvfat);
             int vID = t_chipID;
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: VFAT chip ID " << std::hex << vID << std::dec << std::endl;
             char vID_ch[10];
