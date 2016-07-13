@@ -477,7 +477,8 @@ private:
             int t_chipID = getVFATChipID(AMCID,GEBID,i);
             int vslot = i;
 
-            
+	    
+
             sprintf(vslot_ch, "%d", vslot);
             strcat(dirvfat,"VFAT-");
             strcat(dirvfat, vslot_ch);
@@ -494,20 +495,24 @@ private:
 
             int vID = t_chipID;
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: VFAT chip ID " << std::hex << vID << std::dec << std::endl;
-            char vID_ch[10];
+            char vID_ch[10]; //encoded VFAT location <amcnum><gtxnum><chipid>   
             vID_ch[0] = '\0';
             sprintf(vID_ch, "%d", vID);
             char buff[10];
             buff[0] = '\0';
-            strcpy(buff,g_ch);
+	    strcpy(buff,serial_ch);
+            strcat(buff,g_ch);
             strcat(buff,vID_ch);
             strcpy(vID_ch,buff);
+
+            vfat_map.insert(std::make_pair(vID_ch, vslot)); //assign slot to encoded location
+
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: VFAT Directory " << dirvfat << " created" << std::endl;
             //VFAT HISTOGRAMS HERE
             m_vfatH = new VFAT_histogram(ofilename, gDirectory->mkdir(dirvfat), vslot_ch);
             m_vfatH->bookHistograms();
             //std::cout << "VFAT ID " << vID_ch << std::endl;
-            vfat_map.insert(std::make_pair(vID_ch, v_c));
+
             m_gebH->addVFATH(*m_vfatH);
             if (DEBUG) std::cout << std::dec << "[gemTreeReader]: GEB VFATs size " << m_gebH->vfatsH().size() << std::endl;
 
@@ -556,6 +561,12 @@ private:
           //AMC_histogram * t_amcH = &(m_amc13H->amcsH().at(a_c));
           v_amcH[a_c].fillHistograms(&*a);
 
+	  int serial = a->AMCnum();
+	  char serial_ch[10];
+	  serial_ch[0] = '\0';
+	  sprintf(serial_ch, "%d", serial);
+
+
           if (m_RunType){
             m_deltaV = a->Param2() - a->Param3();
             m_Latency = a->Param1();
@@ -580,12 +591,14 @@ private:
             /* LOOP THROUGH VFATs */
             for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
               int vID = v->ChipID();
-              char vID_ch[10];
+	      vID = vID | 0xf000;
+              char vID_ch[10]; //encoded VFAT location <amcnum><gtxnum><chipid>
               vID_ch[0] = '\0';
               sprintf(vID_ch, "%d", vID);
               char buff[10];
               buff[0] = '\0';
-              strcpy(buff,gID_ch);
+	      strcpy(buff,serial_ch);
+              strcat(buff,gID_ch);
               strcat(buff,vID_ch);
               strcpy(vID_ch,buff);
               auto vfatH_ = vfat_map.find(vID_ch);
@@ -598,7 +611,8 @@ private:
               }
               else {
                 std::cout << "VFAT Not found\n";
-                std::cout << "Chip ID " << vID_ch <<"\n";
+		std::cout << "vID: " << vID << " = " << std::hex << vID << std::dec << std::endl;
+                std::cout << "vID_ch: " << vID_ch <<"\n";
               }
             } /* END VFAT LOOP */
             
