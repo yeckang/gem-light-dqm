@@ -102,7 +102,7 @@ class GEMUnpacker
             // fill the vfat data here
             //std::cout << "Number of VFAT words " << m_gebdata->Vwh() << std::endl;
             int m_nvb = m_gebdata->Vwh() / 3; // number of VFAT2 blocks. Eventually add here sanity check
-            //std::cout << "Number of VFAT blocks " << m_nvb << std::endl;
+            //printf("N vfat blocks %d\n",m_nvb);
             for (unsigned short k = 0; k < m_nvb; k++){
               VFATdata * m_vfatdata = new VFATdata();
               // read 3 vfat block words, totaly 192 bits
