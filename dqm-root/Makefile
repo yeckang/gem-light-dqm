@@ -17,6 +17,11 @@ ROOTGLIBS =$(shell root-config --glibs)
 
 ROOTLIBS += -lRHTTP
 
+PYTHONCFLAGS=$(shell python2.7-config --cflags) 
+PYTHONLIBS=$(shell python2.7-config --ldflags)
+MYSQLLIBS=$(shell mysql_config --libs)
+
+
 #Project=gem
 Project=gem-light-dqm
 Package=dqm-root
@@ -25,11 +30,18 @@ ShortPackage=dqm-root
 PackageName=dqm-root
 
 IncludeDirs = /usr/include/root
+IncludeDirs+= /usr/local/include/root
 IncludeDirs+= $(BUILD_HOME)/$(Project)
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)/include
 IncludeDirs+= $(BUILD_HOME)/$(Project)/gemtreewriter/include
+<<<<<<< HEAD
 IncludeDirs+= ${BUILD_HOME}/cmsgemos/gemreadout/include
+=======
+IncludeDirs+= ${BUILD_HOME}/${GEM_OS_PROJECT}/gemreadout/include
+# IncludeDirs+= /usr/local/lib/python2.7
+IncludeDirs+= /usr/local/include/python2.7
+>>>>>>> 8d90c751d9a6cd96b9af10e46f176aa610f5a1e2
 INC=$(IncludeDirs:%=-I%)
 
 SRC=$(BUILD_HOME)/$(Project)/$(Package)/src/common
@@ -42,7 +54,7 @@ all:
 	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/histogramLayeringExample.cxx $(LIB)/libEvent.so -o $(BIN)/layer
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/gtprinter.cxx $(LIB)/libEvent.so -o $(BIN)/gtprinter
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dqmMain.cxx $(LIB)/libEvent.so -o $(BIN)/dqm
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dqmMain.cxx $(LIB)/libEvent.so -o $(BIN)/dqm $(PYTHONLIBS) $(MYSQLLIBS)
 	$(LS) $(BIN)
 
 dqm:  	#CURRENT VERSION

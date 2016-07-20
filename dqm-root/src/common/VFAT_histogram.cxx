@@ -120,11 +120,11 @@ class VFAT_histogram: public Hardware_histogram
             channelFired = true;
           }
         }
+        if (channelFired) {
+          latencyScan->Fill(latency);
+          thresholdScanChip->Fill(deltaV);
+        }
       }// end loop on channels
-      if (channelFired) {
-        latencyScan->Fill(latency);
-        thresholdScanChip->Fill(deltaV);
-      }
     }
 
   TH1F* getb1010() { return b1010; }

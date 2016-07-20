@@ -4,7 +4,9 @@
  * N. Amapane, G. Cerminara, M. Dalchenko
  * R. King
  */
-#define DEBUG 1
+#ifndef DEBUG
+#define DEBUG 0
+#endif
 
 #include <sstream>
 #include <iostream>
@@ -694,7 +696,7 @@ void gtprint(TH1 *h, TString name, TString opath)
   gROOT->ProcessLine(".!mkdir -p "+opath+"/");
 
   gtprintCanvas(cv, opath+name);
-
+  
 }
 
 void gemTreePrint(TDirectory *source, TString outPath, bool first)
