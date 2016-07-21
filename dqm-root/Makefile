@@ -35,13 +35,11 @@ IncludeDirs+= $(BUILD_HOME)/$(Project)
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)/include
 IncludeDirs+= $(BUILD_HOME)/$(Project)/gemtreewriter/include
-<<<<<<< HEAD
-IncludeDirs+= ${BUILD_HOME}/cmsgemos/gemreadout/include
-=======
 IncludeDirs+= ${BUILD_HOME}/${GEM_OS_PROJECT}/gemreadout/include
-# IncludeDirs+= /usr/local/lib/python2.7
 IncludeDirs+= /usr/local/include/python2.7
->>>>>>> 8d90c751d9a6cd96b9af10e46f176aa610f5a1e2
+#IncludeDirs+= /usr/local/lib/python2.7
+
+
 INC=$(IncludeDirs:%=-I%)
 
 SRC=$(BUILD_HOME)/$(Project)/$(Package)/src/common
