@@ -75,7 +75,7 @@ public:
     if(ifilename.find("chunk") == string::npos)
       RunName = ifilename.substr(ifilename.find("run"),ifilename.size()-9);
     else
-      RunName = ifilename.substr(ifilename.find("run"),ifilename.find("chunk")-1);
+      RunName = ifilename.substr(ifilename.find("run"),ifilename.find("chunk")-6);
     
     std::string tmp = ifilename.substr(ifilename.size()-9, ifilename.size());
     if (tmp != ".raw.root") throw std::runtime_error("Wrong input filename (should end with '.raw.root'): "+ifilename);
@@ -164,7 +164,7 @@ private:
             string GEBBidstr(GEBBidchar);
             string gslot_ch = GEBBidstr.substr(GEBBidstr.find("-")+1,GEBBidstr.size());
             long long int g_slot = atoi(gslot_ch.c_str());
-            string gebdir = "GEB-";
+            string gebdir = "GTX-";
             gebdir += to_string(g_slot);
             m_gebH = new GEB_histogram(ofilename, gDirectory->mkdir(gebdir.c_str()), to_string(g_slot));
             m_gebH->bookHistograms();
@@ -258,7 +258,7 @@ private:
               v_vfatH = v_gebH->vfatsH(slot);
               bool final = i == nentries-1;
               v_vfatH->fillHistograms(&*v, final);
-              if (m_RunType){
+              if (m_RunType == 1){
                 v_vfatH->fillScanHistograms(&*v, m_RunType, m_deltaV, m_Latency);
               }
             } /* END VFAT LOOP */
