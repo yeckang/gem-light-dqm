@@ -56,23 +56,18 @@ vector<string> manyDBQuery(MYSQL * Database, std::string m_Query)
     std::cout << "MySQL query error: " << std::string(mysql_error(Database)) << std::endl;
     return null_return;
   }
-  else
-    std::cout << "MySQL query success: " << manyQuery << std::endl;
+  //else
+  //  std::cout << "MySQL query success: " << manyQuery << std::endl;
 
   MYSQL_RES *res = mysql_use_result(Database);
   MYSQL_ROW row;
-  cout << "res: " << res << endl;
   
   while ((row=mysql_fetch_row(res)))
     {
-      cout << "Fetched row." << endl;
       if (row[0]!=0) {
         string resstr(row[0]); 
-        cout << resstr << endl;
         result.push_back(resstr);
       }
-      // else
-      //   break
     }
 
   mysql_free_result(res);
@@ -169,93 +164,4 @@ unsigned int getChipIDFromID(MYSQL * Database, unsigned int db_id)
   } catch (std::exception& e) {
     std::cout << "[getChipIDFromID]: caught std::exception " << e.what() << std::endl;
   }
-}
-
-unsigned int getVFATChipID(MYSQL * Database, std::string RunName, std::string AMCboardid, std::string GEBchamberid, int slot) {
-
-  // std::string RundbidQuery = "SELECT id FROM ldqm_db_run WHERE Name LIKE '";
-  // RundbidQuery += RunName;
-  // RundbidQuery += "'";
-  // int Rundbid = atoi(simpleDBQuery(Database,RundbidQuery));
-
-
-  // std::string AMCdbidlistQuery  = "SELECT amc_id FROM ldqm_db_run_amcs WHERE run_id LIKE '";
-  // AMCdbidlistQuery += Rundbid;
-  // AMCdbidlistQuery += "'";
-  // vector<char*> AMCdbidlist = manyDBQuery(Database,AMCdbidlistQuery);
-
-  
-  // if (AMCdbidlist.size()==0)                                                                                                                 
-  //   return 0; 
-
-  // for (auto AMCdbid = AMCdbidlist.begin(); AMCdbid != AMCdbidlist.end(); AMCdbid++) {
-  //   std::string currentAMCdbid = AMCdbid;
-  //   std::string AMCdbBoardIDQuery = "SELECT BoardID FROM ldqm_db_amc WHERE id LIKE ";
-  //   AMCdbBoardIDQuery += currentAMCdbid;
-    
-  //   std::string currentAMCdbBoardID = simpleDBQuery(Database,AMCdbBoardIDQuery);
-
-  //   if (currentAMCdbBoardID == AMCboardid) {
-  //     int correctAMCdbid = atoi(currentAMCdbid);
-  //     break;
-  //   }
-
-  // }
-  
-  // int AMCdbid = correctAMCdbid;
-  // std::cout << "AMCdbid: " << AMCdbid << std::endl;
-
-  // std::string GEBdbidsQuery  = "SELECT geb_id FROM ldqm_db_amc_gebs WHERE amc_id LIKE ";
-  // GEBdbidsQuery += std::to_string((long long int)AMCdbid);
-  // vector<char*> GEBdbids = manyDBQuery(Database,GEBdbidsQuery);
-  // std::cout << "GEBdbids.size(): "<< GEBdbids.size() << std::endl;
-  // int correctGEBID = 0;
-  // for (int id = 0; id < GEBdbids.size(); id++) {
-  //   cout << "GEBdbids[id] " << GEBdbids[id] << std::endl;
-  //   int currentGEBid = atoi(GEBdbids[id]);
-  //   cout << "GEBdbids: " << currentGEBid << endl;
-  //   std::string GEBchambermatchQuery = "SELECT ChamberID FROM ldqm_db_geb WHERE id LIKE ";
-  //   GEBchambermatchQuery += std::to_string((long long int)atoi(GEBdbids[id]));
-  //   char* dbchamberid = simpleDBQuery(Database,GEBchambermatchQuery);
-  //   std::string chamberiddb = dbchamberid;
-  //   std::cout << "chamberiddb:" << chamberiddb.substr(0,5) << "\t GEBchamberid:" << GEBchamberid.substr(0,5) << std::endl;
-  //   // std::cout << chamberiddb.substr(0,4) == GEBchamberid.substr(0,4) << std::endl;
-  //   if (chamberiddb.substr(0,5) == GEBchamberid.substr(0,5)) {
-  //     std::cout << "Located correct GEB: " << chamberiddb << std::endl;
-  //     correctGEBID = currentGEBid;
-  //     break;
-  //   }
-  // }
-
-  // if (correctGEBID==0) {
-  //   std::cout << "Could not locate correct GEB" << std::endl;
-  //   return 0;
-  // }
-
-  // std::cout << correctGEBID << std::endl;
-    
-  // std::string GEBVFATsQuery = "SELECT vfat_id FROM ldqm_db_geb_vfats WHERE geb_id LIKE ";
-  // GEBVFATsQuery += std::to_string((long long int)correctGEBID);
-  // vector<char*> correctGEBVFATs = manyDBQuery(Database,GEBVFATsQuery);
-
-  // int correctVFATID = 0;
-  // for (int vf=0; vf<correctGEBVFATs.size();vf++) {
-  //   int currentVFATID = atoi(correctGEBVFATs[vf]);
-  //   std::cout << currentVFATID << std::endl;
-
-  //   std::string VFATSlotQuery = "SELECT Slot FROM ldqm_db_vfat WHERE id LIKE ";
-  //   VFATSlotQuery += std::to_string((long long int)currentVFATID);
-  //   int currentSlot = atoi(simpleDBQuery(Database,VFATSlotQuery));
-  //   if (currentSlot == slot) {
-  //     correctVFATID = currentVFATID;
-  //     break;
-  //   }   
-  // }
-
-  // if (correctVFATID != 0) {
-  //   int ChipID = strtol(simpleDBQuery(Database,"SELECT ChipID FROM ldqm_db_vfat WHERE id LIKE "+std::to_string((long long int)correctVFATID)),NULL,16);
-  //   std::cout << std::hex << ChipID << std::endl;
-  //   return ChipID;
-  // }
-  return 0;
 }

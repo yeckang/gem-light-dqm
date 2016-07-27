@@ -62,7 +62,7 @@ public:
     Errors and Warnings (Thirteen Flags, InFIFO underflow flag, Stuck data flag), OH CRC, VFAT word count (trailer)
   */
 
-  void fillHistograms(GEBdata * geb){
+  void fillHistograms(GEBdata * geb, std::map<int,int> slot_map){
     //ZeroSup->Fill(geb->ZeroSup());
     InputID->Fill(geb->InputID());
     Vwh->Fill(geb->Vwh());
@@ -89,11 +89,7 @@ public:
     v_vfat = geb->vfats();
     for (auto m_vfat = v_vfat.begin(); m_vfat!=v_vfat.end(); m_vfat++)
       {
-        // std::unique_ptr<gem::readout::GEMslotContents> slotInfo_ = std::unique_ptr<gem::readout::GEMslotContents> (new gem::readout::GEMslotContents("slot_table.csv"));     
-        // m_sn = slotInfo_->GEBslotIndex(m_vfat->ChipID());  //converts Chip ID into VFAT slot number
-
-        // m_sn = getVFATSlot(Database,RunName,AMCID,GEBID,m_vfat->ChipID());
-        m_sn = -1;
+        m_sn = slot_map.find(m_vfat->ChipID())->second;
 
         SlotN->Fill(m_sn);
         ofstream myfile;
