@@ -38,6 +38,7 @@
 #include <math.h>
 
 #include "plotter.cxx"
+#include "printer.cxx"
 //#include "dqmCanvases.cxx"
 //#include "GEB_summaryCanvases.cxx"
 

@@ -138,8 +138,10 @@ private:
     AMC13Query += RunName;
     AMC13Query += "'";
 
-    string RunIDstr = stringFromChar(simpleDBQuery(Database, AMC13Query));
-    
+    cout << "RunIDstr: " << RunIDstr << endl;
+    if (stoi(RunIDstr) == 0)
+      throw "Bad run name.";
+
     string AMCQuery = "select amc_id from ldqm_db_run_amcs where run_id like '"+RunIDstr+"'";
     vector<string> AMCs = manyDBQuery(Database,AMCQuery);
     for ( int amc = 0; amc < AMCs.size(); amc++ )
