@@ -270,6 +270,7 @@ private:
             } /* END VFAT LOOP */
             if (i == nentries-1) {
               v_gebH->fillSummaryCanvases(onlineHistsDir,a_c,gID);
+              // printSummaryCanvases(onlineHistsDir,a_c,gID);
             }
             
           } /* END GEB LOOP */

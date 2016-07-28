@@ -1,6 +1,6 @@
-#ifndef DEBUG
-#define DEBUG 1
-#endif
+
+#define DEBUG 0
+
 
 #include <sstream>
 #include <iostream>
@@ -103,17 +103,12 @@ void gemTreePrint(TDirectory *source, TString outPath, bool first)
   }
   else newPath = outPath;
 
-  //Retrieve histograms from current directory
-  vector<TH1*> hs;
-  retrieveHistograms(source, hs);
-  int numH = hs.size();
-  if(DEBUG) std::cout<<"[gemTreePrint]"<< "In directory: " << source->GetName() << std::endl;
-  if(DEBUG) std::cout<<"[gemTreePrint]"<< "Number of histrograms retrieved: " << numH << std::endl;
+  Bool_t status = TH1::AddDirectoryStatus();
+  TH1::AddDirectory(kFALSE);
 
+  
   //Check for directories, print histograms
-  TList* keylist = new TList;
-  keylist = source->GetListOfKeys();
-  TIter nextkey(keylist);
+  TIter nextkey(source->GetListOfKeys());
   TKey *key = new TKey;
   int key_c = 1; //counter
   while (key = (TKey*)nextkey())
@@ -123,24 +118,27 @@ void gemTreePrint(TDirectory *source, TString outPath, bool first)
       if(DEBUG) std::cout<<"[gemTreePrint]"<< "Key Name: " << key->GetName() << std::endl;
       if(DEBUG) std::cout<<"[gemTreePrint]"<< "Key Class: " << key->GetClassName() << std::endl;
       key_c++;
-      TClass *cl = gROOT->GetClass(key->GetClassName());
-      
+      // TClass *cl = gROOT->GetClass(key->GetClassName());
+      TObject *obj = key->ReadObj();
       //Recursively loop through directories
       string keyName = key->GetName();
-      if ((cl->InheritsFrom(TDirectory::Class())) and (keyName.find("OnlineHists")==string::npos)) {
-        if(DEBUG) std::cout<<"[gemTreePrint]"<< "Moving to directory: "<<key->GetName()<<endl;
+      // if ((cl->InheritsFrom(TDirectory::Class())) and (keyName.find("OnlineHists")==string::npos)) {
+      if (obj->IsA()->InheritsFrom(TDirectory::Class()) and (keyName.find("OnlineHists")==string::npos)) {
+        if(DEBUG) std::cout<<"[gemTreePrint]"<< "Moving to directory: "<<keyName<<endl;
         source->cd(key->GetName());
         TDirectory *subdir = gDirectory;
         gemTreePrint(subdir, newPath, false);
       }
       //Print if key is a histogram
-      if (cl->InheritsFrom("TH1")) {
+      // if (cl->InheritsFrom("TH1")) {
+      if (obj->IsA()->InheritsFrom(TH1::Class())) {
 	if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing histogram... " << std::endl;
 	TH1 *h = (TH1*)key->ReadObj();
 	gtprint(h,key->GetName(),newPath);
       }
       //Print summary canvases
-      if (cl->InheritsFrom("TCanvas")) {
+      // if (cl->InheritsFrom("TCanvas")) {
+      if (obj->IsA()->InheritsFrom(TCanvas::Class())) {
 	if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing canvas... " << std::endl;
         gROOT->ProcessLine(".!mkdir -p "+newPath+"summary_canvases/");
 	TString fullPath = newPath + "summary_canvases/" + key->GetName();
@@ -149,6 +147,7 @@ void gemTreePrint(TDirectory *source, TString outPath, bool first)
       }
      
     }
+  TH1::AddDirectory(status);
   return;
 }
 
@@ -158,8 +157,7 @@ void gemTreePrintOnline(TDirectory *source, TString outPath, bool first)
 
   if (gDirectory->cd("/OnlineHists")) {
     TList* keylist = new TList;
-    keylist = gDirectory->GetListOfKeys();
-    TIter nextkey(keylist);
+    TIter nextkey(gDirectory->GetListOfKeys());
     TKey *key = new TKey;
     int key_c = 1; //counter
     while (key = (TKey*)nextkey())
@@ -222,60 +220,21 @@ void gemTreePrintOnline(TDirectory *source, TString outPath, bool first)
   }
   
   return;
-  
-  //Create equivalent output directory via newPath (ignore initial .root directory)
-  TString newPath;
-  if(!first){
-    newPath = outPath + source->GetName() + "/";      
-    if(DEBUG) std::cout<<"[gemTreePrint]"<< "newPath: " << newPath << std::endl;
-    gROOT->ProcessLine(".!mkdir -p "+newPath);
-  }
-  else newPath = outPath;
+ }
 
-  //Retrieve histograms from current directory
-  vector<TH1*> hs;
-  retrieveHistograms(source, hs);
-  int numH = hs.size();
-  if(DEBUG) std::cout<<"[gemTreePrint]"<< "In directory: " << source->GetName() << std::endl;
-  if(DEBUG) std::cout<<"[gemTreePrint]"<< "Number of histrograms retrieved: " << numH << std::endl;
 
-  //Check for directories, print histograms
-  TList* keylist = new TList;
-  keylist = source->GetListOfKeys();
-  TIter nextkey(keylist);
-  TKey *key = new TKey;
-  int key_c = 1; //counter
-  while (key = (TKey*)nextkey())
-    {
-      if(DEBUG) std::cout<< std::endl;
-      if(DEBUG) std::cout<<"[gemTreePrint]"<< "Key: " << key_c << std::endl;
-      if(DEBUG) std::cout<<"[gemTreePrint]"<< "Key Name: " << key->GetName() << std::endl;
-      if(DEBUG) std::cout<<"[gemTreePrint]"<< "Key Class: " << key->GetClassName() << std::endl;
-      key_c++;
-      TClass *cl = gROOT->GetClass(key->GetClassName());
-      
-      //Recursively loop through directories
-      if (cl->InheritsFrom(TDirectory::Class())) {
-        source->cd(key->GetName());
-        TDirectory *subdir = gDirectory;
-        gemTreePrint(subdir, newPath, false);
-      }
-      //Print if key is a histogram
-      if (cl->InheritsFrom("TH1")) {
-	if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing histogram... " << std::endl;
-	TH1 *h = (TH1*)key->ReadObj();
-	gtprint(h,key->GetName(),newPath);
-      }
-      //Print summary canvases
-      if (cl->InheritsFrom("TCanvas")) {
-	if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing canvas... " << std::endl;
-        gROOT->ProcessLine(".!mkdir -p "+newPath+"summary_canvases/");
-	TString fullPath = newPath + "summary_canvases/" + key->GetName();
-	TCanvas *c = (TCanvas*)key->ReadObj();
-	gtprintCanvas(c,fullPath);
-      }
-     
-    }
-  return;
-}
+// void printSummaryCanvases(TDirectory *onlineDir, int amcNumber, int gebNumber) {
 
+//   TString newPath = onlineDir->GetPath() + "/AMC13-1";
+//   newPath = newPath + "/AMC-" + to_string((long long int)amcNumber);
+//   newPath = newPath + "/GTX-" + to_string((long long int)gebNumber); 
+//   newPath = newPath + "/summary_canvases/";
+//   cout << "Path to print: " << newPath << endl;
+
+//   string integrityName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_integrity";
+//   string occupancyName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_occupancy";
+//   string clusterSizeName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_clusterSize";
+//   string clusterMultName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_clusterMult";
+
+
+// }
