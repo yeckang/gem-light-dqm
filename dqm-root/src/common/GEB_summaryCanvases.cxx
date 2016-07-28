@@ -5,6 +5,11 @@ void fillGEBCanvases()
   fillGEBOccupancyCanvas();
   fillGEBClusterSizeCanvas();
   fillGEBClusterMultCanvas();
+  // cout << "Writing other canvases" << endl;
+  // Integrity_canvas->Write();
+  // ClusterSize_canvas->Write();
+  // ClusterMult_canvas->Write();
+
 }
 
 void fillGEBIntegrityCanvas()
@@ -39,36 +44,38 @@ void fillGEBOccupancyCanvas()
   Occupancy_canvas->cd(1);
   std::stringstream ss;
   for (int nb = 1; nb < 9; nb ++)
-  {
-    std::string name = "eta_";
-    ss.str(std::string());
-    ss << 9-nb;
-    name+=ss.str();
-    BeamProfile->GetXaxis()->SetBinLabel(nb, name.c_str());
-  }
+    {
+      std::string name = "eta_";
+      ss.str(std::string());
+      ss << 9-nb;
+      name+=ss.str();
+      BeamProfile->GetXaxis()->SetBinLabel(nb, name.c_str());
+    }
   BeamProfile->GetYaxis()->SetTitle("Strips");
   BeamProfile->GetXaxis()->SetTitle("Pseudorapidity partitions");
   BeamProfile->Draw("colz");
 
   TH1D* p_temp;
   for (int p_i = 1; p_i < 9; p_i++)
-  {
-    Occupancy_canvas->cd(p_i+1);
-    std::string title = "eta_";
-    ss.str(std::string());
-    ss << 9-p_i;
-    title+=ss.str();
-    p_temp = BeamProfile->ProjectionY(title.c_str(),p_i,p_i);
-    p_temp->SetTitle(title.c_str());
-    p_temp->GetYaxis()->SetTitle("Number of events");
-    p_temp->Draw();
-    gPad->Update();
- 
-  }
+    {
+      Occupancy_canvas->cd(p_i+1);
+      std::string title = "eta_";
+      ss.str(std::string());
+      ss << 9-p_i;
+      title+=ss.str();
+      p_temp = BeamProfile->ProjectionY(title.c_str(),p_i,p_i);
+      p_temp->SetTitle(title.c_str());
+      p_temp->GetYaxis()->SetTitle("Number of events");
+      p_temp->Draw();
+      gPad->Update();
+    }
+  
 
+  // Occupancy_canvas->Update();  
+  // Occupancy_canvas->WaitPrimitive();
+  //  Occupancy_canvas->Write();
+  
   //Occupancy_canvas->Draw();
-  //Occupancy_canvas->Update();
-  //Occupancy_canvas->WaitPrimitive();
 }
 
 
@@ -83,18 +90,18 @@ void fillGEBClusterSizeCanvas()
   ClusterSize->Draw();
   gPad->SetLogy();
   for (int p_i = 1; p_i < NETA+1; p_i++)
-  {
-    ClusterSize_canvas->cd(p_i+1);
-    std::string title = "eta_";
-    ss.str(std::string());
-    ss << 9-p_i;
-    title+=ss.str();
-    ClusterSizeEta[NETA-p_i]->GetYaxis()->SetTitle("Number of entries");
-    ClusterSizeEta[NETA-p_i]->GetXaxis()->SetTitle("Cluster size");
-    ClusterSizeEta[NETA-p_i]->SetTitle(title.c_str());
-    ClusterSizeEta[NETA-p_i]->Draw();
-    gPad->SetLogy();
-  }
+    {
+      ClusterSize_canvas->cd(p_i+1);
+      std::string title = "eta_";
+      ss.str(std::string());
+      ss << 9-p_i;
+      title+=ss.str();
+      ClusterSizeEta[NETA-p_i]->GetYaxis()->SetTitle("Number of entries");
+      ClusterSizeEta[NETA-p_i]->GetXaxis()->SetTitle("Cluster size");
+      ClusterSizeEta[NETA-p_i]->SetTitle(title.c_str());
+      ClusterSizeEta[NETA-p_i]->Draw();
+      gPad->SetLogy();
+    }
  
   //clusterSize_canvas->Draw();
   //clusterSize_canvas->Update();
@@ -113,18 +120,18 @@ void fillGEBClusterMultCanvas()
   ClusterMult->Draw();
   gPad->SetLogy();
   for (int p_i = 1; p_i < NETA+1; p_i++)
-  {
-    ClusterMult_canvas->cd(p_i+1);
-    std::string title = "eta_";
-    ss.str(std::string());
-    ss << 9-p_i;
-    title+=ss.str();
-    ClusterMultEta[NETA-p_i]->GetYaxis()->SetTitle("Number of entries");
-    ClusterMultEta[NETA-p_i]->GetXaxis()->SetTitle("Cluster multiplicity");
-    ClusterMultEta[NETA-p_i]->SetTitle(title.c_str());
-    ClusterMultEta[NETA-p_i]->Draw();
-    gPad->SetLogy();
-  }
+    {
+      ClusterMult_canvas->cd(p_i+1);
+      std::string title = "eta_";
+      ss.str(std::string());
+      ss << 9-p_i;
+      title+=ss.str();
+      ClusterMultEta[NETA-p_i]->GetYaxis()->SetTitle("Number of entries");
+      ClusterMultEta[NETA-p_i]->GetXaxis()->SetTitle("Cluster multiplicity");
+      ClusterMultEta[NETA-p_i]->SetTitle(title.c_str());
+      ClusterMultEta[NETA-p_i]->Draw();
+      gPad->SetLogy();
+    }
  
   //clusterMult->Draw();
   //clusterMult->Update();

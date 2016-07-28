@@ -72,11 +72,12 @@ public:
   //!The constructor requires a file name ending with .raw.root
   treeReader(const std::string &ifilename)
   {
-    if(ifilename.find("chunk") == string::npos)
-      RunName = ifilename.substr(ifilename.find("run"),ifilename.size()-9);
+    if(ifilename.find("chunk") == string::npos) {
+      RunName = ifilename.substr(ifilename.find("run"),ifilename.size()-14);
+    }
     else
       RunName = ifilename.substr(ifilename.find("run"),ifilename.find("chunk")-6);
-    
+    cout << "RunName: " << RunName << endl;
     std::string tmp = ifilename.substr(ifilename.size()-9, ifilename.size());
     if (tmp != ".raw.root") throw std::runtime_error("Wrong input filename (should end with '.raw.root'): "+ifilename);
     ifile = new TFile(ifilename.c_str(), "READ");
@@ -123,11 +124,15 @@ private:
   int m_RunType;
   int m_deltaV;
   int m_Latency;
-
+  TDirectory* onlineHistsDir;
   MYSQL *Database;
 
   void fetchHardwareDB()
   {
+    onlineHistsDir = gDirectory->mkdir("OnlineHists");
+    cout << "Online histogram directory created: " << onlineHistsDir->GetPath() << endl;
+    gDirectory->cd("..");
+    
     VFATMap = {{{0}}};
     char * diramc13 = "AMC13-1";
     
@@ -138,10 +143,8 @@ private:
     AMC13Query += RunName;
     AMC13Query += "'";
 
-    cout << "RunIDstr: " << RunIDstr << endl;
-    if (stoi(RunIDstr) == 0)
-      throw "Bad run name.";
-
+    string RunIDstr = stringFromChar(simpleDBQuery(Database, AMC13Query));
+    
     string AMCQuery = "select amc_id from ldqm_db_run_amcs where run_id like '"+RunIDstr+"'";
     vector<string> AMCs = manyDBQuery(Database,AMCQuery);
     for ( int amc = 0; amc < AMCs.size(); amc++ )
@@ -170,6 +173,7 @@ private:
             gebdir += to_string(g_slot);
             m_gebH = new GEB_histogram(ofilename, gDirectory->mkdir(gebdir.c_str()), to_string(g_slot));
             m_gebH->bookHistograms();
+            //            summaryCanvasDir = gDirectory
             string VFATQuery = "select vfat_id from ldqm_db_geb_vfats where geb_id like '"+currentGEBid+"'";
             vector<string> VFATs = manyDBQuery(Database,VFATQuery);
             for ( int vfat = 0; vfat < VFATs.size(); vfat++ )
@@ -264,6 +268,11 @@ private:
                 v_vfatH->fillScanHistograms(&*v, m_RunType, m_deltaV, m_Latency);
               }
             } /* END VFAT LOOP */
+            if (i == nentries-1) {
+              cout << "Last entry - Filling summary histograms.";
+              v_gebH->fillSummaryCanvases(onlineHistsDir,a_c,gID);
+            }
+            
           } /* END GEB LOOP */
           a_c++;
         } /* END AMC LOOP */

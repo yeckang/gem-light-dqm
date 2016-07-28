@@ -150,3 +150,66 @@ void gemTreePrint(TDirectory *source, TString outPath, bool first)
   return;
 }
 
+
+void gemTreePrintOnline(TDirectory *source, TString outPath, bool first)
+{
+
+  
+
+  
+  //Create equivalent output directory via newPath (ignore initial .root directory)
+  TString newPath;
+  if(!first){
+    newPath = outPath + source->GetName() + "/";      
+    if(DEBUG) std::cout<<"[gemTreePrint]"<< "newPath: " << newPath << std::endl;
+    gROOT->ProcessLine(".!mkdir -p "+newPath);
+  }
+  else newPath = outPath;
+
+  //Retrieve histograms from current directory
+  vector<TH1*> hs;
+  retrieveHistograms(source, hs);
+  int numH = hs.size();
+  if(DEBUG) std::cout<<"[gemTreePrint]"<< "In directory: " << source->GetName() << std::endl;
+  if(DEBUG) std::cout<<"[gemTreePrint]"<< "Number of histrograms retrieved: " << numH << std::endl;
+
+  //Check for directories, print histograms
+  TList* keylist = new TList;
+  keylist = source->GetListOfKeys();
+  TIter nextkey(keylist);
+  TKey *key = new TKey;
+  int key_c = 1; //counter
+  while (key = (TKey*)nextkey())
+    {
+      if(DEBUG) std::cout<< std::endl;
+      if(DEBUG) std::cout<<"[gemTreePrint]"<< "Key: " << key_c << std::endl;
+      if(DEBUG) std::cout<<"[gemTreePrint]"<< "Key Name: " << key->GetName() << std::endl;
+      if(DEBUG) std::cout<<"[gemTreePrint]"<< "Key Class: " << key->GetClassName() << std::endl;
+      key_c++;
+      TClass *cl = gROOT->GetClass(key->GetClassName());
+      
+      //Recursively loop through directories
+      if (cl->InheritsFrom(TDirectory::Class())) {
+        source->cd(key->GetName());
+        TDirectory *subdir = gDirectory;
+        gemTreePrint(subdir, newPath, false);
+      }
+      //Print if key is a histogram
+      if (cl->InheritsFrom("TH1")) {
+	if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing histogram... " << std::endl;
+	TH1 *h = (TH1*)key->ReadObj();
+	gtprint(h,key->GetName(),newPath);
+      }
+      //Print summary canvases
+      if (cl->InheritsFrom("TCanvas")) {
+	if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing canvas... " << std::endl;
+        gROOT->ProcessLine(".!mkdir -p "+newPath+"summary_canvases/");
+	TString fullPath = newPath + "summary_canvases/" + key->GetName();
+	TCanvas *c = (TCanvas*)key->ReadObj();
+	gtprintCanvas(c,fullPath);
+      }
+     
+    }
+  return;
+}
+

@@ -49,6 +49,7 @@ public:
     TotalFlag  = new TH1F("TotalFlag", "Control Flags", 15,  0x0 , 0xf);
     TotalCRC   = new TH1F("TotalCRC", "CRC Mismatches", 0xffff,-32768,32768);
 
+    cout << "Booking summary canvases" << endl;
     Integrity_canvas = newCanvas("GEBIntegrity",3,2,2400,1200);
     Occupancy_canvas = newCanvas("GEBOccupancy",3,3,1800,1800);
     ClusterSize_canvas = newCanvas("GEBClusterSize",3,3,1800,1800);
@@ -146,21 +147,62 @@ public:
 
 #include "GEB_summaryCanvases.cxx"
   
-  void fillSummaryCanvases(vector<VFAT_histogram> vfat_histograms)
+  // void fillSummaryCanvases(vector<VFAT_histogram> vfat_histograms)
+  // {
+  //   for(int vfat_index=0;vfat_index<vfat_histograms.size();vfat_index++)
+  //     {
+  // 	VFAT_histogram current_vfatH = vfat_histograms[vfat_index];
+  //       Totalb1010->Add(current_vfatH.getb1010());
+  //       Totalb1100->Add(current_vfatH.getb1100());
+  //       Totalb1110->Add(current_vfatH.getb1110());
+  //       TotalFlag ->Add(current_vfatH.getFlag());
+  //       TotalCRC  ->Add(current_vfatH.getCRC());
+  //     }
+
+  //   fillGEBCanvases();
+  // }
+
+
+  void fillSummaryCanvases(TDirectory* onlineHistsDir,int amcnum,int gebnum)
   {
-    for(int vfat_index=0;vfat_index<vfat_histograms.size();vfat_index++)
+    cout << "===============Filling summary canvases====================" << endl;
+    for(int vfat_index=0; vfat_index < 24; vfat_index++)
       {
-  	VFAT_histogram current_vfatH = vfat_histograms[vfat_index];
-	Totalb1010->Add(current_vfatH.getb1010());
-	Totalb1100->Add(current_vfatH.getb1100());
-	Totalb1110->Add(current_vfatH.getb1110());
-	TotalFlag ->Add(current_vfatH.getFlag());
-	TotalCRC  ->Add(current_vfatH.getCRC());
+  	VFAT_histogram *current_vfatH = vfatsH(vfat_index);
+        try {
+          Totalb1010->Add(current_vfatH->getb1010());
+          Totalb1100->Add(current_vfatH->getb1100());
+          Totalb1110->Add(current_vfatH->getb1110());
+          TotalFlag ->Add(current_vfatH->getFlag());
+          TotalCRC  ->Add(current_vfatH->getCRC());
+        }
+        catch(...) {
+          std::cout << "No VFAT_histogram at index " << vfat_index;
+        }
       }
-
     fillGEBCanvases();
-  }
+    onlineHistsDir->cd();
+    cout << "Currently in: " << gDirectory->GetPath() << endl;
+    string integrityName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_integrity";
+    string occupancyName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_occupancy";
+    string clusterSizeName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_clusterSize";
+    string clusterMultName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_clusterMult";
 
+
+    Integrity_canvas->SetName(integrityName.c_str());
+    Integrity_canvas->Write();
+    Occupancy_canvas->SetName(occupancyName.c_str());
+    Occupancy_canvas->Write();
+    ClusterSize_canvas->SetName(clusterSizeName.c_str());
+    ClusterSize_canvas->Write();
+    ClusterMult_canvas->SetName(clusterMultName.c_str());
+    ClusterMult_canvas->Write();
+
+
+
+
+    
+  }
   
 
   
