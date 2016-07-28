@@ -146,26 +146,9 @@ public:
   }
 
 #include "GEB_summaryCanvases.cxx"
-  
-  // void fillSummaryCanvases(vector<VFAT_histogram> vfat_histograms)
-  // {
-  //   for(int vfat_index=0;vfat_index<vfat_histograms.size();vfat_index++)
-  //     {
-  // 	VFAT_histogram current_vfatH = vfat_histograms[vfat_index];
-  //       Totalb1010->Add(current_vfatH.getb1010());
-  //       Totalb1100->Add(current_vfatH.getb1100());
-  //       Totalb1110->Add(current_vfatH.getb1110());
-  //       TotalFlag ->Add(current_vfatH.getFlag());
-  //       TotalCRC  ->Add(current_vfatH.getCRC());
-  //     }
-
-  //   fillGEBCanvases();
-  // }
-
 
   void fillSummaryCanvases(TDirectory* onlineHistsDir,int amcnum,int gebnum)
   {
-    cout << "===============Filling summary canvases====================" << endl;
     for(int vfat_index=0; vfat_index < 24; vfat_index++)
       {
   	VFAT_histogram *current_vfatH = vfatsH(vfat_index);
@@ -182,12 +165,10 @@ public:
       }
     fillGEBCanvases();
     onlineHistsDir->cd();
-    cout << "Currently in: " << gDirectory->GetPath() << endl;
     string integrityName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_integrity";
     string occupancyName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_occupancy";
     string clusterSizeName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_clusterSize";
     string clusterMultName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_clusterMult";
-
 
     Integrity_canvas->SetName(integrityName.c_str());
     Integrity_canvas->Write();
@@ -197,10 +178,6 @@ public:
     ClusterSize_canvas->Write();
     ClusterMult_canvas->SetName(clusterMultName.c_str());
     ClusterMult_canvas->Write();
-
-
-
-
     
   }
   

@@ -126,7 +126,9 @@ void gemTreePrint(TDirectory *source, TString outPath, bool first)
       TClass *cl = gROOT->GetClass(key->GetClassName());
       
       //Recursively loop through directories
-      if (cl->InheritsFrom(TDirectory::Class())) {
+      string keyName = key->GetName();
+      if ((cl->InheritsFrom(TDirectory::Class())) and (keyName.find("OnlineHists")==string::npos)) {
+        if(DEBUG) std::cout<<"[gemTreePrint]"<< "Moving to directory: "<<key->GetName()<<endl;
         source->cd(key->GetName());
         TDirectory *subdir = gDirectory;
         gemTreePrint(subdir, newPath, false);
@@ -154,8 +156,72 @@ void gemTreePrint(TDirectory *source, TString outPath, bool first)
 void gemTreePrintOnline(TDirectory *source, TString outPath, bool first)
 {
 
-  
+  if (gDirectory->cd("/OnlineHists")) {
+    TList* keylist = new TList;
+    keylist = gDirectory->GetListOfKeys();
+    TIter nextkey(keylist);
+    TKey *key = new TKey;
+    int key_c = 1; //counter
+    while (key = (TKey*)nextkey())
+      {
+        // Process name to get directory destination
+        string chop = key->GetName();
+        bool done = false;
+        int vfat = -1;
+        int geb = -1;
+        int amc = -1;
+        string histName = chop.substr(chop.find_last_of("_")+1);
+        chop = chop.substr(0,chop.find_last_of("_"));
+        while (!done) {
+          int found = chop.find_last_of("_");
+          if (found == string::npos)
+            done = true;
+          string hw = chop.substr(found+1);
+          chop = chop.substr(0,found);
+          if (hw.find("AMC") != string::npos)
+            amc = stoi(hw.substr(4));
+          else if ((hw.find("GTX") != string::npos) or (hw.find("GEB") != string::npos))
+            geb = stoi(hw.substr(4));
+          else if (hw.find("VFAT") != string::npos)
+            vfat = stoi(hw.substr(5));
+          else
+            done = true;
+        }
+        TString newPath = outPath + "AMC13-1";
+        if (amc > -1) {
+          newPath = newPath + "/AMC-" + to_string((long long int)amc);
+          if (geb > -1) {
+            newPath = newPath + "/GTX-" + to_string((long long int)geb); 
+            if (vfat > -1)
+              newPath = newPath + "/VFAT-" + to_string((long long int)vfat);
+          }
+        }
 
+        TClass *cl = gROOT->GetClass(key->GetClassName());
+        //Print if key is a histogram
+        if (cl->InheritsFrom("TH1")) {
+          if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing histogram... " << std::endl;
+          gROOT->ProcessLine(".!mkdir -p "+newPath);
+          TH1 *h = (TH1*)key->ReadObj();
+          gtprint(h,histName,newPath);
+        }
+        //Print summary canvases
+        if (cl->InheritsFrom("TCanvas")) {
+          if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing canvas... " << std::endl;
+          gROOT->ProcessLine(".!mkdir -p "+newPath+"/summary_canvases/");
+          TString fullPath = newPath + "/summary_canvases/" + histName;
+          TCanvas *c = (TCanvas*)key->ReadObj();
+          gtprintCanvas(c,fullPath);
+        }
+      }
+  
+  }
+  else {
+    cout << "Could not find online histograms directory!" << endl;
+    return;
+  }
+  
+  return;
   
   //Create equivalent output directory via newPath (ignore initial .root directory)
   TString newPath;

@@ -269,7 +269,6 @@ private:
               }
             } /* END VFAT LOOP */
             if (i == nentries-1) {
-              cout << "Last entry - Filling summary histograms.";
               v_gebH->fillSummaryCanvases(onlineHistsDir,a_c,gID);
             }
             

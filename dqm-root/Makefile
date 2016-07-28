@@ -52,6 +52,7 @@ all:
 	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/histogramLayeringExample.cxx $(LIB)/libEvent.so -o $(BIN)/layer
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/gtprinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/gtprinter
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/onlinePrinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/onlineprinter
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dqmMain.cxx $(LIB)/libEvent.so -o $(BIN)/dqm $(PYTHONLIBS) $(MYSQLLIBS)
 	$(LS) $(BIN)
 
@@ -72,6 +73,12 @@ layer:
 printer:
 	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/gtprinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/gtprinter
+	$(LS) $(BIN)
+
+
+onlineprinter:
+	mkdir -p $(BIN)
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/onlinePrinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/onlineprinter
 	$(LS) $(BIN)
 
 
