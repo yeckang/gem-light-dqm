@@ -52,7 +52,6 @@ int main(int argc, char** argv)
 {
   cout << "==Online GemTreePrinter==" << endl;
   gErrorIgnoreLevel = kWarning;
-  cout << endl;
   if (argc!=2) 
     {
       cout << "Please provide ONE root file." << endl;
@@ -73,8 +72,6 @@ int main(int argc, char** argv)
 
   ifile = new TFile(ifilename, "READ");
   if(DEBUG) std::cout<<"[gtprinter]" << "ifile: " << ifile->GetName() << std::endl;
-  TDirectory *idir = gDirectory->GetDirectory("");
-  if(DEBUG) std::cout<<"[gtprinter]" << "idir: " << idir->GetName() << std::endl;
 
   TString iname; //name of file without .analyzed.root extension
 
@@ -90,7 +87,7 @@ int main(int argc, char** argv)
 
   gROOT->ProcessLine(".!mkdir -p "+dPath);  
 
-  gemTreePrintOnline(idir,dPath,true);
+  gemTreePrintOnline(gDirectory->GetDirectory(""),dPath,true);
   
   std::cout<<"Printing complete. " << iname << std::endl;
   return 0;

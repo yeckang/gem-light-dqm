@@ -73,10 +73,13 @@ public:
   treeReader(const std::string &ifilename)
   {
     if(ifilename.find("chunk") == string::npos) {
-      RunName = ifilename.substr(ifilename.find("run"),ifilename.size()-14);
+      cout << "chunk not found" << endl;
+      RunName = ifilename.substr(ifilename.find("run"),ifilename.find(".raw.root")-ifilename.find("run"));
     }
-    else
-      RunName = ifilename.substr(ifilename.find("run"),ifilename.find("chunk")-6);
+    else {
+      // RunName = ifilename.substr(ifilename.find("run"),ifilename.find("chunk")-1);
+      RunName = ifilename.substr(ifilename.find("run"),ifilename.find("_chunk")-ifilename.find("run"));
+    }
     cout << "RunName: " << RunName << endl;
     std::string tmp = ifilename.substr(ifilename.size()-9, ifilename.size());
     if (tmp != ".raw.root") throw std::runtime_error("Wrong input filename (should end with '.raw.root'): "+ifilename);
