@@ -2,7 +2,7 @@
 #define NSLOTS 12
 #define NGTX 2
 #define NETA 8
-
+#define DEBUG 1
 #define PORT 3306
 #include <mysql/mysql.h>
 #include <Python.h>
@@ -94,7 +94,7 @@ public:
     if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fetching hardware" << std::endl;   
     this->fetchHardwareDB();
 
-    // if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Booking histograms" << std::endl;   
+    if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Filling histograms" << std::endl;   
     // this->bookAllHistograms();
     this->fillAllHistograms();
   }
@@ -150,6 +150,7 @@ private:
     
     string AMCQuery = "select amc_id from ldqm_db_run_amcs where run_id like '"+RunIDstr+"'";
     vector<string> AMCs = manyDBQuery(Database,AMCQuery);
+    if (DEBUG) cout << "Number of AMCs: " << AMCs.size() << endl;
     for ( int amc = 0; amc < AMCs.size(); amc++ )
       {
         string currentAMCid = stringFromChar(AMCs.at(amc).c_str());
@@ -164,6 +165,7 @@ private:
         m_amcH->bookHistograms();
         string GEBQuery = "select geb_id from ldqm_db_amc_gebs where amc_id like '"+currentAMCid+"'";
         vector<string> GEBs = manyDBQuery(Database,GEBQuery);
+        if (DEBUG) cout << "Number of GEBs: " << GEBs.size() << endl;
         for ( int geb = 0; geb < GEBs.size(); geb++ )
           {
             string currentGEBid = stringFromChar(GEBs.at(geb).c_str());
@@ -179,6 +181,7 @@ private:
             //            summaryCanvasDir = gDirectory
             string VFATQuery = "select vfat_id from ldqm_db_geb_vfats where geb_id like '"+currentGEBid+"'";
             vector<string> VFATs = manyDBQuery(Database,VFATQuery);
+            if (DEBUG) cout << "Number of VFATs: " << VFATs.size() << endl;
             for ( int vfat = 0; vfat < VFATs.size(); vfat++ )
               {
                 string currentVFATid = stringFromChar(VFATs.at(vfat).c_str());

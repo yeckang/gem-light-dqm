@@ -1,4 +1,5 @@
 #define PORT 3306
+#define DEBUG 1
 #include <mysql/mysql.h>
 #include <Python.h>
 
@@ -32,7 +33,7 @@ MYSQL* connectDB()
 {
   MYSQL *Database;
   Database = mysql_init(0);
-  if (mysql_real_connect(Database,"gem904daq01.cern.ch","gemdaq","gemdaq","ldqm_db",PORT,0,CLIENT_COMPRESS) == 0) {
+  if (mysql_real_connect(Database,"gem904daq01.cern.ch","gemdaq","gemdaq","ldqm_test_db",PORT,0,CLIENT_COMPRESS) == 0) {
     std::string message("Error connecting to database '");
     message += "' : ";
     message += mysql_error(Database);
@@ -56,8 +57,8 @@ vector<string> manyDBQuery(MYSQL * Database, std::string m_Query)
     std::cout << "MySQL query error: " << std::string(mysql_error(Database)) << std::endl;
     return null_return;
   }
-  //else
-  //  std::cout << "MySQL query success: " << manyQuery << std::endl;
+  else
+    if (DEBUG) std::cout << "MySQL query success: " << manyQuery << std::endl;
 
   MYSQL_RES *res = mysql_use_result(Database);
   MYSQL_ROW row;
