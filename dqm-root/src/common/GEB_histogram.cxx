@@ -49,7 +49,6 @@ public:
     TotalFlag  = new TH1F("TotalFlag", "Control Flags", 15,  0x0 , 0xf);
     TotalCRC   = new TH1F("TotalCRC", "CRC Mismatches", 0xffff,-32768,32768);
 
-    cout << "Booking summary canvases" << endl;
     Integrity_canvas = newCanvas("GEBIntegrity",3,2,2400,1200);
     Occupancy_canvas = newCanvas("GEBOccupancy",3,3,1800,1800);
     ClusterSize_canvas = newCanvas("GEBClusterSize",3,3,1800,1800);

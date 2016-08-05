@@ -58,8 +58,7 @@ all:
 
 dqm:  	#CURRENT VERSION
 	mkdir -p $(BIN)
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dqmMain.cxx $(LIB)/libEvent.so -o $(BIN)/dqm
-
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dqmMain.cxx $(LIB)/libEvent.so -o $(BIN)/dqm $(PYTHONLIBS) $(MYSQLLIBS)
 
 merger:
 	mkdir -p $(BIN)

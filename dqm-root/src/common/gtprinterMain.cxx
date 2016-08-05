@@ -1,4 +1,4 @@
-#define DEBUG 1
+#define DEBUG 0
 #include <iomanip> 
 #include <iostream>
 #include <fstream>
@@ -46,8 +46,8 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
+  cout << "--==Offline Printer Main==--" << endl;
   gErrorIgnoreLevel = kWarning;
-  cout << endl;
   if (argc!=2) 
     {
       cout << "Please provide ONE root file." << endl;
@@ -87,6 +87,6 @@ int main(int argc, char** argv)
 
   gemTreePrint(idir,dPath,true);
   
-  if(DEBUG) std::cout<<"[gtprinter]"<< "Printing complete. " << iname << std::endl;
+  if (DEBUG) cout<< "Online Printer Complete." << endl;
   return 0;
 }

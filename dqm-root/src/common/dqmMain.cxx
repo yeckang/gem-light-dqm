@@ -6,13 +6,14 @@
 #include "dqm-root/src/common/GEMClusterization/GEMClusterizer.cc"
 #include "TApplication.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 
 using namespace std;
 int main(int argc, char** argv)
 {
-
+  gErrorIgnoreLevel = kError;
+  std::cout << "--==DQM Main==--" << endl;
   if (argc<2) 
     {
       cout << "Please provide input filenames" << endl;
@@ -32,11 +33,8 @@ int main(int argc, char** argv)
 
   string m_raw_filename = m_root_filename;
 
-  std::cout << "[MAIN]: Beginning DQM treeReader" << std::endl;
-  std::cout << "[MAIN]: Input file name: " << m_raw_filename << std::endl;
   treeReader *reader = new treeReader(m_raw_filename);
-  std::cout << "[MAIN]: DQM analysis done" << std::endl;
-
+  if (DEBUG) std::cout << "DQM Complete." << endl;
   return 0;
 
 

@@ -2,7 +2,7 @@
 #define NSLOTS 12
 #define NGTX 2
 #define NETA 8
-#define DEBUG 1
+#define DEBUG 0
 #define PORT 3306
 #include <mysql/mysql.h>
 #include <Python.h>
@@ -73,14 +73,11 @@ public:
   treeReader(const std::string &ifilename)
   {
     if(ifilename.find("chunk") == string::npos) {
-      cout << "chunk not found" << endl;
       RunName = ifilename.substr(ifilename.find("run"),ifilename.find(".raw.root")-ifilename.find("run"));
     }
     else {
-      // RunName = ifilename.substr(ifilename.find("run"),ifilename.find("chunk")-1);
       RunName = ifilename.substr(ifilename.find("run"),ifilename.find("_chunk")-ifilename.find("run"));
     }
-    cout << "RunName: " << RunName << endl;
     std::string tmp = ifilename.substr(ifilename.size()-9, ifilename.size());
     if (tmp != ".raw.root") throw std::runtime_error("Wrong input filename (should end with '.raw.root'): "+ifilename);
     ifile = new TFile(ifilename.c_str(), "READ");
@@ -89,14 +86,17 @@ public:
     ofile = new TFile(ofilename.c_str(), "RECREATE");
     if (DEBUG) std::cout << std::dec << "[gemTreeReader]: File for histograms created" << std::endl;   
 
+    cout << "Connect to DB" << endl;
     if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Connecting to database on port " << PORT << std::endl;
     Database = connectDB();
+    cout << "Fetch HW" << endl;
     if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Fetching hardware" << std::endl;   
     this->fetchHardwareDB();
-
+    cout << "Fill Histograms" << endl;
     if (DEBUG) std::cout << std::dec << "[gemTreeReader]: Filling histograms" << std::endl;   
     // this->bookAllHistograms();
     this->fillAllHistograms();
+    cout << "Done." << endl;
   }
   ~treeReader(){}
 
@@ -133,7 +133,6 @@ private:
   void fetchHardwareDB()
   {
     onlineHistsDir = gDirectory->mkdir("OnlineHists");
-    cout << "Online histogram directory created: " << onlineHistsDir->GetPath() << endl;
     gDirectory->cd("..");
     
     VFATMap = {{{0}}};
@@ -232,6 +231,7 @@ private:
     Int_t nentries = tree->GetEntries();
     /* LOOP THROUGH Events */
     for (int i = 0; i < nentries; i++){
+      bool final = i == nentries-1;
       branch->GetEntry(i);
       v_amc13 = event->amc13s();
       /* LOOP THROUGH AMC13s */
@@ -268,13 +268,12 @@ private:
             for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
               int slot = slot_map.find(v->ChipID())->second;
               v_vfatH = v_gebH->vfatsH(slot);
-              bool final = i == nentries-1;
               v_vfatH->fillHistograms(&*v, final);
               if (m_RunType == 1){
                 v_vfatH->fillScanHistograms(&*v, m_RunType, m_deltaV, m_Latency);
               }
             } /* END VFAT LOOP */
-            if (i == nentries-1) {
+            if (final) {
               v_gebH->fillSummaryCanvases(onlineHistsDir,a_c,gID);
               // printSummaryCanvases(onlineHistsDir,a_c,gID);
             }
