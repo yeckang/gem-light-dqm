@@ -7,6 +7,10 @@ class AMC_histogram: public Hardware_histogram
   public:
     //!Constructor calls the base constructor of Hardware_histogram. Requires a string for filename, directory, and another string.
     AMC_histogram(const std::string & filename, TDirectory * dir, const std::string & hwid):Hardware_histogram(filename, dir, hwid){}//call base constructor
+    ~AMC_histogram()
+    {
+        delete[] m_gebsH;
+    }
 
     //!Books histograms for AMC data
     /*!
@@ -14,6 +18,7 @@ class AMC_histogram: public Hardware_histogram
     */
     void bookHistograms()
     {
+      m_gebsH = new GEB_histogram*[2];
       m_dir->cd();
       AMCnum     = new TH1F("AMCnum", "AMC number", 12,  0, 12);
       //L1A        = new TH1F("L1A", "L1A ID", 0xffffff,  0x0, 0xffffff);      
@@ -74,7 +79,7 @@ class AMC_histogram: public Hardware_histogram
     //!Returns the m_gebsH vector
     GEB_histogram* gebsH(int i){return m_gebsH[i];}
   private:
-    GEB_histogram *m_gebsH[2];   ///<A vector of GEB_histogram
+    GEB_histogram **m_gebsH;   ///<A vector of GEB_histogram
     TH1F* AMCnum;                         ///<Histogram for AMC number
     TH1F* L1A;                            ///<Histogram for L1A number
     TH1F* BX;                             ///<Histogram for Bunch Crossing ID
