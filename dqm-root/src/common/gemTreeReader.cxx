@@ -2,6 +2,9 @@
 #define NSLOTS 12
 #define NGTX 2
 #define NETA 8
+#ifndef DEBUG
+  #define DEBUG 1
+#endif
 
 #define PORT 3306
 #include <mysql/mysql.h>
@@ -141,6 +144,7 @@ private:
     
     m_amc13H = new AMC13_histogram(ofilename, gDirectory->mkdir(diramc13), "1");
     m_amc13H->bookHistograms();
+    if (DEBUG) cout << "AMC13 histograms booked "<< endl;
 
     string AMC13Query = "select id from ldqm_db_run where Name like '";
     AMC13Query += RunName;
@@ -202,7 +206,9 @@ private:
           } /* END GEB LOOP */
         gDirectory->cd("..");       //moves back to previous directory
         m_amc13H->addAMCH(m_amcH, a_slot);
+        if (DEBUG) cout << "Add AMC histograms to AMC13 for amc in " << a_slot << endl;
       } /* END AMC LOOP */
+    cout << "Hardware fetched "<< endl;
   } /* END AMC13 LOOP */
 
   int slotFromMap(int a, int g, int cid)
@@ -217,6 +223,7 @@ private:
   //!Fills the histograms that were book from bookAllHistograms
   void fillAllHistograms()
   {
+    cout << "Start filling histograms "<< endl;
     int a13_c=0;    //counter through AMC13s
     int a_c=0;      //counter through AMCs
     int g_c=0;      //counter through GEBs
@@ -231,10 +238,13 @@ private:
     for (int i = 0; i < nentries; i++){
       branch->GetEntry(i);
       v_amc13 = event->amc13s();
+      if (DEBUG) cout << "Get a vector of AMC13 "<< endl;
       /* LOOP THROUGH AMC13s */
       for(auto a13 = v_amc13.begin(); a13!=v_amc13.end(); a13++){
-        v_amc = a13->amcs();
+        if (DEBUG) cout << "Get AMC13 "<< endl;
         m_amc13H->fillHistograms(&*a13);
+        if (DEBUG) cout << "AMC13 histograms filled "<< endl;
+        v_amc = a13->amcs();
         /* LOOP THROUGH AMCs */
         for(auto a=v_amc.begin(); a!=v_amc.end(); a++){
           v_geb = a->gebs();

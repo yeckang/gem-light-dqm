@@ -38,19 +38,19 @@ class AMC13_histogram: public Hardware_histogram
      This fills histograms for the following data: control_bit5, control_bitA, Evt_ty, LV1_id, BX_id, Source_id, CalTyp, nAMC, Blk_Not, LV1_idT, BX_idT, EvtLength, and CRC_cdf
     */
     void fillHistograms(AMC13Event *amc13){
+      std::cout << "AMC13 fill Histograms method " << std::endl;
       nAMC->Fill(amc13->nAMC());
-      control_bit5->Fill(amc13->cb_5());
+      //control_bit5->Fill(amc13->cb_5());
       Evt_ty->Fill(amc13->Evt_ty());
       //LV1_id->Fill(amc13->LV1_id());
-      BX_id->Fill(amc13->BX_id());
+      //BX_id->Fill(amc13->BX_id());
       Source_id->Fill(amc13->Source_id());
       CalTyp->Fill(amc13->CalTyp());
       Blk_NoT->Fill(amc13->Blk_NoT());
       LV1_idT->Fill(amc13->LV1_idT());
-      BX_idT->Fill(amc13->BX_idT());
+      //BX_idT->Fill(amc13->BX_idT());
       control_bitA->Fill(amc13->cbA());
       BX_diff->Fill(amc13->BX_idT()-amc13->BX_id());
-
     }
 
      
