@@ -14,6 +14,10 @@ class GEB_histogram: public Hardware_histogram
 public:
   //!Constructor calls base constructor of Hardware_histogram. Requires a string for filename, directory, and another string.
   GEB_histogram(const std::string & filename, TDirectory * dir, const std::string & hwid):Hardware_histogram(filename, dir, hwid){}//call base constructor
+  ~GEB_histogram()
+  {
+      delete[] m_vfatsH;
+  }
 
   //!Books histograms for GEB data
   /*!
@@ -22,6 +26,7 @@ public:
   */
   void bookHistograms()
   {
+    m_vfatsH = new VFAT_histogram*[24];
     m_dir->cd();
     //ZeroSup  = new TH1F("ZeroSup", "Zero Suppression", 0xffffff,  0x0 , 0xffffff);
     InputID  = new TH1F("InputID", "GLIB input ID", 31,  0x0 , 0b11111);      
@@ -188,7 +193,7 @@ public:
   //!Returns the m_vfatsH vector
   VFAT_histogram * vfatsH(int i){return m_vfatsH[i];}
 private:
-  VFAT_histogram *m_vfatsH[24];    ///<A vector of VFAT_histogram 
+  VFAT_histogram **m_vfatsH;    ///<A vector of VFAT_histogram 
   //TH1F* ZeroSup;                           ///<Histogram for Zero Suppression flags
   TH1F* InputID;                           ///<Histogram for GLIB input ID
   TH1F* Vwh;                               ///<Histogram for VFAT word count (header)
