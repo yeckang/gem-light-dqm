@@ -73,34 +73,34 @@ class VFAT_histogram: public Hardware_histogram
         Errors->Fill(0);
       }
       SlotN->Fill(m_sn);
-      this->readMap(m_sn, m_strip_map);
-      uint16_t chan0xf = 0;
-      for (int chan = 0; chan < 128; ++chan) {
-        if (chan < 64){
-          chan0xf = ((vfat->lsData() >> chan) & 0x1);
-          if(chan0xf) {
-            FiredChannels->Fill(chan);
-            FiredStrips->Fill(m_strip_map[chan]);
-          }
-        } else {
-          chan0xf = ((vfat->msData() >> (chan-64)) & 0x1);
-          if(chan0xf) {
-            FiredChannels->Fill(chan);
-            FiredStrips->Fill(m_strip_map[chan]);
-          }
-        }
-      }
+      //this->readMap(m_sn, m_strip_map);
+      //uint16_t chan0xf = 0;
+      //for (int chan = 0; chan < 128; ++chan) {
+      //  if (chan < 64){
+      //    chan0xf = ((vfat->lsData() >> chan) & 0x1);
+      //    if(chan0xf) {
+      //      FiredChannels->Fill(chan);
+      //      FiredStrips->Fill(m_strip_map[chan]);
+      //    }
+      //  } else {
+      //    chan0xf = ((vfat->msData() >> (chan-64)) & 0x1);
+      //    if(chan0xf) {
+      //      FiredChannels->Fill(chan);
+      //      FiredStrips->Fill(m_strip_map[chan]);
+      //    }
+      //  }
+      //}
 
-      if (final) {
-        if (DEBUG) std::cout << "[VFAT_histogram] Slot " << std::stoi(m_HWID) << " Fired Channels: " << FiredChannels->GetEntries() << std::endl;
-        if (DEBUG) std::cout << "[VFAT_histogram] Slot " << std::stoi(m_HWID) << " CRC Mismatches: " << Errors->GetEntries() << std::endl;
-        if (FiredChannels->GetEntries() == 0) { 
-          Warnings->Fill(1);
-        }
-        else if (FiredChannels->GetEntries() > 64*b1010->GetEntries()) {
-          Warnings->Fill(2);
-        }
-      }
+      //if (final) {
+      //  if (DEBUG) std::cout << "[VFAT_histogram] Slot " << std::stoi(m_HWID) << " Fired Channels: " << FiredChannels->GetEntries() << std::endl;
+      //  if (DEBUG) std::cout << "[VFAT_histogram] Slot " << std::stoi(m_HWID) << " CRC Mismatches: " << Errors->GetEntries() << std::endl;
+      //  if (FiredChannels->GetEntries() == 0) { 
+      //    Warnings->Fill(1);
+      //  }
+      //  else if (FiredChannels->GetEntries() > 64*b1010->GetEntries()) {
+      //    Warnings->Fill(2);
+      //  }
+      //}
     }
     //!Fills the histograms for the Threshold Scans
     void fillScanHistograms(VFATdata * vfat, int runtype, int deltaV, int latency){

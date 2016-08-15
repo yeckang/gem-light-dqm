@@ -1,7 +1,9 @@
 #define PORT 3306
-#define DEBUG 0
+#ifndef DEBUG
+  #define DEBUG 1
+#endif
 #include <mysql/mysql.h>
-#include <Python.h>
+//#include <Python.h>
 
 #include <iomanip> 
 #include <iostream>

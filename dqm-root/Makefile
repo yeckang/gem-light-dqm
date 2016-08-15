@@ -3,9 +3,9 @@
 #
 BUILD_HOME:=$(shell pwd)/../..
 
-CC=g++
+CC=g++-4.9.3
 CCFLAGS=-O2 -Wall -fPIC -pthread -m64
-ADDFLAGS=-g -std=c++0x
+ADDFLAGS=-g -std=c++11
 RC=rootcint
 LBL=-shared -O2 -m64
 LS=ls -lartF
@@ -33,6 +33,7 @@ IncludeDirs = /usr/include/root
 IncludeDirs+= /usr/local/include/root
 IncludeDirs+= $(BUILD_HOME)/$(Project)
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)
+IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)/src/common
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)/include
 IncludeDirs+= $(BUILD_HOME)/$(Project)/gemtreewriter/include
 IncludeDirs+= ${BUILD_HOME}/${GEM_OS_PROJECT}/gemreadout/include
@@ -58,7 +59,7 @@ all:
 
 dqm:  	#CURRENT VERSION
 	mkdir -p $(BIN)
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dqmMain.cxx $(LIB)/libEvent.so -o $(BIN)/dqm $(PYTHONLIBS) $(MYSQLLIBS)
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dqmMain.cxx $(LIB)/libEvent.so -o $(BIN)/dqm $(PYTHONLIBS) $(MYSQLLIBS) -lProof -lProofPlayer
 
 merger:
 	mkdir -p $(BIN)

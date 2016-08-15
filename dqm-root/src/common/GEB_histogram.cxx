@@ -3,7 +3,11 @@
 #include "GEMClusterization/GEMStripCollection.h"
 #include "GEMClusterization/GEMClusterContainer.h"
 #include "GEMClusterization/GEMClusterizer.h"
+
+#include "TCanvas.h"
+#include "TGaxis.h"
 #include "TH1.h"
+#include "TStyle.h"
 #define NETA 8
 // #include "gem/readout/GEMslotContents.h"
 // #include "db_interface.cxx"
@@ -18,6 +22,20 @@ public:
   {
       delete[] m_vfatsH;
   }
+
+  TCanvas * newCanvas(TString title="", Int_t xdiv=1, Int_t ydiv =1,
+                      Int_t w=600, Int_t h=600)
+  {
+    TCanvas* c= new TCanvas;
+    c->SetWindowSize(w,h);
+    if (title != "") c->SetTitle(title);
+    if (xdiv*ydiv>1) {
+      c->Divide(xdiv,ydiv);
+      c->cd(1);
+    }
+    return c;
+  }
+
 
   //!Books histograms for GEB data
   /*!
@@ -98,54 +116,54 @@ public:
 
         SlotN->Fill(m_sn);
         ofstream myfile;
-        this->readMap(m_sn, m_strip_map);
-        uint16_t chan0xf = 0;
-        for (int chan = 0; chan < 128; ++chan) {
-          if (chan < 64){
-            chan0xf = ((m_vfat->lsData() >> chan) & 0x1);
-            if(chan0xf) {
-              int m_i = (int) m_sn%8;
-              int m_j = 127 - m_strip_map[chan] + ((int) m_sn/8)*128;
-              if (allstrips.find(m_i) == allstrips.end()){
-                GEMStripCollection strips;
-                allstrips[m_i]=strips;
-              }
-              // bx set to 0...
-              GEMStrip s(m_j,0);
-              allstrips[m_i].insert(s);
-              BeamProfile->Fill(m_i,m_j);
-            }
-          } else {
-            chan0xf = ((m_vfat->msData() >> (chan-64)) & 0x1);
-            if(chan0xf) {
-              int m_i = (int) m_sn%8;
-              int m_j = 127 - m_strip_map[chan] + ((int) m_sn/8)*128;
-              if (allstrips.find(m_i) == allstrips.end()){
-                GEMStripCollection strips;
-                allstrips[m_i]=strips;
-              }
-              // bx set to 0...
-              GEMStrip s(m_j,0);
-              allstrips[m_i].insert(s);
-              BeamProfile->Fill(m_i,m_j);
-            }
-          }
-        }
+        //this->readMap(m_sn, m_strip_map);
+        //uint16_t chan0xf = 0;
+        //for (int chan = 0; chan < 128; ++chan) {
+        //  if (chan < 64){
+        //    chan0xf = ((m_vfat->lsData() >> chan) & 0x1);
+        //    if(chan0xf) {
+        //      int m_i = (int) m_sn%8;
+        //      int m_j = 127 - m_strip_map[chan] + ((int) m_sn/8)*128;
+        //      if (allstrips.find(m_i) == allstrips.end()){
+        //        GEMStripCollection strips;
+        //        allstrips[m_i]=strips;
+        //      }
+        //      // bx set to 0...
+        //      GEMStrip s(m_j,0);
+        //      allstrips[m_i].insert(s);
+        //      BeamProfile->Fill(m_i,m_j);
+        //    }
+        //  } else {
+        //    chan0xf = ((m_vfat->msData() >> (chan-64)) & 0x1);
+        //    if(chan0xf) {
+        //      int m_i = (int) m_sn%8;
+        //      int m_j = 127 - m_strip_map[chan] + ((int) m_sn/8)*128;
+        //      if (allstrips.find(m_i) == allstrips.end()){
+        //        GEMStripCollection strips;
+        //        allstrips[m_i]=strips;
+        //      }
+        //      // bx set to 0...
+        //      GEMStrip s(m_j,0);
+        //      allstrips[m_i].insert(s);
+        //      BeamProfile->Fill(m_i,m_j);
+        //    }
+        //  }
+        //}
       }
     int ncl=0;
     int ncleta=0;
-    for (std::map<int, GEMStripCollection>::iterator ieta=allstrips.begin(); ieta!= allstrips.end(); ieta++){
-      ncleta=0;
-      GEMClusterizer clizer;
-      GEMClusterContainer cls = clizer.doAction(ieta->second);
-      ncl+=cls.size();
-      ncleta+=cls.size();
-      for (GEMClusterContainer::iterator icl=cls.begin();icl!=cls.end();icl++){
-        ClusterSize->Fill(icl->clusterSize());    
-        ClusterSizeEta[NETA-1-ieta->first]->Fill(icl->clusterSize());   
-      }
-      ClusterMultEta[NETA-1-ieta->first]->Fill(ncleta);   
-    }
+    //for (std::map<int, GEMStripCollection>::iterator ieta=allstrips.begin(); ieta!= allstrips.end(); ieta++){
+    //  ncleta=0;
+    //  GEMClusterizer clizer;
+    //  GEMClusterContainer cls = clizer.doAction(ieta->second);
+    //  ncl+=cls.size();
+    //  ncleta+=cls.size();
+    //  for (GEMClusterContainer::iterator icl=cls.begin();icl!=cls.end();icl++){
+    //    ClusterSize->Fill(icl->clusterSize());    
+    //    ClusterSizeEta[NETA-1-ieta->first]->Fill(icl->clusterSize());   
+    //  }
+    //  ClusterMultEta[NETA-1-ieta->first]->Fill(ncleta);   
+    //}
     ClusterMult->Fill(ncl);
   }
 
@@ -175,13 +193,13 @@ public:
     string clusterMultName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_clusterMult";
 
     Integrity_canvas->SetName(integrityName.c_str());
-    Integrity_canvas->Write();
+    //Integrity_canvas->Write();
     Occupancy_canvas->SetName(occupancyName.c_str());
-    Occupancy_canvas->Write();
+    //Occupancy_canvas->Write();
     ClusterSize_canvas->SetName(clusterSizeName.c_str());
-    ClusterSize_canvas->Write();
+    //ClusterSize_canvas->Write();
     ClusterMult_canvas->SetName(clusterMultName.c_str());
-    ClusterMult_canvas->Write();
+    //ClusterMult_canvas->Write();
     
   }
   
@@ -218,8 +236,8 @@ private:
   TCanvas* ClusterMult_canvas;
   
   
-  std::map<int, GEMStripCollection> allstrips;
-  //VFATdata * m_vfat;
+  //std::map<int, GEMStripCollection> allstrips;
+  VFATdata * m_vfat;
   std::vector<VFATdata> v_vfat;            ///Vector of VFATdata
   int m_sn;
   int m_strip_map[128];
