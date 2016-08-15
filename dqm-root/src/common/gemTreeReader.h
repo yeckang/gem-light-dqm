@@ -2,7 +2,7 @@
 #define gemTreeReader_h
 
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 #include <TChain.h>
 #include <TProofOutputFile.h>
@@ -53,10 +53,9 @@
 #include <memory>
 //#include <unordered_map>
 
-#include "GEMClusterization/GEMStrip.h"
-#include "GEMClusterization/GEMStripCollection.h"
-#include "GEMClusterization/GEMClusterContainer.h"
-#include "GEMClusterization/GEMClusterizer.h"
+//#include "GEMClusterization/GEMStrip.cc"
+//#include "GEMClusterization/GEMCluster.cc"
+//#include "GEMClusterization/GEMClusterizer.cc"
 //#include "plotter.cxx"
 #include "logger.cxx"
 #include "integrity_checker.cxx"
@@ -113,6 +112,8 @@ public :
 
   TFile *fFile;
   TProofOutputFile *fProofFile;
+
+  //std::map<int, GEMStripCollection> allstrips;
 
   ClassDef(gemTreeReader,2);
 };

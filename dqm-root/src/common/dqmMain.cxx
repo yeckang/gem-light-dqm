@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-#define DEBUG 1
+#define DEBUG 0
 
 using namespace std;
 
@@ -152,7 +152,7 @@ int main(int argc, char** argv)
   TList * m_config = new TList();
   m_config = getConfig(ifilename);
 
-  TProof::Open("workers=2");
+  TProof::Open("workers=4");
   gProof->AddInput(m_config);
   gProof->AddInput(new TNamed("PROOF_OUTPUTFILE", ofilename.c_str()));
   gProof->GetInputList()->Print();

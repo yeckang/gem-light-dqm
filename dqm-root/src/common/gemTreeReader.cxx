@@ -7,7 +7,6 @@ void gemTreeReader::Begin(TTree * /*tree*/)
 
   if (DEBUG) std::cout << "MASTER BEGIN"<< std::endl;
   TString option = GetOption();
-  //gSystem->Load("libEvent.so");
 } 
 
 void gemTreeReader::SlaveBegin(TTree * /*tree*/)
