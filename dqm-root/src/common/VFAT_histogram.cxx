@@ -47,6 +47,9 @@ class VFAT_histogram: public Hardware_histogram
       for (int i = 0; i < 128; i++){
         thresholdScan[i] = new TH1F(("thresholdScan"+to_string(static_cast<long long int>(i))).c_str(),("thresholdScan"+to_string(static_cast<long long int>(i))).c_str(),256,0,256);
       }// end loop on channels
+      //get maps
+      m_sn = std::stoi(m_HWID);
+      readMapFromFile(m_sn,m_strip_map);
       gDirectory->cd("..");
     }
     
@@ -73,7 +76,6 @@ class VFAT_histogram: public Hardware_histogram
         Errors->Fill(0);
       }
       SlotN->Fill(m_sn);
-      this->readMap(m_sn, m_strip_map);
       uint16_t chan0xf = 0;
       for (int chan = 0; chan < 128; ++chan) {
         if (chan < 64){
@@ -132,6 +134,8 @@ class VFAT_histogram: public Hardware_histogram
   TH1F* getb1110() { return b1110; }
   TH1F* getFlag()  { return Flag; }
   TH1F* getCRC()   { return crc_difference; }
+
+  int * getMap(){ return m_strip_map;}
 
 
   

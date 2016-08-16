@@ -79,7 +79,7 @@ void gemTreeReader::SlaveBegin(TTree * /*tree*/)
         VFATMap[a_slot][g_slot][v_slot] = i_chipID;
         if (DEBUG) cout << "Insert chip ID " << i_chipID << " in place a,g,v: " << a_slot << ", " << g_slot << ", " << v_slot << endl;
         v_slot_s.Insert(0,"VFAT-");
-        m_vfatH = new VFAT_histogram("preved", gDirectory->mkdir(v_slot_s.Data()), chipID_s->GetName());
+        m_vfatH = new VFAT_histogram("preved", gDirectory->mkdir(v_slot_s.Data()), to_string(v_slot).c_str());
         m_vfatH->bookHistograms();
         m_gebH->addVFATH(m_vfatH,v_slot);
         std::cout << "Slave Begin: add vfat " << v_slot << std::endl;
