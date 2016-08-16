@@ -15,7 +15,7 @@ class Hardware_histogram
   void bookHistograms(){}
   TDirectory * getTDir(){return m_dir;}
   std::string getHWID(){return m_HWID;}
-  void readMap(int sn, int* t_strip_map){
+  void readMapFromFile(int sn, int* t_strip_map){
     path = std::getenv("BUILD_HOME");
     if (sn < 2) {
       path += "/gem-light-dqm/dqm-root/data/v2b_schema_chips0-1.csv";

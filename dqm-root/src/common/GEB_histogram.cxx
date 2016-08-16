@@ -99,7 +99,7 @@ public:
 
         SlotN->Fill(m_sn);
         ofstream myfile;
-        this->readMap(m_sn, m_strip_map);
+        m_strip_map = vfatsH(m_sn)->getMap();
         uint16_t chan0xf = 0;
         for (int chan = 0; chan < 128; ++chan) {
           if (chan < 64){
@@ -223,5 +223,5 @@ private:
   //VFATdata * m_vfat;
   std::vector<VFATdata> v_vfat;            ///Vector of VFATdata
   int m_sn;
-  int m_strip_map[128];
+  int *m_strip_map;
 };
