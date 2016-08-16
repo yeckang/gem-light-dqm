@@ -455,7 +455,7 @@ class AMC13Event
 
     int nAMC()            {return unsigned(m_nAMC);}
     int LV1_id()          {return unsigned(m_LV1_id);}
-    uint8_t cb_5()        {return m_cb5;}   
+    int cb_5()            {return unsigned(m_cb5);}   
     uint8_t Evt_ty()      {return m_Evt_ty;}
     uint16_t BX_id()      {return m_BX_id;} 
     uint16_t Source_id()  {return m_Source_id;}
