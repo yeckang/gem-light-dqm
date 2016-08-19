@@ -151,7 +151,7 @@ Bool_t gemTreeReader::Process(Long64_t entry)
           if (DEBUG) cout << "Try get slot for chip ID " << v->ChipID() << ", retrieved slot " << slot <<  endl;
           if (slot>-1) {v_vfatH = v_gebH->vfatsH(slot);} else { continue;}
           if (v_vfatH) {
-            v_vfatH->fillHistograms(&*v, false);
+            v_vfatH->fillHistograms(&*v);
             if (m_RunType == 1){
               v_vfatH->fillScanHistograms(&*v, m_RunType, m_deltaV, m_Latency);
             }
@@ -172,6 +172,22 @@ void gemTreeReader::SlaveTerminate()
   //
   // Should we fill summary canvases here?
   //
+  for (unsigned int i = 0; i < 12; i++){
+      if (auto a = m_amc13H->amcsH(i)){
+          cout << "SlaveTerminate: found AMC at slot " << i << endl;
+          for (unsigned int j = 0; j < 2; j++){
+              if (auto g = a->gebsH(j)){
+                  cout << "SlaveTerminate: found GEB at slot " << j << endl;
+                  for (unsigned int k = 0; k < 24; k++){
+                      if (auto v = g->vfatsH(k)){
+                          cout << "SlaveTerminate: found VFAT at slot " << k << endl;
+                          v->fillWarnings();
+                      }
+                  }
+              }
+          }
+      }
+  }
   TDirectory *savedir = gDirectory;
   fFile->cd();
   fFile->Write();

@@ -44,6 +44,9 @@ public:
   void bookHistograms()
   {
     m_vfatsH = new VFAT_histogram*[24];
+    for (unsigned int i = 0; i<24; i++){
+        m_vfatsH[i] = 0;
+    }
     m_dir->cd();
     //ZeroSup  = new TH1F("ZeroSup", "Zero Suppression", 0xffffff,  0x0 , 0xffffff);
     InputID  = new TH1F("InputID", "GLIB input ID", 31,  0x0 , 0b11111);      
@@ -71,10 +74,10 @@ public:
     TotalFlag  = new TH1F("TotalFlag", "Control Flags", 15,  0x0 , 0xf);
     TotalCRC   = new TH1F("TotalCRC", "CRC Mismatches", 0xffff,-32768,32768);
 
-    Integrity_canvas = newCanvas("GEBIntegrity",3,2,2400,1200);
-    Occupancy_canvas = newCanvas("GEBOccupancy",3,3,1800,1800);
-    ClusterSize_canvas = newCanvas("GEBClusterSize",3,3,1800,1800);
-    ClusterMult_canvas = newCanvas("GEBClusterMult",3,3,1800,1800);
+    //Integrity_canvas = newCanvas("GEBIntegrity",3,2,2400,1200);
+    //Occupancy_canvas = newCanvas("GEBOccupancy",3,3,1800,1800);
+    //ClusterSize_canvas = newCanvas("GEBClusterSize",3,3,1800,1800);
+    //ClusterMult_canvas = newCanvas("GEBClusterMult",3,3,1800,1800);
   }
 
 

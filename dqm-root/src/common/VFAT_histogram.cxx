@@ -57,7 +57,7 @@ class VFAT_histogram: public Hardware_histogram
     /*!
      This fills histograms for the following data: Difference between crc and recalculated crc, Control Bit 1010, Control Bit 1100, Control Bit 1110, Bunch Crossing Number, Event Counter, Control Flags, and Chip ID, and Fired Channels
      */
-  void fillHistograms(VFATdata * vfat, bool final){
+  void fillHistograms(VFATdata * vfat){
       setVFATBlockWords(vfat); 
       int crc_diff = vfat->crc()-checkCRC(vfatBlockWords);
       if (crc_diff != 0) crc_difference->Fill(crc_diff);  
@@ -92,17 +92,14 @@ class VFAT_histogram: public Hardware_histogram
           }
         }
       }
-
-      if (final) {
-        if (DEBUG) std::cout << "[VFAT_histogram] Slot " << std::stoi(m_HWID) << " Fired Channels: " << FiredChannels->GetEntries() << std::endl;
-        if (DEBUG) std::cout << "[VFAT_histogram] Slot " << std::stoi(m_HWID) << " CRC Mismatches: " << Errors->GetEntries() << std::endl;
+    }
+    void fillWarnings(){
         if (FiredChannels->GetEntries() == 0) { 
           Warnings->Fill(1);
         }
         else if (FiredChannels->GetEntries() > 64*b1010->GetEntries()) {
           Warnings->Fill(2);
         }
-      }
     }
     //!Fills the histograms for the Threshold Scans
     void fillScanHistograms(VFATdata * vfat, int runtype, int deltaV, int latency){
