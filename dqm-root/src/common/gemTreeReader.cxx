@@ -174,13 +174,11 @@ void gemTreeReader::SlaveTerminate()
   //
   for (unsigned int i = 0; i < 12; i++){
       if (auto a = m_amc13H->amcsH(i)){
-          cout << "SlaveTerminate: found AMC at slot " << i << endl;
           for (unsigned int j = 0; j < 2; j++){
               if (auto g = a->gebsH(j)){
-                  cout << "SlaveTerminate: found GEB at slot " << j << endl;
+                  g->fillSummaryCanvases();
                   for (unsigned int k = 0; k < 24; k++){
                       if (auto v = g->vfatsH(k)){
-                          cout << "SlaveTerminate: found VFAT at slot " << k << endl;
                           v->fillWarnings();
                       }
                   }
@@ -203,7 +201,6 @@ void gemTreeReader::Terminate()
   if ((fProofFile = dynamic_cast<TProofOutputFile*>(fOutput->FindObject("SimpleFile.root")))) {
     TString outputFile(fProofFile->GetOutputFileName());
     TString outputName(fProofFile->GetName());
-    //outputName += ".root";
     Printf("outputFile: %s", outputFile.Data());
   }
 }

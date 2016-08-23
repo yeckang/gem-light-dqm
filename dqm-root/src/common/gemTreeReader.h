@@ -16,50 +16,8 @@
 #include <cstdlib>
 #include <sstream>
 #include <vector>
-//#include <cstdint>
-#include <stdexcept>
-#include <algorithm>
-#include <functional>
-//#include <array>
-#include <TFile.h>
-#include <TKey.h>
-#include <TDirectory.h>
-#include <TNtuple.h>
-#include <TH2.h>
-#include <TProfile.h>
-#include <TCanvas.h>
-#include <TFrame.h>
-#include <TROOT.h>
 #include <TSystem.h>
-#include <TRandom3.h>
-#include <TBenchmark.h>
-#include <TInterpreter.h>
-#include <TApplication.h>
-#include <TString.h>
-#include <Event.h>
-#include <TObject.h>
-#include <TClonesArray.h>
-#include <TRefArray.h>
-#include <TRef.h>
-#include <TH1.h>
-#include <TBits.h>
-#include <TMath.h>
-#include <TFile.h>
-#include <TClassTable.h>
-#include <TTree.h>
-#include <TBranch.h>
-#include <TError.h>
-#include <TBufferJSON.h>
-#include <memory>
-//#include <unordered_map>
 
-//#include "GEMClusterization/GEMStrip.cc"
-//#include "GEMClusterization/GEMCluster.cc"
-//#include "GEMClusterization/GEMClusterizer.cc"
-//#include "plotter.cxx"
-#include "logger.cxx"
-#include "integrity_checker.cxx"
-#include "GEMDQMerrors.cxx"
 #include "AMC13_histogram.cxx"
 
 class gemTreeReader: public TSelector {
@@ -93,7 +51,6 @@ public :
   vector<GEBdata> v_geb;         ///<Vector of GEBdata
   vector<VFATdata> v_vfat;       ///Vector of VFATdata
 
-  //vector<AMC13_histogram> v_amc13H;   //unused
   AMC_histogram * v_amcH;        ///<Vector of AMC_histogram
   GEB_histogram * v_gebH;        ///<Vector of GEB_histogram
   VFAT_histogram * v_vfatH;      ///<Vector of VFAT_histogram
@@ -113,12 +70,7 @@ public :
   TFile *fFile;
   TProofOutputFile *fProofFile;
 
-  //std::map<int, GEMStripCollection> allstrips;
-
   ClassDef(gemTreeReader,2);
 };
 
 #endif
-
-#ifdef gemTreeReader_cxx
-#endif // #ifdef gemTreeReader_cxx

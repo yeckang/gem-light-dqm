@@ -29,7 +29,6 @@ TList *getConfig(string filename)
   TObjString * slot = new TObjString();
   TObjString * chipID = new TObjString();
   config->SetName("config");
-  //if (DEBUG) std::cout << "Config name : "<< config->GetName() << std::endl;
   string AMC13Query = "select id from ldqm_db_run where Name like '";
   AMC13Query += RunName;
   AMC13Query += "'";
@@ -87,27 +86,6 @@ TList *getConfig(string filename)
     //if (DEBUG) cout << "Add AMC histograms to AMC13 for amc in " << a_slot << endl;
   } /* END AMC LOOP */
 
-  //  TList * amc = new TList();
-  //  amc->SetName("10");
-  //    TMap * geb = new TMap();
-  //    geb->SetName("0");
-  //      TObjString * slot = new TObjString("10");
-  //      TObjString * chipID = new TObjString("0xdead");
-  //    geb->Add((TObject*)slot->Clone(),(TObject*)chipID->Clone());
-  //      slot->SetString("1");
-  //      chipID->SetString("0xfeac");
-  //    geb->Add((TObject*)slot->Clone(),(TObject*)chipID->Clone());
-  //  amc->Add(geb->Clone());
-  //    geb->Clear();
-  //    geb->SetName("1");
-  //      slot->SetString("0");
-  //      chipID->SetString("0xfead");
-  //    geb->Add((TObject*)slot->Clone(),(TObject*)chipID->Clone());
-  //      slot->SetString("23");
-  //      chipID->SetString("0xfe87");
-  //    geb->Add((TObject*)slot->Clone(),(TObject*)chipID->Clone());
-  //  amc->Add(geb);
-  //config->Add(amc);
   return config;
 }
 
@@ -124,7 +102,6 @@ int main(int argc, char** argv)
   string ifilename = argv[1];
   string ofilename;
   string RunName;
-  // string m_slot_file = argv[2];
   bool print_hist = false;
   if (argc > 2){
     string option = argv[2];
@@ -157,7 +134,6 @@ int main(int argc, char** argv)
   gProof->AddInput(new TNamed("PROOF_OUTPUTFILE", ofilename.c_str()));
   gProof->GetInputList()->Print();
   ch->SetProof();;
-  //gSystem->Load("libEvent.so");
   string sel;
   string path;
   sel = getenv("BUILD_HOME");

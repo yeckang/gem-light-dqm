@@ -6,11 +6,9 @@
 #include "TCanvas.h"
 #include "TGaxis.h"
 #include "TH1.h"
+#include "TH2.h"
 #include "TStyle.h"
 #define NETA 8
-// #include "gem/readout/GEMslotContents.h"
-// #include "db_interface.cxx"
-//#include "plotter.cxx"
 //!A class that creates histograms for GEB data
 class GEB_histogram: public Hardware_histogram
 {
@@ -73,11 +71,6 @@ public:
     Totalb1110 = new TH1F("Totalb1110", "Control Bit 1110", 15,  0x0 , 0xf);
     TotalFlag  = new TH1F("TotalFlag", "Control Flags", 15,  0x0 , 0xf);
     TotalCRC   = new TH1F("TotalCRC", "CRC Mismatches", 0xffff,-32768,32768);
-
-    //Integrity_canvas = newCanvas("GEBIntegrity",3,2,2400,1200);
-    //Occupancy_canvas = newCanvas("GEBOccupancy",3,3,1800,1800);
-    //ClusterSize_canvas = newCanvas("GEBClusterSize",3,3,1800,1800);
-    //ClusterMult_canvas = newCanvas("GEBClusterMult",3,3,1800,1800);
   }
 
 
@@ -169,9 +162,7 @@ public:
     ClusterMult->Fill(ncl);
   }
 
-#include "GEB_summaryCanvases.cxx"
-
-  void fillSummaryCanvases(TDirectory* onlineHistsDir,int amcnum,int gebnum)
+  void fillSummaryCanvases()
   {
     for(int vfat_index=0; vfat_index < 24; vfat_index++)
       {
@@ -187,26 +178,7 @@ public:
           std::cout << "No VFAT_histogram at index " << vfat_index;
         }
       }
-    fillGEBCanvases();
-    onlineHistsDir->cd();
-    string integrityName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_integrity";
-    string occupancyName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_occupancy";
-    string clusterSizeName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_clusterSize";
-    string clusterMultName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_clusterMult";
-
-    Integrity_canvas->SetName(integrityName.c_str());
-    //Integrity_canvas->Write();
-    Occupancy_canvas->SetName(occupancyName.c_str());
-    //Occupancy_canvas->Write();
-    ClusterSize_canvas->SetName(clusterSizeName.c_str());
-    //ClusterSize_canvas->Write();
-    ClusterMult_canvas->SetName(clusterMultName.c_str());
-    //ClusterMult_canvas->Write();
-    
   }
-  
-
-  
   
   //!Adds a VFAT_histogram object to the m_vfatH vector
   void addVFATH(VFAT_histogram* vfatH, int i){m_vfatsH[i]=vfatH;}
@@ -232,11 +204,6 @@ private:
   TH1F* Totalb1110;
   TH1F* TotalFlag;
   TH1F* TotalCRC;
-  TCanvas* Integrity_canvas;
-  TCanvas* Occupancy_canvas;
-  TCanvas* ClusterSize_canvas;
-  TCanvas* ClusterMult_canvas;
-  
   
   std::map<int, GEMStripCollection> allstrips;
   VFATdata * m_vfat;
