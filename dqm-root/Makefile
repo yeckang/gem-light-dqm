@@ -52,8 +52,8 @@ LIB=$(BUILD_HOME)/$(Project)/gemtreewriter/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
 all:
 	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/histogramLayeringExample.cxx $(LIB)/libEvent.so -o $(BIN)/layer
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/gtprinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/gtprinter
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/onlinePrinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/onlineprinter
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/gtprinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/gtprinter $(PYTHONLIBS) $(MYSQLLIBS)
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/onlinePrinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/onlineprinter $(PYTHONLIBS) $(MYSQLLIBS)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dqmMain.cxx $(LIB)/libEvent.so -o $(BIN)/dqm $(PYTHONLIBS) $(MYSQLLIBS) -lProof -lProofPlayer
 	$(LS) $(BIN)
 
@@ -72,13 +72,13 @@ layer:
 
 printer:
 	mkdir -p $(BIN)
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/gtprinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/gtprinter
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/gtprinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/gtprinter $(PYTHONLIBS) $(MYSQLLIBS)
 	$(LS) $(BIN)
 
 
 onlineprinter:
 	mkdir -p $(BIN)
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/onlinePrinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/onlineprinter
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/onlinePrinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/onlineprinter $(PYTHONLIBS) $(MYSQLLIBS)
 	$(LS) $(BIN)
 
 

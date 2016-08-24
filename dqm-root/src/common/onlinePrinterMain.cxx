@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 
   gROOT->ProcessLine(".!mkdir -p "+dPath);  
 
-  gemTreePrintOnline(gDirectory->GetDirectory(""),dPath,true);
+  gemTreePrintOnline(gDirectory->GetDirectory(""),dPath,iname,ifilestring,true);
   
   if (DEBUG) std::cout<<"Online Printer Complete. "<< std::endl;
   return 0;
