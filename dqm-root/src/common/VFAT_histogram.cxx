@@ -47,6 +47,9 @@ class VFAT_histogram: public Hardware_histogram
       for (int i = 0; i < 128; i++){
         thresholdScan[i] = new TH1F(("thresholdScan"+to_string(static_cast<long long int>(i))).c_str(),("thresholdScan"+to_string(static_cast<long long int>(i))).c_str(),256,0,256);
       }// end loop on channels
+      //get maps
+      m_sn = std::stoi(m_HWID);
+      readMapFromFile(m_sn,m_strip_map);
       gDirectory->cd("..");
     }
     
@@ -54,10 +57,10 @@ class VFAT_histogram: public Hardware_histogram
     /*!
      This fills histograms for the following data: Difference between crc and recalculated crc, Control Bit 1010, Control Bit 1100, Control Bit 1110, Bunch Crossing Number, Event Counter, Control Flags, and Chip ID, and Fired Channels
      */
-  void fillHistograms(VFATdata * vfat, bool final){
+  void fillHistograms(VFATdata * vfat){
       setVFATBlockWords(vfat); 
       int crc_diff = vfat->crc()-checkCRC(vfatBlockWords);
-      crc_difference->Fill(crc_diff);  
+      if (crc_diff != 0) crc_difference->Fill(crc_diff);  
       b1010->Fill(vfat->b1010());
       b1100->Fill(vfat->b1100());
       b1110->Fill(vfat->b1110());
@@ -73,7 +76,6 @@ class VFAT_histogram: public Hardware_histogram
         Errors->Fill(0);
       }
       SlotN->Fill(m_sn);
-      this->readMap(m_sn, m_strip_map);
       uint16_t chan0xf = 0;
       for (int chan = 0; chan < 128; ++chan) {
         if (chan < 64){
@@ -90,17 +92,14 @@ class VFAT_histogram: public Hardware_histogram
           }
         }
       }
-
-      if (final) {
-        if (DEBUG) std::cout << "[VFAT_histogram] Slot " << std::stoi(m_HWID) << " Fired Channels: " << FiredChannels->GetEntries() << std::endl;
-        if (DEBUG) std::cout << "[VFAT_histogram] Slot " << std::stoi(m_HWID) << " CRC Mismatches: " << Errors->GetEntries() << std::endl;
+    }
+    void fillWarnings(){
         if (FiredChannels->GetEntries() == 0) { 
           Warnings->Fill(1);
         }
         else if (FiredChannels->GetEntries() > 64*b1010->GetEntries()) {
           Warnings->Fill(2);
         }
-      }
     }
     //!Fills the histograms for the Threshold Scans
     void fillScanHistograms(VFATdata * vfat, int runtype, int deltaV, int latency){
@@ -126,6 +125,17 @@ class VFAT_histogram: public Hardware_histogram
         }
       }// end loop on channels
     }
+
+  TH1F* getb1010() { return b1010; }
+  TH1F* getb1100() { return b1100; }
+  TH1F* getb1110() { return b1110; }
+  TH1F* getFlag()  { return Flag; }
+  TH1F* getCRC()   { return crc_difference; }
+
+  int * getMap(){ return m_strip_map;}
+
+
+  
   private:
     TH1F* b1010;            ///<Histogram for control bit 1010
     TH1F* BC;               ///<Histogram for Bunch Crossing Number

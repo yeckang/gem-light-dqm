@@ -38,13 +38,16 @@
 #include <math.h>
 
 #include "plotter.cxx"
+#include "printer.cxx"
+//#include "dqmCanvases.cxx"
+//#include "GEB_summaryCanvases.cxx"
 
 using namespace std;
 
 int main(int argc, char** argv)
 {
+  cout << "--==Offline Printer Main==--" << endl;
   gErrorIgnoreLevel = kWarning;
-  cout << endl;
   if (argc!=2) 
     {
       cout << "Please provide ONE root file." << endl;
@@ -68,7 +71,6 @@ int main(int argc, char** argv)
   TDirectory *idir = gDirectory->GetDirectory("");
   if(DEBUG) std::cout<<"[gtprinter]" << "idir: " << idir->GetName() << std::endl;
 
-
   TString iname; //name of file without .analyzed.root extension
 
   TString name = ifilename;
@@ -78,25 +80,14 @@ int main(int argc, char** argv)
   iname = subname;
   if(DEBUG) std::cout<<"[gtprinter]"<< "iname: " << iname << std::endl;
 
-  //Create date path to hold prints based on time printer was run
-  // time_t t = time(NULL);
-  // tm* timePtr = localtime(&t);
-  //char oPath [64];
-  // strftime (oPath, 64, "./output/%m_%d-%H/%b%d_%G-%H_%M_%S/", timePtr);
-
   TString dPath = "/tmp/"+iname+"/"; 
   if(DEBUG) std::cout<<"[gtprinter]" << "dPath: " << dPath << std::endl;
 
   gROOT->ProcessLine(".!mkdir -p "+dPath);
   
-  // TFile *ofile = new TFile(dPath+iname+".root", "RECREATE");
-  // cout<<"Output File: "<<dPath<<iname<<".root"<<endl;
-    
-
-  gemTreePrint(idir,dPath,true);
-
-  if(DEBUG) std::cout<<"[gtprinter]"<< "Printing complete. " << iname << std::endl;
-
+  gemTreePrintOnline(idir,dPath,iname,ifilestring);
+  gemTreePrint(idir,dPath,iname,ifilestring,true);
   
+  if (DEBUG) cout<< "Online Printer Complete." << endl;
   return 0;
 }
