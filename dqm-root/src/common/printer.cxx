@@ -91,68 +91,8 @@ void gtprint(TH1 *h, TString name, TString opath)
   
 }
 
-void gemTreePrint(TDirectory *source, TString outPath, bool first)
-{
 
-  //Create equivalent output directory via newPath (ignore initial .root directory)
-  TString newPath;
-  if(!first){
-    newPath = outPath + source->GetName() + "/";      
-    if(DEBUG) std::cout<<"[gemTreePrint]"<< "newPath: " << newPath << std::endl;
-    gROOT->ProcessLine(".!mkdir -p "+newPath);
-  }
-  else newPath = outPath;
-
-  Bool_t status = TH1::AddDirectoryStatus();
-  TH1::AddDirectory(kFALSE);
-
-  
-  //Check for directories, print histograms
-  TIter nextkey(source->GetListOfKeys());
-  TKey *key = new TKey;
-  int key_c = 1; //counter
-  while (key = (TKey*)nextkey())
-    {
-      if(DEBUG) std::cout<< std::endl;
-      if(DEBUG) std::cout<<"[gemTreePrint]"<< "Key: " << key_c << std::endl;
-      if(DEBUG) std::cout<<"[gemTreePrint]"<< "Key Name: " << key->GetName() << std::endl;
-      if(DEBUG) std::cout<<"[gemTreePrint]"<< "Key Class: " << key->GetClassName() << std::endl;
-      key_c++;
-      // TClass *cl = gROOT->GetClass(key->GetClassName());
-      TObject *obj = key->ReadObj();
-      //Recursively loop through directories
-      string keyName = key->GetName();
-      // if ((cl->InheritsFrom(TDirectory::Class())) and (keyName.find("OnlineHists")==string::npos)) {
-      if (obj->IsA()->InheritsFrom(TDirectory::Class()) and (keyName.find("OnlineHists")==string::npos)) {
-        if(DEBUG) std::cout<<"[gemTreePrint]"<< "Moving to directory: "<<keyName<<endl;
-        source->cd(key->GetName());
-        TDirectory *subdir = gDirectory;
-        gemTreePrint(subdir, newPath, false);
-      }
-      //Print if key is a histogram
-      // if (cl->InheritsFrom("TH1")) {
-      if (obj->IsA()->InheritsFrom(TH1::Class())) {
-	if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing histogram... " << std::endl;
-	TH1 *h = (TH1*)key->ReadObj();
-	gtprint(h,key->GetName(),newPath);
-      }
-      //Print summary canvases
-      // if (cl->InheritsFrom("TCanvas")) {
-      if (obj->IsA()->InheritsFrom(TCanvas::Class())) {
-	if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing canvas... " << std::endl;
-        gROOT->ProcessLine(".!mkdir -p "+newPath+"summary_canvases/");
-	TString fullPath = newPath + "summary_canvases/" + key->GetName();
-	TCanvas *c = (TCanvas*)key->ReadObj();
-	gtprintCanvas(c,fullPath);
-      }
-     
-    }
-  TH1::AddDirectory(status);
-  return;
-}
-
-
-void gemTreePrintOnline(TDirectory *source, TString outPath, TString runName, string fullPath,bool first)
+void gemTreePrintOnline(TDirectory *source, TString outPath, TString runName, string fullPath)
 {
   // Find active GEBs in DB
   MYSQL *Database;
@@ -189,7 +129,7 @@ void gemTreePrintOnline(TDirectory *source, TString outPath, TString runName, st
           long long int g_slot = atoi(gslot_ch.c_str());
 
           TString targetPathFull = fullPath+":/AMC13-1/AMC-"+a_slot+"/GTX-"+g_slot;
-          cout << "targetPathFull: " << targetPathFull << endl;
+          if (DEBUG) cout << "targetPathFull: " << targetPathFull << endl;
           gDirectory->cd(targetPathFull);
 
           SummaryCanvases* summaryCans = new SummaryCanvases(outPath,a_slot,g_slot);
@@ -205,6 +145,71 @@ void gemTreePrintOnline(TDirectory *source, TString outPath, TString runName, st
     }
   
   return;
+}
+
+
+
+void gemTreePrint(TDirectory *source, TString outPath, TString runName, string fullPath, bool first)
+{
+
+  
+  //Create equivalent output directory via newPath (ignore initial .root directory)
+  TString newPath;
+  if(!first){
+    newPath = outPath + source->GetName() + "/";      
+    if(DEBUG) std::cout<<"[gemTreePrint]"<< "newPath: " << newPath << std::endl;
+    gROOT->ProcessLine(".!mkdir -p "+newPath);
+  }
+  else newPath = outPath;
+
+  Bool_t status = TH1::AddDirectoryStatus();
+  TH1::AddDirectory(kFALSE);
+
+  
+  //Check for directories, print histograms
+  TIter nextkey(source->GetListOfKeys());
+  TKey *key = new TKey;
+  int key_c = 1; //counter
+  while (key = (TKey*)nextkey())
+    {
+      if(DEBUG) std::cout<< std::endl;
+      if(DEBUG) std::cout<<"[gemTreePrint]"<< "Key: " << key_c << std::endl;
+      if(DEBUG) std::cout<<"[gemTreePrint]"<< "Key Name: " << key->GetName() << std::endl;
+      if(DEBUG) std::cout<<"[gemTreePrint]"<< "Key Class: " << key->GetClassName() << std::endl;
+      key_c++;
+      // TClass *cl = gROOT->GetClass(key->GetClassName());
+      TObject *obj = key->ReadObj();
+      //Recursively loop through directories
+      string keyName = key->GetName();
+      // if ((cl->InheritsFrom(TDirectory::Class())) and (keyName.find("OnlineHists")==string::npos)) {
+      if (obj->IsA()->InheritsFrom(TDirectory::Class()) and (keyName.find("OnlineHists")==string::npos)) {
+        if(DEBUG) std::cout<<"[gemTreePrint]"<< "Moving to directory: "<<keyName<<endl;
+        source->cd(key->GetName());
+        TDirectory *subdir = gDirectory;
+        gemTreePrint(subdir, newPath, runName, fullPath, false);
+      }
+      //Print if key is a histogram
+      // if (cl->InheritsFrom("TH1")) {
+      if (obj->IsA()->InheritsFrom(TH1::Class())) {
+	if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing histogram... " << std::endl;
+	TH1 *h = (TH1*)key->ReadObj();
+	gtprint(h,key->GetName(),newPath);
+      }
+      //Print summary canvases
+      // if (cl->InheritsFrom("TCanvas")) {
+      if (obj->IsA()->InheritsFrom(TCanvas::Class())) {
+	if(DEBUG) std::cout<<"[gemTreePrint]"<< "Printing canvas... " << std::endl;
+        gROOT->ProcessLine(".!mkdir -p "+newPath+"summary_canvases/");
+	TString fullPath = newPath + "summary_canvases/" + key->GetName();
+	TCanvas *c = (TCanvas*)key->ReadObj();
+	gtprintCanvas(c,fullPath);
+      }
+     
+    }
+  TH1::AddDirectory(status);
+  return;
+}
+
 
   
   // if (gDirectory->cd("/OnlineHists")) {
@@ -272,8 +277,8 @@ void gemTreePrintOnline(TDirectory *source, TString outPath, TString runName, st
   //   return;
   // }
   
-  return;
-}
+//   return;
+// }
 
 
 // void printSummaryCanvases(TDirectory *onlineDir, int amcNumber, int gebNumber) {

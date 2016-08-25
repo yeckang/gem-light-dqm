@@ -234,7 +234,7 @@ public:
 
     // Print Summary Canvases in correct directory
     TString printPath = outPath+"AMC13-1/AMC-"+a_slot+"/GTX-"+g_slot+"/summary_canvases/";
-    cout << "printPath: " << printPath << endl;
+    if (DEBUG) cout << "printPath: " << printPath << endl;
     gROOT->ProcessLine(".!mkdir -p "+printPath);
 
           

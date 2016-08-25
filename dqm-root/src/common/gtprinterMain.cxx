@@ -83,9 +83,10 @@ int main(int argc, char** argv)
   TString dPath = "/tmp/"+iname+"/"; 
   if(DEBUG) std::cout<<"[gtprinter]" << "dPath: " << dPath << std::endl;
 
-  gROOT->ProcessLine(".!mkdir -p "+dPath);  
-
-  gemTreePrint(idir,dPath,true);
+  gROOT->ProcessLine(".!mkdir -p "+dPath);
+  
+  gemTreePrintOnline(idir,dPath,iname,ifilestring);
+  gemTreePrint(idir,dPath,iname,ifilestring,true);
   
   if (DEBUG) cout<< "Online Printer Complete." << endl;
   return 0;
