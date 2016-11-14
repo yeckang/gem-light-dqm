@@ -1,5 +1,6 @@
 #include "Hardware_histogram.h"
 #include "TH1.h"
+#include "TH2.h"
 #include <Event.h>
 #define NCHANNELS 128
 
@@ -28,13 +29,15 @@ class VFAT_histogram: public Hardware_histogram
       b1110    = new TH1F("b1110", "Control Bits", 15,  0x0 , 0xf);
       ChipID   = new TH1F("ChipID", "Chip ID", 4095,  0x0 , 0xfff);
       SlotN    = new TH1F("SlotN", "Slot Number", 24,  0, 24);
-      FiredChannels   = new TH1F("FiredChannels", "FiredChannels", 128,  0, 128);
-      FiredStrips   = new TH1F("FiredStrips", "FiredStrips", 128,  0, 128);
+      FiredChannels = new TH1F("FiredChannels", "FiredChannels", 128, -0.5, 127.5);
+      FiredStrips   = new TH1F("FiredStrips",   "FiredStrips",   128, -0.5, 127.5);
       crc      = new TH1F("crc", "check sum value", 0xffff,  0x0 , 0xffff);
       crc_calc = new TH1F("crc_calc", "check sum value recalculated", 0xffff,  0x0 , 0xffff);
       crc_difference = new TH1F("crc_difference", "difference between crc and crc_calc", 0xffff,  -32768 , 32768);
-      latencyScan = new TH1F("latencyScan", "Latency Scan", 255,  0, 255);
-      thresholdScanChip = new TH1F("thresholdScan","Threshold Scan",255,0,255);
+      latencyScan   = new TH1F("latencyScan",   "Latency Scan", 256,  -0.5, 255.5);
+      latencyScan2D = new TH2F("latencyScan2D", "Latency Scan", 256,  -0.5, 255.5, 128,  -0.5, 127.5);
+      thresholdScanChip   = new TH1F("thresholdScan",  "Threshold Scan",256, -0.5, 255.5);
+      thresholdScanChip2D = new TH2F("thresholdScan2D","Threshold Scan",256, -0.5, 255.5, 128,  -0.5, 127.5);
       const char *warning_labels[3] = {"Flag raised", "No channels fired", "Excessive channels fired"};
       const char *error_labels[1] = {"CRC mismatch"};
       Warnings = new TH1I("Warnings", "Warnings", 3,  0, 3);
@@ -110,20 +113,24 @@ class VFAT_histogram: public Hardware_histogram
           chan0xf = ((vfat->lsData() >> i) & 0x1);
           if(chan0xf) {
             thresholdScan[i]->Fill(deltaV);
+            thresholdScanChip2D->Fill(deltaV,i);
+	    latencyScan2D->Fill(latency,i);
             channelFired = true;
           }
         } else {
           chan0xf = ((vfat->msData() >> (i-64)) & 0x1);
           if(chan0xf) {
             thresholdScan[i]->Fill(deltaV);
+            thresholdScanChip2D->Fill(deltaV,i);
+	    latencyScan2D->Fill(latency,i);
             channelFired = true;
           }
         }
-        if (channelFired) {
-          latencyScan->Fill(latency);
-          thresholdScanChip->Fill(deltaV);
-        }
       }// end loop on channels
+      if (channelFired) {
+	latencyScan->Fill(latency);
+	thresholdScanChip->Fill(deltaV);
+      }
     }
 
   TH1F* getb1010() { return b1010; }
@@ -151,7 +158,9 @@ class VFAT_histogram: public Hardware_histogram
     TH1F* crc;
     TH1F* crc_calc;
     TH1F* latencyScan;
+    TH2F* latencyScan2D;
     TH1F* thresholdScanChip;
+    TH2F* thresholdScanChip2D;
     TH1F* thresholdScan[NCHANNELS];
     TH1I* Warnings;
     TH1I* Errors;
