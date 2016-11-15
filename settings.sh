@@ -1,4 +1,4 @@
-cd /data/bigdisk/sw/root-git/v5-34-00-patches/gcc493
+cd $GEM_DQM_ROOT_BASE
 source bin/thisroot.sh
 cd -
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/gcc/4.9.3/lib64
