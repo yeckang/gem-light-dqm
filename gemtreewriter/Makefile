@@ -10,8 +10,8 @@ ROOTGLIBS =$(shell root-config --glibs)
 ROOTINC   =$(shell root-config --incdir)
 
 CC=g++-4.9.3
-CCFLAGS=-O2 -Wall -fPIC ${ROOTCFLAGS}
-ADDFLAGS=-g -std=c++0x
+CCFLAGS=-O0 -g3 -fno-inline -Wall -fPIC ${ROOTCFLAGS}
+ADDFLAGS=-std=c++0x
 RC=rootcint
 LBL=-shared -O2 -m64
 LS=ls -lartF

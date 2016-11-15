@@ -152,7 +152,7 @@ int main(int argc, char** argv)
 
   gSystem->SetIncludePath("-I$BUILD_HOME/gem-light-dqm/dqm-root/include -I$BUILD_HOME/gem-light-dqm/dqm-root/src/common -I$BUILD_HOME/gem-light-dqm/gemtreewriter/include");
 
-  sel += "/gem-light-dqm/dqm-root/src/common/gemTreeReader.cxx+";
+  sel += "/gem-light-dqm/dqm-root/src/common/gemTreeReader.cxx++g";
   ch->Process(sel.c_str());
   //TProofLite::Mgr("__lite__")->GetSessionLogs()->Display("*");
 

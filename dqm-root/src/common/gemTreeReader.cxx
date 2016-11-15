@@ -144,6 +144,7 @@ Bool_t gemTreeReader::Process(Long64_t entry)
           slot_map.insert(std::make_pair(v->ChipID(), slot));
           if (DEBUG) cout << "Inserted in map: chip ID " << v->ChipID() << ", slot "<< slot <<  endl;
         }
+	if (DEBUG) std::cout << "v_gebH " << std::hex << std::setw(8) << std::setfill('0') << v_gebH << std::dec << std::endl;
         if (v_gebH) v_gebH->fillHistograms(&*g, slot_map);
         /* LOOP THROUGH VFATs */
         for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
@@ -152,7 +153,7 @@ Bool_t gemTreeReader::Process(Long64_t entry)
           if (slot>-1) {v_vfatH = v_gebH->vfatsH(slot);} else { continue;}
           if (v_vfatH) {
             v_vfatH->fillHistograms(&*v);
-            if (m_RunType == 1){
+            if (m_RunType == 1 || m_RunType == 2 || m_RunType == 3){
               v_vfatH->fillScanHistograms(&*v, m_RunType, m_deltaV, m_Latency);
             }
           }

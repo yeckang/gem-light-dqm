@@ -4,8 +4,8 @@
 BUILD_HOME:=$(shell pwd)/../..
 
 CC=g++-4.9.3
-CCFLAGS=-O2 -Wall -fPIC -pthread -m64
-ADDFLAGS=-g -std=c++11
+CCFLAGS=-O0 -g3 -fno-inline -Wall -fPIC -pthread -m64
+ADDFLAGS=-std=c++11
 RC=rootcint
 LBL=-shared -O2 -m64
 LS=ls -lartF
