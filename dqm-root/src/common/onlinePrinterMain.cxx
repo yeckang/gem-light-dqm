@@ -2,7 +2,7 @@
    only printing summary canvases and a select few others */
 
 
-//#define DEBUG 0
+#define DEBUG 0
 #include <iomanip> 
 #include <iostream>
 #include <fstream>
@@ -50,8 +50,8 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-  cout << "==Online GemTreePrinter==" << endl;
-  gErrorIgnoreLevel = kWarning;
+  cout << "--==Online Printer Main==--" << endl;
+  gErrorIgnoreLevel = kError;
   if (argc!=2) 
     {
       cout << "Please provide ONE root file." << endl;
@@ -87,8 +87,8 @@ int main(int argc, char** argv)
 
   gROOT->ProcessLine(".!mkdir -p "+dPath);  
 
-  gemTreePrintOnline(gDirectory->GetDirectory(""),dPath,true);
+  gemTreePrintOnline(gDirectory->GetDirectory(""),dPath,iname,ifilestring);
   
-  std::cout<<"Printing complete. " << iname << std::endl;
+  if (DEBUG) std::cout<<"Online Printer Complete. "<< std::endl;
   return 0;
 }

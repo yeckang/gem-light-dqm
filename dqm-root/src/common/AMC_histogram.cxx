@@ -19,6 +19,9 @@ class AMC_histogram: public Hardware_histogram
     void bookHistograms()
     {
       m_gebsH = new GEB_histogram*[2];
+      for (unsigned int i = 0; i<2; i++){
+          m_gebsH[i] = 0;
+      }
       m_dir->cd();
       AMCnum     = new TH1F("AMCnum", "AMC number", 12,  0, 12);
       //L1A        = new TH1F("L1A", "L1A ID", 0xffffff,  0x0, 0xffffff);      

@@ -19,6 +19,9 @@ class AMC13_histogram: public Hardware_histogram
     void bookHistograms()
     {
       m_amcsH = new AMC_histogram*[12];
+      for (unsigned int i = 0; i < 12; i++){
+          m_amcsH[i] = 0;
+      }
       m_dir->cd();
       Control_bit5 = new TH1F("Control_Bit5", "Control Bit 5", 15,  0x0 , 0xf);
       Control_bitA = new TH1F("Control_BitA", "Control Bit A", 15,  0x0 , 0xf); 
