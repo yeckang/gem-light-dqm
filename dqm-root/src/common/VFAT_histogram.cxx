@@ -82,17 +82,17 @@ public:
     uint16_t chan0xf = 0;
     for (int chan = 0; chan < 128; ++chan) {
       if (chan < 64){
-	chan0xf = ((vfat->lsData() >> chan) & 0x1);
-	if(chan0xf) {
-	  FiredChannels->Fill(chan);
-	  FiredStrips->Fill(m_strip_map[chan]);
-	}
+	      chan0xf = ((vfat->lsData() >> chan) & 0x1);
+	      if(chan0xf) {
+	        FiredChannels->Fill(chan);
+	        FiredStrips->Fill(m_strip_map[chan]);
+	      }
       } else {
-	chan0xf = ((vfat->msData() >> (chan-64)) & 0x1);
-	if(chan0xf) {
-	  FiredChannels->Fill(chan);
-	  FiredStrips->Fill(m_strip_map[chan]);
-	}
+	      chan0xf = ((vfat->msData() >> (chan-64)) & 0x1);
+	      if(chan0xf) {
+	        FiredChannels->Fill(chan);
+	        FiredStrips->Fill(m_strip_map[chan]);
+	      }
       }
     }
   }
@@ -110,21 +110,21 @@ public:
     for (int i = 0; i < 128; i++){
       uint16_t chan0xf = 0;
       if (i < 64){
-	chan0xf = ((vfat->lsData() >> i) & 0x1);
-	if(chan0xf) {
-	  thresholdScan[i]->Fill(deltaV);
-	  thresholdScanChip2D->Fill(deltaV,i);
-	  latencyScan2D->Fill(latency,i);
-	  channelFired = true;
-	}
+	      chan0xf = ((vfat->lsData() >> i) & 0x1);
+	      if(chan0xf) {
+	        thresholdScan[i]->Fill(deltaV);
+	        thresholdScanChip2D->Fill(deltaV,i);
+	        latencyScan2D->Fill(latency,i);
+	        channelFired = true;
+	      }
       } else {
-	chan0xf = ((vfat->msData() >> (i-64)) & 0x1);
-	if(chan0xf) {
-	  thresholdScan[i]->Fill(deltaV);
-	  thresholdScanChip2D->Fill(deltaV,i);
-	  latencyScan2D->Fill(latency,i);
-	  channelFired = true;
-	}
+	      chan0xf = ((vfat->msData() >> (i-64)) & 0x1);
+	      if(chan0xf) {
+	        thresholdScan[i]->Fill(deltaV);
+	        thresholdScanChip2D->Fill(deltaV,i);
+	        latencyScan2D->Fill(latency,i);
+	        channelFired = true;
+	      }
       }
     }// end loop on channels
     if (channelFired) {
