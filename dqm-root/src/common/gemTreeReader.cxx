@@ -84,7 +84,7 @@ void gemTreeReader::SlaveBegin(TTree * /*tree*/)
         //s_chipID_s = TString::BaseConvert(s_chipID_s, 16,10);
         int v_slot = v_slot_s.Atoi(); // retrieve v_slot from the config somehow
         int i_chipID = s_chipID_s.Atoi();
-        VFATMap[a_slot][g_slot][v_slot] = i_chipID;
+        VFATMap[a_slot-1][g_slot][v_slot] = i_chipID;// a_slot is 1..12 while we need 0..11
         if (DEBUG) std::cout << "Insert chip ID 0x"
 			     << std::hex << std::setw(4) << std::setfill('0') << i_chipID << std::dec
 			     << " in place a,g,v: "
@@ -106,7 +106,7 @@ void gemTreeReader::SlaveBegin(TTree * /*tree*/)
     } /* END GEB LOOP */
     gDirectory->cd("..");       //moves back to previous directory
     if (DEBUG) std::cout << "Adding histograms for AMC(" << a_slot << ")" << std::endl;
-    m_amc13H->addAMCH(m_amcH, a_slot);
+    m_amc13H->addAMCH(m_amcH, a_slot-1);// a_slot is 1..12 while we need 0..11
     if (DEBUG) std::cout << "Slave Begin: add amc " << a_slot << std::endl;
   } /* END AMC LOOP */
 
@@ -137,12 +137,12 @@ Bool_t gemTreeReader::Process(Long64_t entry)
       v_geb = a->gebs();
       if (DEBUG) std::cout << "Get GEB "<< endl;
       a_c=a->AMCnum();
-      if (a_c < 0 || a_c > 12) {
-	std::cerr << "Invalid number of AMCs(" << a_c << ") reported, continuing" << std::endl;
+      if (a_c < 1 || a_c > 12) {
+	std::cerr << "Invalid slot number of AMC(" << a_c << ") reported, continuing" << std::endl;
 	continue;
       }
       if (DEBUG) std::cout << "Trying to access histograms for AMC(" << a_c << ")" << std::endl;
-      v_amcH = m_amc13H->amcsH(a_c);
+      v_amcH = m_amc13H->amcsH(a_c-1);//a_c = 1..12 while we need 0..11
       if (DEBUG) std::cout << "Get AMC H "<< endl;
       if (v_amcH) v_amcH->fillHistograms(&*a);
       if (DEBUG) std::cout << "Fill AMC histograms"<< endl;
@@ -167,7 +167,7 @@ Bool_t gemTreeReader::Process(Long64_t entry)
         for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
           int vID = v->ChipID();
           vID = vID | 0xf000;
-          int slot = slotFromMap(a_c, gID, vID);
+          int slot = slotFromMap(a_c-1, gID, vID);
           slot_map.insert(std::make_pair(v->ChipID(), slot));
           if (DEBUG) std::cout << "Inserted in map: chip ID " << v->ChipID() << ", slot "<< slot <<  endl;
         }
