@@ -21,8 +21,9 @@ public:
   */
   void bookHistograms(){
     m_dir->cd();
+    n_hits_per_event    = new TH1F("n_hits_per_event", "n_hits_per_event", 129,  -0.5 , 128.5);
     b1010    = new TH1F("b1010", "Control Bits", 15,  0x0 , 0xf);
-    BC       = new TH1F("BC", "Bunch Crossing Number", 4095,  0x0 , 0xfff);
+    BC       = new TH1D("BC", "Bunch Crossing Number", 4096,  -0.5, 4095.5);
     b1100    = new TH1F("b1100", "Control Bits", 15,  0x0 , 0xf);
     EC       = new TH1F("EC", "Event Counter", 255,  0x0 , 0xff);
     Flag     = new TH1F("Flag", "Control Flags", 15,  0x0 , 0xf);
@@ -34,8 +35,11 @@ public:
     crc      = new TH1F("crc", "check sum value", 0xffff,  0x0 , 0xffff);
     crc_calc = new TH1F("crc_calc", "check sum value recalculated", 0xffff,  0x0 , 0xffff);
     crc_difference = new TH1F("crc_difference", "difference between crc and crc_calc", 0xffff,  -32768 , 32768);
-    latencyScan   = new TH1F("latencyScan",   "Latency Scan", 256,  -0.5, 255.5);
-    latencyScan2D = new TH2F("latencyScan2D", "Latency Scan", 256,  -0.5, 255.5, 128,  -0.5, 127.5);
+    latencyScan   = new TH1D("latencyScan",   "Latency Scan", 256,  -0.5, 255.5);
+    latencyBXdiffScan   = new TH1D("latencyBXdiffScan",   "Latency Scan BX subtracted", 4352,  -256.5, 4095.5);
+    //latencyScan2D = new TH2F("latencyScan2D", "Latency Scan", 256,  -0.5, 255.5, 128,  -0.5, 127.5);
+    latencyScanBX2D = new TH2D("latencyScanBX2D", "Latency Scan vs BX", 256,  -0.5, 255.5, 4096,  -0.5,4095.5);
+    latencyScanBX2D_extraHighOcc = new TH2F("latencyScanBX2D_extraHighOcc", "Latency Scan vs BX when number of fired channels is greater than 100", 256,  -0.5, 255.5, 4096,  -0.5,4095.5);
     thresholdScanChip   = new TH1F("thresholdScan",  "Threshold Scan",256, -0.5, 255.5);
     thresholdScanChip2D = new TH2F("thresholdScan2D","Threshold Scan",256, -0.5, 255.5, 128,  -0.5, 127.5);
     const char *warning_labels[3] = {"Flag raised", "No channels fired", "Excessive channels fired"};
@@ -60,14 +64,14 @@ public:
   /*!
     This fills histograms for the following data: Difference between crc and recalculated crc, Control Bit 1010, Control Bit 1100, Control Bit 1110, Bunch Crossing Number, Event Counter, Control Flags, and Chip ID, and Fired Channels
   */
-  void fillHistograms(VFATdata * vfat){
+  void fillHistograms(VFATdata * vfat, long long int orbitNumber){
     setVFATBlockWords(vfat);
     int crc_diff = vfat->crc()-checkCRC(vfatBlockWords);
     if (crc_diff != 0) crc_difference->Fill(crc_diff);
     b1010->Fill(vfat->b1010());
     b1100->Fill(vfat->b1100());
     b1110->Fill(vfat->b1110());
-    BC->Fill(vfat->BC());
+    BC->Fill(orbitNumber*4095 + vfat->BC());
     EC->Fill(vfat->EC());
     Flag->Fill(vfat->Flag());
     ChipID->Fill(vfat->ChipID());
@@ -80,21 +84,26 @@ public:
     }
     SlotN->Fill(m_sn);
     uint16_t chan0xf = 0;
+    int n_hits_fired = 0;
     for (int chan = 0; chan < 128; ++chan) {
       if (chan < 64){
-	      chan0xf = ((vfat->lsData() >> chan) & 0x1);
-	      if(chan0xf) {
-	        FiredChannels->Fill(chan);
-	        FiredStrips->Fill(m_strip_map[chan]);
-	      }
+	chan0xf = ((vfat->lsData() >> chan) & 0x1);
+	if(chan0xf) {
+          n_hits_fired++;
+	  FiredChannels->Fill(chan);
+	  FiredStrips->Fill(m_strip_map[chan]);
+	}
       } else {
-	      chan0xf = ((vfat->msData() >> (chan-64)) & 0x1);
-	      if(chan0xf) {
-	        FiredChannels->Fill(chan);
-	        FiredStrips->Fill(m_strip_map[chan]);
-	      }
+	chan0xf = ((vfat->msData() >> (chan-64)) & 0x1);
+	if(chan0xf) {
+          n_hits_fired++;
+	  FiredChannels->Fill(chan);
+	  FiredStrips->Fill(m_strip_map[chan]);
+	}
       }
     }
+    n_hits_per_event->Fill(n_hits_fired);
+
   }
   void fillWarnings(){
     if (FiredChannels->GetEntries() == 0) {
@@ -107,29 +116,35 @@ public:
   //!Fills the histograms for the Threshold Scans
   void fillScanHistograms(VFATdata * vfat, int runtype, int deltaV, int latency){
     bool channelFired = false;
+    int n_h_fired = 0;
     for (int i = 0; i < 128; i++){
       uint16_t chan0xf = 0;
       if (i < 64){
-	      chan0xf = ((vfat->lsData() >> i) & 0x1);
-	      if(chan0xf) {
-	        thresholdScan[i]->Fill(deltaV);
-	        thresholdScanChip2D->Fill(deltaV,i);
-	        latencyScan2D->Fill(latency,i);
-	        channelFired = true;
-	      }
+	chan0xf = ((vfat->lsData() >> i) & 0x1);
+	if(chan0xf) {
+	  thresholdScan[i]->Fill(deltaV);
+	  thresholdScanChip2D->Fill(deltaV,i);
+	  //latencyScan2D->Fill(latency,i);
+	  channelFired = true;
+          n_h_fired++;
+	}
       } else {
-	      chan0xf = ((vfat->msData() >> (i-64)) & 0x1);
-	      if(chan0xf) {
-	        thresholdScan[i]->Fill(deltaV);
-	        thresholdScanChip2D->Fill(deltaV,i);
-	        latencyScan2D->Fill(latency,i);
-	        channelFired = true;
-	      }
+	chan0xf = ((vfat->msData() >> (i-64)) & 0x1);
+	if(chan0xf) {
+	  thresholdScan[i]->Fill(deltaV);
+	  thresholdScanChip2D->Fill(deltaV,i);
+	  //latencyScan2D->Fill(latency,i);
+	  channelFired = true;
+          n_h_fired++;
+	}
       }
     }// end loop on channels
     if (channelFired) {
       latencyScan->Fill(latency);
+      latencyBXdiffScan->Fill(vfat->BC()-latency);
+      latencyScanBX2D->Fill(latency, vfat->BC());
       thresholdScanChip->Fill(deltaV);
+      if (n_h_fired > 100) {latencyScanBX2D_extraHighOcc->Fill(latency, vfat->BC());}
     }
   }
 
@@ -141,9 +156,12 @@ public:
 
   int * getMap(){ return m_strip_map;}
 
+
+
 private:
+  TH1F* n_hits_per_event;
   TH1F* b1010;            ///<Histogram for control bit 1010
-  TH1F* BC;               ///<Histogram for Bunch Crossing Number
+  TH1D* BC;               ///<Histogram for Bunch Crossing Number
   TH1F* b1100;            ///<Histogram for control bit 1100
   TH1F* EC;               ///<Histogram for Event Counter
   TH1F* Flag;             ///<Histogram for Control Flags
@@ -155,8 +173,11 @@ private:
   TH1F* FiredStrips;
   TH1F* crc;
   TH1F* crc_calc;
-  TH1F* latencyScan;
-  TH2F* latencyScan2D;
+  TH1D* latencyScan;
+  TH1D* latencyBXdiffScan;
+  //TH2F* latencyScan2D;
+  TH2D* latencyScanBX2D;
+  TH2F* latencyScanBX2D_extraHighOcc;
   TH1F* thresholdScanChip;
   TH2F* thresholdScanChip2D;
   TH1F* thresholdScan[NCHANNELS];

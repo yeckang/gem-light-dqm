@@ -1,4 +1,119 @@
-#include "gemTreeReader.h"
+//#ifndef gemTreeReader_h
+//#define gemTreeReader_h
+
+#ifndef DEBUG
+#define DEBUG 0
+#endif
+#include <TChain.h>
+#include <TProofOutputFile.h>
+#include <TSelector.h>
+
+#include <TTreeReader.h>
+#include <TTreeReaderValue.h>
+#include <TTreeReaderArray.h>
+
+
+#include <iomanip> 
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <cstring>
+#include <cstdlib>
+#include <sstream>
+#include <vector>
+#include <TSystem.h>
+
+#include "AMC13_histogram.cxx"
+
+class gemTreeReader: public TSelector {
+public :
+  TTree          *fChain;   //!pointer to the analyzed TTree or TChain
+   TTreeReader     fReader;  //!the tree reader
+  
+   // Readers to access the data (delete the ones you do not need).
+   TTreeReaderValue<unsigned int> fUniqueID = {fReader, "fUniqueID"};
+   TTreeReaderValue<unsigned int> fBits = {fReader, "fBits"};
+   TTreeReaderValue<Int_t> fEvtHdr_fEvtNum = {fReader, "fEvtHdr.fEvtNum"};
+   TTreeReaderValue<Int_t> fEvtHdr_fRun = {fReader, "fEvtHdr.fRun"};
+   TTreeReaderValue<Int_t> fEvtHdr_fDate = {fReader, "fEvtHdr.fDate"};
+   TTreeReaderArray<UChar_t> famc13s_m_cb5 = {fReader, "famc13s.m_cb5"};
+   TTreeReaderArray<UChar_t> famc13s_m_Evt_ty = {fReader, "famc13s.m_Evt_ty"};
+   TTreeReaderArray<unsigned int> famc13s_m_LV1_id = {fReader, "famc13s.m_LV1_id"};
+   TTreeReaderArray<unsigned short> famc13s_m_BX_id = {fReader, "famc13s.m_BX_id"};
+   TTreeReaderArray<unsigned short> famc13s_m_Source_id = {fReader, "famc13s.m_Source_id"};
+   TTreeReaderArray<UChar_t> famc13s_m_CalTyp = {fReader, "famc13s.m_CalTyp"};
+   TTreeReaderArray<UChar_t> famc13s_m_nAMC = {fReader, "famc13s.m_nAMC"};
+   TTreeReaderArray<unsigned int> famc13s_m_OrN = {fReader, "famc13s.m_OrN"};
+   TTreeReaderArray<UChar_t> famc13s_m_cb0 = {fReader, "famc13s.m_cb0"};
+   TTreeReaderArray<vector<unsigned int>> famc13s_m_AMC_size = {fReader, "famc13s.m_AMC_size"};
+   TTreeReaderArray<vector<unsigned char>> famc13s_m_Blk_No = {fReader, "famc13s.m_Blk_No"};
+   TTreeReaderArray<vector<unsigned char>> famc13s_m_AMC_No = {fReader, "famc13s.m_AMC_No"};
+   TTreeReaderArray<vector<unsigned short>> famc13s_m_BoardID = {fReader, "famc13s.m_BoardID"};
+   TTreeReaderArray<vector<AMCdata>> famc13s_m_amcs = {fReader, "famc13s.m_amcs"};
+   TTreeReaderArray<unsigned int> famc13s_m_CRC_amc13 = {fReader, "famc13s.m_CRC_amc13"};
+   TTreeReaderArray<UChar_t> famc13s_m_Blk_NoT = {fReader, "famc13s.m_Blk_NoT"};
+   TTreeReaderArray<UChar_t> famc13s_m_LV1_idT = {fReader, "famc13s.m_LV1_idT"};
+   TTreeReaderArray<unsigned short> famc13s_m_BX_idT = {fReader, "famc13s.m_BX_idT"};
+   TTreeReaderArray<UChar_t> famc13s_m_cbA = {fReader, "famc13s.m_cbA"};
+   TTreeReaderArray<unsigned int> famc13s_m_EvtLength = {fReader, "famc13s.m_EvtLength"};
+   TTreeReaderArray<unsigned short> famc13s_m_CRC_cdf = {fReader, "famc13s.m_CRC_cdf"};
+   TTreeReaderValue<Bool_t> fisEventGood = {fReader, "fisEventGood"};
+
+
+  // Declaration of leaf types
+  Event           *GEMEvents;
+  // List of branches
+  TBranch        *b_GEMEvents;   //!
+  gemTreeReader(TTree * /*tree*/ =0) : fChain(0) { }
+  //gemTreeReader(TTree * /*tree*/ =0) : { }
+  virtual ~gemTreeReader() { }
+  virtual Int_t   Version() const { return 2; }
+  virtual void    Begin(TTree *tree);
+  virtual void    SlaveBegin(TTree *tree);
+  virtual void    Init(TTree *tree);
+  virtual Bool_t  Notify();
+  virtual Bool_t  Process(Long64_t entry);
+  virtual Int_t   GetEntry(Long64_t entry, Int_t getall = 0) { return fChain ? fChain->GetTree()->GetEntry(entry, getall) : 0; }
+  virtual void    SetOption(const char *option) { fOption = option; }
+  virtual void    SetObject(TObject *obj) { fObject = obj; }
+  virtual void    SetInputList(TList *input) { fInput = input; }
+  virtual TList  *GetOutputList() const { return fOutput; }
+  virtual void    SlaveTerminate();
+  virtual void    Terminate();
+
+  int slotFromMap(int a, int g, int cid);
+
+  vector<AMC13Event> v_amc13;    ///<Vector of AMC13Event
+  vector<AMCdata> v_amc;         ///<Vector of AMCdata
+  vector<GEBdata> v_geb;         ///<Vector of GEBdata
+  vector<VFATdata> v_vfat;       ///Vector of VFATdata
+
+  AMC_histogram * v_amcH;        ///<Vector of AMC_histogram
+  GEB_histogram * v_gebH;        ///<Vector of GEB_histogram
+  VFAT_histogram * v_vfatH;      ///<Vector of VFAT_histogram
+
+  int VFATMap[12][12][24];
+
+  AMC13_histogram * m_amc13H;
+  AMC_histogram * m_amcH;
+  GEB_histogram * m_gebH;
+  VFAT_histogram * m_vfatH;
+
+  int m_RunType;
+  int m_deltaV;
+  int m_Latency;
+  long long int m_OrbitNumber;
+  long long int m_RelOrbitNumber;
+  TDirectory* onlineHistsDir;
+
+  TFile *fFile;
+  TProofOutputFile *fProofFile;
+
+  ClassDef(gemTreeReader,2);
+};
+
+//#endif//
+//#include "gemTreeReader.h"
 void gemTreeReader::Begin(TTree * /*tree*/)
 {
   // The Begin() function is called at the start of the query.
@@ -62,7 +177,11 @@ void gemTreeReader::SlaveBegin(TTree * /*tree*/)
       std::cout << "Slave Begin: found object " << geb->GetName() << std::endl;
       TString g_slot_s = (TString)geb->GetName();
       int g_slot = g_slot_s.Atoi(); // retrieve g_slot from the config somehow
+      // FIXME!!! Tmp plug to correct offset introduced in the DB
+      g_slot = g_slot -1;
+      g_slot_s.Form("%d",g_slot);
       g_slot_s.Insert(0,"GTX-");
+      // end of FIXME
       m_gebH = new GEB_histogram("preved", gDirectory->mkdir(g_slot_s.Data()), geb->GetName());
       m_gebH->bookHistograms();
       TMapIter nextvfat((TMap*)geb);
@@ -76,6 +195,7 @@ void gemTreeReader::SlaveBegin(TTree * /*tree*/)
         //s_chipID_s = TString::BaseConvert(s_chipID_s, 16,10);
         int v_slot = v_slot_s.Atoi(); // retrieve v_slot from the config somehow
         int i_chipID = s_chipID_s.Atoi();
+        i_chipID = i_chipID & 0x0FFF;
         VFATMap[a_slot][g_slot][v_slot] = i_chipID;
         if (DEBUG) cout << "Insert chip ID " << i_chipID << " in place a,g,v: " << a_slot << ", " << g_slot << ", " << v_slot << endl;
         v_slot_s.Insert(0,"VFAT-");
@@ -101,6 +221,7 @@ void gemTreeReader::SlaveBegin(TTree * /*tree*/)
 //!Fills the histograms that were book from bookAllHistograms
 Bool_t gemTreeReader::Process(Long64_t entry)
 {
+  //fReader.SetEntry(entry);
   fChain->GetEntry(entry);
   int a13_c=0;    //counter through AMC13s
   int a_c=0;      //counter through AMCs
@@ -127,32 +248,36 @@ Bool_t gemTreeReader::Process(Long64_t entry)
       if (DEBUG) cout << "Fill AMC histograms"<< endl;
       m_RunType = a->Rtype();
       if (m_RunType){
-        m_deltaV = a->Param2() - a->Param3();
-        m_Latency = a->Param1();
+        m_deltaV = a->Param2() - a->Param1();
+        m_Latency = a->Param3();
       }
+      //if ( (m_Latency > 166) && (m_Latency < 172) ) {continue;}
       g_c=0;
       /* LOOP THROUGH GEBs */
       for(auto g=v_geb.begin(); g!=v_geb.end();g++){
         v_vfat = g->vfats();
         int gID = g->InputID();
+        //if (gID!=4) continue;
         v_gebH = v_amcH->gebsH(gID);
         std::map<int,int> slot_map;
         for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
           int vID = v->ChipID();
-          vID = vID | 0xf000;
+          //vID = vID | 0xf000;
+          if (DEBUG) cout << "Look for slot number of " << v->ChipID() << ", in AMC "<< a_c << " and GEB " << gID <<  endl;
           int slot = slotFromMap(a_c, gID, vID);
           slot_map.insert(std::make_pair(v->ChipID(), slot));
           if (DEBUG) cout << "Inserted in map: chip ID " << v->ChipID() << ", slot "<< slot <<  endl;
         }
-	if (DEBUG) std::cout << "v_gebH " << std::hex << std::setw(8) << std::setfill('0') << v_gebH << std::dec << std::endl;
+        if (DEBUG) std::cout << "v_gebH " << std::hex << std::setw(8) << std::setfill('0') << v_gebH << std::dec << std::endl;
         if (v_gebH) v_gebH->fillHistograms(&*g, slot_map);
         /* LOOP THROUGH VFATs */
         for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
           int slot = slot_map.find(v->ChipID())->second;
           if (DEBUG) cout << "Try get slot for chip ID " << v->ChipID() << ", retrieved slot " << slot <<  endl;
+          //if ( (slot == 6) || (slot == 7) || (slot == 8) || (slot == 14) || (slot == 15) || (slot == 19) || (slot == 22) || (slot == 23) ) continue;
           if (slot>-1) {v_vfatH = v_gebH->vfatsH(slot);} else { continue;}
           if (v_vfatH) {
-            v_vfatH->fillHistograms(&*v);
+            v_vfatH->fillHistograms(&*v, m_RelOrbitNumber);
             if (m_RunType == 1 || m_RunType == 2 || m_RunType == 3){
               v_vfatH->fillScanHistograms(&*v, m_RunType, m_deltaV, m_Latency);
             }
@@ -163,6 +288,8 @@ Bool_t gemTreeReader::Process(Long64_t entry)
     } /* END AMC LOOP */
     a13_c++;
   } /* END AMC13 LOOP */
+
+  return kTRUE;
 }
 
 void gemTreeReader::SlaveTerminate()
@@ -175,7 +302,7 @@ void gemTreeReader::SlaveTerminate()
   //
   for (unsigned int i = 0; i < 12; i++){
       if (auto a = m_amc13H->amcsH(i)){
-          for (unsigned int j = 0; j < 2; j++){
+          for (unsigned int j = 0; j < 12; j++){
               if (auto g = a->gebsH(j)){
                   g->fillSummaryCanvases();
                   for (unsigned int k = 0; k < 24; k++){

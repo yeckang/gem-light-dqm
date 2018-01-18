@@ -99,7 +99,7 @@ public :
   GEB_histogram * v_gebH;        ///<Vector of GEB_histogram
   VFAT_histogram * v_vfatH;      ///<Vector of VFAT_histogram
 
-  int VFATMap[12][2][24];
+  int VFATMap[12][12][24];
 
   AMC13_histogram * m_amc13H;
   AMC_histogram * m_amcH;

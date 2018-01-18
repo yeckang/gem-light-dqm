@@ -35,7 +35,7 @@ MYSQL* connectDB()
 {
   MYSQL *Database;
   Database = mysql_init(0);
-  if (mysql_real_connect(Database,"gem904daq01.cern.ch","gemdaq","gemdaq","ldqm_db",PORT,0,CLIENT_COMPRESS) == 0) {
+  if (mysql_real_connect(Database,"gemvm-daqcc7.cms","ldqm_dbuser","clod4_Callow","ldqm_db",PORT,0,CLIENT_COMPRESS) == 0) {
     std::string message("Error connecting to database '");
     message += "' : ";
     message += mysql_error(Database);

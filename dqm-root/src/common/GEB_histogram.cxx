@@ -84,7 +84,6 @@ public:
     //ZeroSup->Fill(geb->ZeroSup());
     InputID->Fill(geb->InputID());
     Vwh->Fill(geb->Vwh());
-    Errors->Fill(geb->ErrorC());
     //OHCRC->Fill(geb->OHCRC());
     Vwt->Fill(geb->Vwt());
     //InFu->Fill(geb->InFu());
@@ -108,6 +107,7 @@ public:
     for (auto m_vfat = v_vfat.begin(); m_vfat!=v_vfat.end(); m_vfat++)
       {
         m_sn = slot_map.find(m_vfat->ChipID())->second;
+        //if ( (m_sn == 6) || (m_sn == 7) || (m_sn == 8) || (m_sn == 14) || (m_sn == 15) || (m_sn == 19) || (m_sn == 22) || (m_sn == 23) ) continue;
 
         SlotN->Fill(m_sn);
         ofstream myfile;
@@ -119,13 +119,13 @@ public:
             if(chan0xf) {
               int m_i = (int) m_sn%8;
               int m_j = 127 - m_strip_map[chan] + ((int) m_sn/8)*128;
-              if (allstrips.find(m_i) == allstrips.end()){
-                GEMStripCollection strips;
-                allstrips[m_i]=strips;
-              }
+              //if (allstrips.find(m_i) == allstrips.end()){
+              //  GEMStripCollection strips;
+              //  allstrips[m_i]=strips;
+              //}
               // bx set to 0...
-              GEMStrip s(m_j,0);
-              allstrips[m_i].insert(s);
+              //GEMStrip s(m_j,0);
+              //allstrips[m_i].insert(s);
               BeamProfile->Fill(m_i,m_j);
             }
           } else {
@@ -133,13 +133,13 @@ public:
             if(chan0xf) {
               int m_i = (int) m_sn%8;
               int m_j = 127 - m_strip_map[chan] + ((int) m_sn/8)*128;
-              if (allstrips.find(m_i) == allstrips.end()){
-                GEMStripCollection strips;
-                allstrips[m_i]=strips;
-              }
+              //if (allstrips.find(m_i) == allstrips.end()){
+              //  GEMStripCollection strips;
+              //  allstrips[m_i]=strips;
+              //}
               // bx set to 0...
-              GEMStrip s(m_j,0);
-              allstrips[m_i].insert(s);
+              //GEMStrip s(m_j,0);
+              //allstrips[m_i].insert(s);
               BeamProfile->Fill(m_i,m_j);
             }
           }

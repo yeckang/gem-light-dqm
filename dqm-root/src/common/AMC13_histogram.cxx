@@ -31,7 +31,7 @@ class AMC13_histogram: public Hardware_histogram
       Source_id    = new TH1F("Source_id", "Source_id", 4095, 0x0, 0xfff);
       CalTyp       = new TH1F("CalTyp", "CalTyp", 15, 0x0, 0xf);
       nAMC         = new TH1F("nAMC", "nAMC", 12, 0, 12);
-      //OrN          = new TH1F("OrN", "OrN", 0xffffffff, 0x0, 0xffffffff);// N bins overflow!!
+      OrN          = new TH1D("OrN", "OrN", 0xffffffff, 0x0, 0xffffffff);// N bins overflow!!
       //CRC_amc13    = new TH1F("CRC_amc13", "CRC_amc13", 0xffffffff, 0x0, 0xffffffff);// N bins overflow!!
       Blk_NoT      = new TH1F("Blk_NoT", "Blk_NoT", 255, 0x0, 0xff);
       LV1_idT      = new TH1F("LV1_idT", "LV1_idT", 255, 0x0, 0xff);
@@ -51,6 +51,7 @@ class AMC13_histogram: public Hardware_histogram
       Evt_ty->Fill(amc13->Evt_ty());
       //LV1_id->Fill(amc13->LV1_id());
       //BX_id->Fill(amc13->BX_id());
+      OrN->Fill(amc13->OrN());
       Source_id->Fill(amc13->Source_id());
       CalTyp->Fill(amc13->CalTyp());
       Blk_NoT->Fill(amc13->Blk_NoT());
@@ -77,7 +78,7 @@ class AMC13_histogram: public Hardware_histogram
     TH1F* Source_id;                      ///<Histogram for Source_id
     TH1F* CalTyp;                         ///<Histogram for CalTyp
     TH1F* nAMC;                           ///<Histogram for nAMC
-    //TH1F* OrN;                            ///<Histogram for OrN
+    TH1D* OrN;                            ///<Histogram for OrN
     //TH1F* CRC_amc13;                      ///<Histogram for CRC_amc13
     TH1F* Blk_NoT;                        ///<Histogram for Blk_Not
     TH1F* LV1_idT;                        ///<Histogram for LV1_idT

@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-#define DEBUG 0
+#define DEBUG 1
 
 using namespace std;
 
@@ -23,6 +23,7 @@ TList *getConfig(string filename)
   else {
     RunName = filename.substr(filename.find("run"),filename.find("_chunk")-filename.find("run"));
   }
+  std::cout << "Run Name " << RunName <<std::endl;
   TList * config = new TList();
   TList * amc = new TList();
   TMap * geb = new TMap();
@@ -91,7 +92,9 @@ TList *getConfig(string filename)
 
 int main(int argc, char** argv)
 {
-  gErrorIgnoreLevel = kError;
+  //gErrorIgnoreLevel = kError;
+  gProofDebugMask = TProofDebug::kAll;
+  gProofDebugLevel = 5;
   std::cout << "--==DQM Main==--" << endl;
   if (argc<2) 
     {
