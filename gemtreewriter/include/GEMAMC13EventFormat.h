@@ -3,13 +3,12 @@
 class VFATdata 
 {
   private:
-    uint8_t  fb1010;                   ///<1010:4 Control bits, shoud be 1010
-    uint16_t fBC;                      ///<Bunch Crossing number, 12 bits
-    uint8_t  fb1100;                   ///<1100:4, Control bits, shoud be 1100
+    // Currently used VFAT3 lossless data format. The size of one VFAT data block is 192 bits. Bits[175:0] come from the VFAT3, and bits[191:176] are appended by the CTP7.
+    uint8_t  fPos;                     ///<an 8bit value indicating the VFAT position on this GEB (it can be 0 to 23, so really only 6 bits are used, but anyway...)
+    uint8_t  fCRCcheck;                ///<bits 183:177 are not used, should be 0, bit 176 is 1 if CTP7 detected a CRC mismatch
+   uint8_t  fHeader;                  /// Either 0x5E (normally it should be 0x1E, if it is 0x5E that indicates that the VFAT3 internal buffer is half-full, so it's like a warning)
     uint8_t  fEC;                      ///<Event Counter, 8 bits
-    uint8_t  fFlag;                    ///<Control Flags: 4 bits, Hamming Error/AFULL/SEUlogic/SUEI2C
-    uint8_t  fb1110;                   ///<1110:4 Control bits, shoud be 1110
-    uint16_t fChipID;                  ///<Chip ID, 12 bits
+    uint16_t  fBC;                     ///<Bunch counter
     uint64_t flsData;                  ///<channels from 1to64 
     uint64_t fmsData;                  ///<channels from 65to128
     uint16_t fcrc;                     ///<Check Sum value, 16 bits
@@ -21,26 +20,22 @@ class VFATdata
     //!Empty constructor. Functions used to assign data members.
     VFATdata(){}
     //!Constructor requiring arguments.
-    VFATdata(const uint8_t &b1010_, 
-            const uint16_t &BC_,
-            const uint8_t &b1100_, 
+    VFATdata(const uint8_t &Pos_, 
+            const uint8_t &CRCcheck_,
+            const uint8_t &Header_,
             const uint8_t &EC_,
-            const uint8_t &Flag_, 
-            const uint8_t &b1110_, 
-            const uint16_t &ChipID_, 
+            const uint16_t &BC_,
             const uint64_t &lsData_, 
             const uint64_t &msData_, 
             const uint16_t &crc_,
             const uint16_t &crc_calc_,
             const int &SlotNumber_,
             const bool &isBlockGood_) : 
-        fb1010(b1010_),
-        fBC(BC_),
-        fb1100(b1100_),
+        fPos(Pos_),
+        fCRCcheck(CRCcheck_),
+        fHeader(Header_),
         fEC(EC_),
-        fFlag(Flag_),
-        fb1110(b1110_),
-        fChipID(ChipID_),
+        fBC(BC_),
         flsData(lsData_),
         fmsData(msData_),
         fcrc(crc_),
@@ -53,13 +48,11 @@ class VFATdata
     //!Read first word from the block.
     void read_fw(uint64_t word)
     {
-      fb1010 = 0x0f & (word >> 60);
-      fBC = 0x0fff & (word >> 48);
-      fb1100 = 0x0f & (word >> 44);
-      fEC = word >> 36;
-      fFlag = 0x0f & (word >> 32);
-      fb1110 = 0x0f & (word >> 28);
-      fChipID = 0x0fff & (word >> 16);
+      fPos = 0x3f & (word >> 56);
+      fCRCcheck = 0xff & (word >> 48);
+      fHeader = 0xff & (word >> 40);
+      fEC = 0xff & (word >> 32);
+      fBC = 0xffff & (word >> 16);
       fmsData = 0xffff000000000000 & (word << 48);
     }
     
@@ -74,16 +67,14 @@ class VFATdata
     void read_tw(uint64_t word)
     {
       flsData = flsData | (0x0000ffffffffffff & word >> 16);
-      fcrc = word;
+      fcrc = 0xffff & word;
     }
     
-    uint8_t   b1010      (){ return fb1010;      }
+    uint8_t   Pos        (){ return fPos;        }
     uint16_t  BC         (){ return fBC;         }
-    uint8_t   b1100      (){ return fb1100;      }
+    uint8_t   Header     (){ return fHeader;     }
     uint8_t   EC         (){ return fEC;         }
-    uint8_t   Flag       (){ return fFlag;       }
-    uint8_t   b1110      (){ return fb1110;      }
-    uint16_t  ChipID     (){ return fChipID;     }
+    uint8_t   CRCcheck   (){ return fCRCcheck;   }
     uint64_t  lsData     (){ return flsData;     }
     uint64_t  msData     (){ return fmsData;     }
     uint16_t  crc        (){ return fcrc;        }

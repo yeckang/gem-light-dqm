@@ -67,7 +67,7 @@ class Event : public TObject {
 
         std::vector<AMC13Event> amc13s(){ return famc13s;}
 
-        ClassDef(Event,1)               //Event structure
+        ClassDef(Event,2)               //Event structure
 };
 
 #endif
