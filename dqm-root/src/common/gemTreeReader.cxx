@@ -81,7 +81,7 @@ public :
   virtual void    SlaveTerminate();
   virtual void    Terminate();
 
-  int slotFromMap(int a, int g, int cid);
+  //int slotFromMap(int a, int g, int cid);
 
   vector<AMC13Event> v_amc13;    ///<Vector of AMC13Event
   vector<AMCdata> v_amc;         ///<Vector of AMCdata
@@ -92,7 +92,7 @@ public :
   GEB_histogram * v_gebH;        ///<Vector of GEB_histogram
   VFAT_histogram * v_vfatH;      ///<Vector of VFAT_histogram
 
-  int VFATMap[12][12][24];
+  //int VFATMap[12][12][24];
 
   AMC13_histogram * m_amc13H;
   AMC_histogram * m_amcH;
@@ -188,16 +188,16 @@ void gemTreeReader::SlaveBegin(TTree * /*tree*/)
       TPair *vfat;
       while ((vfat = (TPair*)nextvfat())) 
       {
-        TObject *chipID_s = ((TPair*)geb->FindObject(vfat))->Value();
+        //TObject *chipID_s = ((TPair*)geb->FindObject(vfat))->Value();
         TString v_slot_s = (TString)vfat->GetName();
-        TString s_chipID_s = (TString)chipID_s->GetName();
-        if (DEBUG) cout << "s_chipID_s " << s_chipID_s << endl;
+        //TString s_chipID_s = (TString)chipID_s->GetName();
+        //if (DEBUG) cout << "s_chipID_s " << s_chipID_s << endl;
         //s_chipID_s = TString::BaseConvert(s_chipID_s, 16,10);
         int v_slot = v_slot_s.Atoi(); // retrieve v_slot from the config somehow
-        int i_chipID = s_chipID_s.Atoi();
-        i_chipID = i_chipID & 0x0FFF;
-        VFATMap[a_slot][g_slot][v_slot] = i_chipID;
-        if (DEBUG) cout << "Insert chip ID " << i_chipID << " in place a,g,v: " << a_slot << ", " << g_slot << ", " << v_slot << endl;
+        //int i_chipID = s_chipID_s.Atoi();
+        //i_chipID = i_chipID & 0x0FFF;
+        //VFATMap[a_slot][g_slot][v_slot] = i_chipID;
+        //if (DEBUG) cout << "Insert chip ID " << i_chipID << " in place a,g,v: " << a_slot << ", " << g_slot << ", " << v_slot << endl;
         v_slot_s.Insert(0,"VFAT-");
         m_vfatH = new VFAT_histogram("preved", gDirectory->mkdir(v_slot_s.Data()), to_string(v_slot).c_str());
         m_vfatH->bookHistograms();
@@ -259,21 +259,22 @@ Bool_t gemTreeReader::Process(Long64_t entry)
         int gID = g->InputID();
         //if (gID!=4) continue;
         v_gebH = v_amcH->gebsH(gID);
-        std::map<int,int> slot_map;
-        for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
-          int vID = v->ChipID();
-          //vID = vID | 0xf000;
-          if (DEBUG) cout << "Look for slot number of " << v->ChipID() << ", in AMC "<< a_c << " and GEB " << gID <<  endl;
-          int slot = slotFromMap(a_c, gID, vID);
-          slot_map.insert(std::make_pair(v->ChipID(), slot));
-          if (DEBUG) cout << "Inserted in map: chip ID " << v->ChipID() << ", slot "<< slot <<  endl;
-        }
+        //std::map<int,int> slot_map;
+        //for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
+        //  int vID = v->ChipID();
+        //  //vID = vID | 0xf000;
+        //  if (DEBUG) cout << "Look for slot number of " << v->ChipID() << ", in AMC "<< a_c << " and GEB " << gID <<  endl;
+        //  int slot = slotFromMap(a_c, gID, vID);
+        //  slot_map.insert(std::make_pair(v->ChipID(), slot));
+        //  if (DEBUG) cout << "Inserted in map: chip ID " << v->ChipID() << ", slot "<< slot <<  endl;
+        //}
         if (DEBUG) std::cout << "v_gebH " << std::hex << std::setw(8) << std::setfill('0') << v_gebH << std::dec << std::endl;
         if (v_gebH) v_gebH->fillHistograms(&*g, slot_map);
         /* LOOP THROUGH VFATs */
         for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
-          int slot = slot_map.find(v->ChipID())->second;
-          if (DEBUG) cout << "Try get slot for chip ID " << v->ChipID() << ", retrieved slot " << slot <<  endl;
+          //int slot = slot_map.find(v->ChipID())->second;
+          int slot = v->Pos();
+          //if (DEBUG) cout << "Try get slot for chip ID " << v->ChipID() << ", retrieved slot " << slot <<  endl;
           //if ( (slot == 6) || (slot == 7) || (slot == 8) || (slot == 14) || (slot == 15) || (slot == 19) || (slot == 22) || (slot == 23) ) continue;
           if (slot>-1) {v_vfatH = v_gebH->vfatsH(slot);} else { continue;}
           if (v_vfatH) {
@@ -300,20 +301,20 @@ void gemTreeReader::SlaveTerminate()
   //
   // Should we fill summary canvases here?
   //
-  for (unsigned int i = 0; i < 12; i++){
-      if (auto a = m_amc13H->amcsH(i)){
-          for (unsigned int j = 0; j < 12; j++){
-              if (auto g = a->gebsH(j)){
-                  g->fillSummaryCanvases();
-                  for (unsigned int k = 0; k < 24; k++){
-                      if (auto v = g->vfatsH(k)){
-                          v->fillWarnings();
-                      }
-                  }
-              }
-          }
-      }
-  }
+  //for (unsigned int i = 0; i < 12; i++){
+  //    if (auto a = m_amc13H->amcsH(i)){
+  //        for (unsigned int j = 0; j < 12; j++){
+  //            if (auto g = a->gebsH(j)){
+  //                g->fillSummaryCanvases();
+  //                for (unsigned int k = 0; k < 24; k++){
+  //                    if (auto v = g->vfatsH(k)){
+  //                        v->fillWarnings();
+  //                    }
+  //                }
+  //            }
+  //        }
+  //    }
+  //}
   TDirectory *savedir = gDirectory;
   fFile->cd();
   fFile->Write();
@@ -332,14 +333,14 @@ void gemTreeReader::Terminate()
     Printf("outputFile: %s", outputFile.Data());
   }
 }
-int gemTreeReader::slotFromMap(int a, int g, int cid)
-{
-  int res = -1;
-  for (int i=0; i<24; i++){
-    if (VFATMap[a][g][i] == cid) {res = i;}
-  }
-  return res;
-}
+//int gemTreeReader::slotFromMap(int a, int g, int cid)
+//{
+//  int res = -1;
+//  for (int i=0; i<24; i++){
+//    if (VFATMap[a][g][i] == cid) {res = i;}
+//  }
+//  return res;
+//}
 void gemTreeReader::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize

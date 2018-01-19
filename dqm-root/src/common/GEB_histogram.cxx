@@ -66,10 +66,10 @@ public:
       ClusterSizeEta  [ie] = new TH1I(("ClusterSize"+std::to_string(static_cast <long long> (ie))).c_str(), "Cluster size", 384,  0, 384 );
     }
     SlotN   = new TH1I("VFATSlots", "VFAT Slots", 24,  0, 24);
-    Totalb1010 = new TH1F("Totalb1010", "Control Bit 1010", 15,  0x0 , 0xf);
-    Totalb1100 = new TH1F("Totalb1100", "Control Bit 1100", 15,  0x0 , 0xf);
-    Totalb1110 = new TH1F("Totalb1110", "Control Bit 1110", 15,  0x0 , 0xf);
-    TotalFlag  = new TH1F("TotalFlag", "Control Flags", 15,  0x0 , 0xf);
+    //Totalb1010 = new TH1F("Totalb1010", "Control Bit 1010", 15,  0x0 , 0xf);
+    //Totalb1100 = new TH1F("Totalb1100", "Control Bit 1100", 15,  0x0 , 0xf);
+    //Totalb1110 = new TH1F("Totalb1110", "Control Bit 1110", 15,  0x0 , 0xf);
+    //TotalFlag  = new TH1F("TotalFlag", "Control Flags", 15,  0x0 , 0xf);
     TotalCRC   = new TH1F("TotalCRC", "CRC Mismatches", 0xffff,-32768,32768);
   }
 
@@ -106,7 +106,8 @@ public:
     v_vfat = geb->vfats();
     for (auto m_vfat = v_vfat.begin(); m_vfat!=v_vfat.end(); m_vfat++)
       {
-        m_sn = slot_map.find(m_vfat->ChipID())->second;
+        //m_sn = slot_map.find(m_vfat->ChipID())->second;
+        m_sn = m_vfat->Pos();
         //if ( (m_sn == 6) || (m_sn == 7) || (m_sn == 8) || (m_sn == 14) || (m_sn == 15) || (m_sn == 19) || (m_sn == 22) || (m_sn == 23) ) continue;
 
         SlotN->Fill(m_sn);
@@ -168,10 +169,10 @@ public:
       {
   	VFAT_histogram *current_vfatH = vfatsH(vfat_index);
         try {
-          Totalb1010->Add(current_vfatH->getb1010());
-          Totalb1100->Add(current_vfatH->getb1100());
-          Totalb1110->Add(current_vfatH->getb1110());
-          TotalFlag ->Add(current_vfatH->getFlag());
+          //Totalb1010->Add(current_vfatH->getb1010());
+          //Totalb1100->Add(current_vfatH->getb1100());
+          //Totalb1110->Add(current_vfatH->getb1110());
+          //TotalFlag ->Add(current_vfatH->getFlag());
           TotalCRC  ->Add(current_vfatH->getCRC());
         }
         catch(...) {
