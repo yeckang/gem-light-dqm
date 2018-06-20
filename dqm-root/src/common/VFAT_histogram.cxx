@@ -62,9 +62,9 @@ public:
     This fills histograms for the following data: Difference between crc and recalculated crc, Control Bit 1010, Control Bit 1100, Control Bit 1110, Bunch Crossing Number, Event Counter, Control Flags, and Chip ID, and Fired Channels
   */
   void fillHistograms(VFATdata * vfat, long long int orbitNumber){
-    setVFATBlockWords(vfat);
-    int crc_diff = vfat->crc()-checkCRC(vfatBlockWords);
-    if (crc_diff != 0) crc_difference->Fill(crc_diff);
+    //setVFATBlockWords(vfat);
+    //int crc_diff = vfat->crc()-checkCRC(vfatBlockWords);
+    //if (crc_diff != 0) crc_difference->Fill(crc_diff);
     //b1010->Fill(vfat->b1010());
     //b1100->Fill(vfat->b1100());
     //b1110->Fill(vfat->b1110());
@@ -144,11 +144,11 @@ public:
     }
   }
 
-  TH1F* getb1010() { return b1010; }
-  TH1F* getb1100() { return b1100; }
-  TH1F* getb1110() { return b1110; }
-  TH1F* getFlag()  { return Flag; }
-  TH1F* getCRC()   { return crc_difference; }
+  //TH1F* getb1010() { return b1010; }
+  //TH1F* getb1100() { return b1100; }
+  //TH1F* getb1110() { return b1110; }
+  //TH1F* getFlag()  { return Flag; }
+  //TH1F* getCRC()   { return crc_difference; }
 
   int * getMap(){ return m_strip_map;}
 
@@ -188,17 +188,17 @@ private:
   //!This puts the VFAT data in an array of uint16_t to be used for the crc check
   void setVFATBlockWords(VFATdata * vfat_)
   {
-    vfatBlockWords[11] = ((0x000f & vfat_->b1010())<<12) | vfat_->BC();
-    vfatBlockWords[10] = ((0x000f & vfat_->b1100())<<12) | ((0x00ff & vfat_->EC()) <<4) | (0x000f & vfat_->Flag());
-    vfatBlockWords[9]  = ((0x000f & vfat_->b1110())<<12) | vfat_->ChipID();
-    vfatBlockWords[8]  = (0xffff000000000000 & vfat_->msData()) >> 48;
-    vfatBlockWords[7]  = (0x0000ffff00000000 & vfat_->msData()) >> 32;
-    vfatBlockWords[6]  = (0x00000000ffff0000 & vfat_->msData()) >> 16;
-    vfatBlockWords[5]  = (0x000000000000ffff & vfat_->msData());
-    vfatBlockWords[4]  = (0xffff000000000000 & vfat_->lsData()) >> 48;
-    vfatBlockWords[3]  = (0x0000ffff00000000 & vfat_->lsData()) >> 32;
-    vfatBlockWords[2]  = (0x00000000ffff0000 & vfat_->lsData()) >> 16;
-    vfatBlockWords[1]  = (0x000000000000ffff & vfat_->lsData());
+    //vfatBlockWords[11] = ((0x000f & vfat_->b1010())<<12) | vfat_->BC();
+    //vfatBlockWords[10] = ((0x000f & vfat_->b1100())<<12) | ((0x00ff & vfat_->EC()) <<4) | (0x000f & vfat_->Flag());
+    //vfatBlockWords[9]  = ((0x000f & vfat_->b1110())<<12) | vfat_->ChipID();
+    //vfatBlockWords[8]  = (0xffff000000000000 & vfat_->msData()) >> 48;
+    //vfatBlockWords[7]  = (0x0000ffff00000000 & vfat_->msData()) >> 32;
+    //vfatBlockWords[6]  = (0x00000000ffff0000 & vfat_->msData()) >> 16;
+    //vfatBlockWords[5]  = (0x000000000000ffff & vfat_->msData());
+    //vfatBlockWords[4]  = (0xffff000000000000 & vfat_->lsData()) >> 48;
+    //vfatBlockWords[3]  = (0x0000ffff00000000 & vfat_->lsData()) >> 32;
+    //vfatBlockWords[2]  = (0x00000000ffff0000 & vfat_->lsData()) >> 16;
+    //vfatBlockWords[1]  = (0x000000000000ffff & vfat_->lsData());
   }
 
   //!Recalculates the CRC to be compared to original CRC. Difference should be 0.

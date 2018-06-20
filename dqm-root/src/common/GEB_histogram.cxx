@@ -173,7 +173,7 @@ public:
           //Totalb1100->Add(current_vfatH->getb1100());
           //Totalb1110->Add(current_vfatH->getb1110());
           //TotalFlag ->Add(current_vfatH->getFlag());
-          TotalCRC  ->Add(current_vfatH->getCRC());
+          //TotalCRC  ->Add(current_vfatH->getCRC());
         }
         catch(...) {
           std::cout << "No VFAT_histogram at index " << vfat_index;

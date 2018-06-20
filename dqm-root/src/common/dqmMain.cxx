@@ -114,12 +114,12 @@ int main(int argc, char** argv)
     }
   }
 
-  if(ifilename.find("chunk") == string::npos) {
-    RunName = ifilename.substr(ifilename.find("run"),ifilename.find(".raw.root")-ifilename.find("run"));
-  }
-  else {
-    RunName = ifilename.substr(ifilename.find("run"),ifilename.find("_chunk")-ifilename.find("run"));
-  }
+  //if(ifilename.find("chunk") == string::npos) {
+  //  RunName = ifilename.substr(ifilename.find("run"),ifilename.find(".raw.root")-ifilename.find("run"));
+  //}
+  //else {
+  //  RunName = ifilename.substr(ifilename.find("run"),ifilename.find("_chunk")-ifilename.find("run"));
+  //}
   std::string tmp = ifilename.substr(ifilename.size()-9, ifilename.size());
   if (tmp != ".raw.root") throw std::runtime_error("Wrong input filename (should end with '.raw.root'): "+ifilename);
   ofilename = ifilename.substr(0,ifilename.size()-9);
@@ -130,10 +130,10 @@ int main(int argc, char** argv)
   ch->Add(ifilename.c_str());
 
   TList * m_config = new TList();
-  m_config = getConfig(ifilename);
+  //m_config = getConfig(ifilename);
 
   TProof::Open("workers=4");
-  gProof->AddInput(m_config);
+  //gProof->AddInput(m_config);
   gProof->AddInput(new TNamed("PROOF_OUTPUTFILE", ofilename.c_str()));
   gProof->GetInputList()->Print();
   ch->SetProof();;

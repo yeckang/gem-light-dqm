@@ -160,59 +160,81 @@ void gemTreeReader::SlaveBegin(TTree * /*tree*/)
   TList *config_s = (TList*)fInput->FindObject("config");
   if (DEBUG) std::cout << "Slave Begin: retrieved config name " << config_s->GetName() << std::endl;
   if (DEBUG) std::cout << "Slave Begin: try to get config iterator"<< std::endl;
-  TIter nextamc(config_s);
-  TObject *amc;
-  while ((amc = nextamc())) 
-  {
-    std::cout << "Slave Begin: found object " << amc->GetName() << std::endl;
-    TString a_slot_s = (TString) amc->GetName();
-    int a_slot = a_slot_s.Atoi(); // retrieve a_slot from the config somehow
-    a_slot_s.Insert(0,"AMC-");
-    m_amcH = new AMC_histogram("preved", gDirectory->mkdir(a_slot_s.Data()), amc->GetName());
-    m_amcH->bookHistograms();
-    TIter nextgeb((TList*)amc);
-    TObject *geb;
-    while ((geb = nextgeb())) 
-    {
-      std::cout << "Slave Begin: found object " << geb->GetName() << std::endl;
-      TString g_slot_s = (TString)geb->GetName();
-      int g_slot = g_slot_s.Atoi(); // retrieve g_slot from the config somehow
-      // FIXME!!! Tmp plug to correct offset introduced in the DB
-      g_slot = g_slot -1;
-      g_slot_s.Form("%d",g_slot);
-      g_slot_s.Insert(0,"GTX-");
-      // end of FIXME
-      m_gebH = new GEB_histogram("preved", gDirectory->mkdir(g_slot_s.Data()), geb->GetName());
-      m_gebH->bookHistograms();
-      TMapIter nextvfat((TMap*)geb);
-      TPair *vfat;
-      while ((vfat = (TPair*)nextvfat())) 
-      {
-        //TObject *chipID_s = ((TPair*)geb->FindObject(vfat))->Value();
-        TString v_slot_s = (TString)vfat->GetName();
-        //TString s_chipID_s = (TString)chipID_s->GetName();
-        //if (DEBUG) cout << "s_chipID_s " << s_chipID_s << endl;
-        //s_chipID_s = TString::BaseConvert(s_chipID_s, 16,10);
-        int v_slot = v_slot_s.Atoi(); // retrieve v_slot from the config somehow
-        //int i_chipID = s_chipID_s.Atoi();
-        //i_chipID = i_chipID & 0x0FFF;
-        //VFATMap[a_slot][g_slot][v_slot] = i_chipID;
-        //if (DEBUG) cout << "Insert chip ID " << i_chipID << " in place a,g,v: " << a_slot << ", " << g_slot << ", " << v_slot << endl;
-        v_slot_s.Insert(0,"VFAT-");
-        m_vfatH = new VFAT_histogram("preved", gDirectory->mkdir(v_slot_s.Data()), to_string(v_slot).c_str());
-        m_vfatH->bookHistograms();
-        m_gebH->addVFATH(m_vfatH,v_slot);
-        std::cout << "Slave Begin: add vfat " << v_slot << std::endl;
-        gDirectory->cd("..");   //moves back to previous directory
-      } /* END VFAT LOOP */
-      gDirectory->cd("..");     //moves back to previous directory
-      m_amcH->addGEBH(m_gebH,g_slot);
-      std::cout << "Slave Begin: add geb " << g_slot << std::endl;
-    } /* END GEB LOOP */
-    gDirectory->cd("..");       //moves back to previous directory
-    m_amc13H->addAMCH(m_amcH, a_slot);
-    std::cout << "Slave Begin: add amc " << a_slot << std::endl;
-  } /* END AMC LOOP */
+
+  m_amcH = new AMC_histogram("preved", gDirectory->mkdir("AMC-5"), "5");
+  m_amcH->bookHistograms();
+  for (int j=0; j<12; j++){
+    std::string str0 = "GEB-";
+    str0.append(to_string(j).c_str());
+    m_gebH = new GEB_histogram("preved", gDirectory->mkdir(str0.c_str()), to_string(j).c_str());
+    m_gebH->bookHistograms();
+    for (int i=0; i<24; i++){
+      std::string str = "VFAT-";
+      str.append(to_string(i).c_str());
+      m_vfatH = new VFAT_histogram("preved", gDirectory->mkdir(str.c_str()), to_string(i).c_str());
+      m_vfatH->bookHistograms();
+      m_gebH->addVFATH(m_vfatH,i);
+      gDirectory->cd("..");   //moves back to previous directory
+    }
+    gDirectory->cd("..");     //moves back to previous directory
+    m_amcH->addGEBH(m_gebH,j);
+  }
+  gDirectory->cd("..");       //moves back to previous directory
+  m_amc13H->addAMCH(m_amcH, 5);
+
+  //TIter nextamc(config_s);
+  //TObject *amc;
+  //while ((amc = nextamc())) 
+  //{
+  //  std::cout << "Slave Begin: found object " << amc->GetName() << std::endl;
+  //  TString a_slot_s = (TString) amc->GetName();
+  //  int a_slot = a_slot_s.Atoi(); // retrieve a_slot from the config somehow
+  //  a_slot_s.Insert(0,"AMC-");
+  //  m_amcH = new AMC_histogram("preved", gDirectory->mkdir(a_slot_s.Data()), amc->GetName());
+  //  m_amcH->bookHistograms();
+  //  TIter nextgeb((TList*)amc);
+  //  TObject *geb;
+  //  while ((geb = nextgeb())) 
+  //  {
+  //    std::cout << "Slave Begin: found object " << geb->GetName() << std::endl;
+  //    TString g_slot_s = (TString)geb->GetName();
+  //    int g_slot = g_slot_s.Atoi(); // retrieve g_slot from the config somehow
+  //    // FIXME!!! Tmp plug to correct offset introduced in the DB
+  //    g_slot = g_slot -1;
+  //    g_slot_s.Form("%d",g_slot);
+  //    g_slot_s.Insert(0,"GTX-");
+  //    // end of FIXME
+  //    m_gebH = new GEB_histogram("preved", gDirectory->mkdir(g_slot_s.Data()), geb->GetName());
+  //    m_gebH->bookHistograms();
+  //    TMapIter nextvfat((TMap*)geb);
+  //    TPair *vfat;
+  //    while ((vfat = (TPair*)nextvfat())) 
+  //    {
+  //      //TObject *chipID_s = ((TPair*)geb->FindObject(vfat))->Value();
+  //      TString v_slot_s = (TString)vfat->GetName();
+  //      //TString s_chipID_s = (TString)chipID_s->GetName();
+  //      //if (DEBUG) cout << "s_chipID_s " << s_chipID_s << endl;
+  //      //s_chipID_s = TString::BaseConvert(s_chipID_s, 16,10);
+  //      int v_slot = v_slot_s.Atoi(); // retrieve v_slot from the config somehow
+  //      //int i_chipID = s_chipID_s.Atoi();
+  //      //i_chipID = i_chipID & 0x0FFF;
+  //      //VFATMap[a_slot][g_slot][v_slot] = i_chipID;
+  //      //if (DEBUG) cout << "Insert chip ID " << i_chipID << " in place a,g,v: " << a_slot << ", " << g_slot << ", " << v_slot << endl;
+  //      v_slot_s.Insert(0,"VFAT-");
+  //      m_vfatH = new VFAT_histogram("preved", gDirectory->mkdir(v_slot_s.Data()), to_string(v_slot).c_str());
+  //      m_vfatH->bookHistograms();
+  //      m_gebH->addVFATH(m_vfatH,v_slot);
+  //      std::cout << "Slave Begin: add vfat " << v_slot << std::endl;
+  //      gDirectory->cd("..");   //moves back to previous directory
+  //    } /* END VFAT LOOP */
+  //    gDirectory->cd("..");     //moves back to previous directory
+  //    m_amcH->addGEBH(m_gebH,g_slot);
+  //    std::cout << "Slave Begin: add geb " << g_slot << std::endl;
+  //  } /* END GEB LOOP */
+  //  gDirectory->cd("..");       //moves back to previous directory
+  //  m_amc13H->addAMCH(m_amcH, a_slot);
+  //  std::cout << "Slave Begin: add amc " << a_slot << std::endl;
+  //} /* END AMC LOOP */
 
   gDirectory = savedir;
   if (DEBUG) std::cout << "SLAVE END"<< std::endl;
@@ -259,7 +281,7 @@ Bool_t gemTreeReader::Process(Long64_t entry)
         int gID = g->InputID();
         //if (gID!=4) continue;
         v_gebH = v_amcH->gebsH(gID);
-        //std::map<int,int> slot_map;
+        std::map<int,int> slot_map;
         //for(auto v=v_vfat.begin(); v!=v_vfat.end();v++){
         //  int vID = v->ChipID();
         //  //vID = vID | 0xf000;
