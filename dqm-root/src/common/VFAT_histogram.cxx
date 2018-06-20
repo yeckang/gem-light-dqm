@@ -24,12 +24,8 @@ public:
     n_hits_per_event    = new TH1F("n_hits_per_event", "n_hits_per_event", 129,  -0.5 , 128.5);
     //b1010    = new TH1F("b1010", "Control Bits", 15,  0x0 , 0xf);
     BC       = new TH1D("BC", "Bunch Crossing Number", 4096,  -0.5, 4095.5);
-    //b1100    = new TH1F("b1100", "Control Bits", 15,  0x0 , 0xf);
     EC       = new TH1F("EC", "Event Counter", 255,  0x0 , 0xff);
-    //Flag     = new TH1F("Flag", "Control Flags", 15,  0x0 , 0xf);
     Header     = new TH1F("Header", "Header", 32,  0x0 , 0xff);
-    //b1110    = new TH1F("b1110", "Control Bits", 15,  0x0 , 0xf);
-    //ChipID   = new TH1F("ChipID", "Chip ID", 4095,  0x0 , 0xfff);
     SlotN    = new TH1F("SlotN", "Slot Number", 24,  0, 24);
     FiredChannels = new TH1F("FiredChannels", "FiredChannels", 128, -0.5, 127.5);
     FiredStrips   = new TH1F("FiredStrips",   "FiredStrips",   128, -0.5, 127.5);
@@ -43,12 +39,12 @@ public:
     latencyScanBX2D_extraHighOcc = new TH2F("latencyScanBX2D_extraHighOcc", "Latency Scan vs BX when number of fired channels is greater than 100", 256,  -0.5, 255.5, 4096,  -0.5,4095.5);
     thresholdScanChip   = new TH1F("thresholdScan",  "Threshold Scan",256, -0.5, 255.5);
     thresholdScanChip2D = new TH2F("thresholdScan2D","Threshold Scan",256, -0.5, 255.5, 128,  -0.5, 127.5);
-    //const char *warning_labels[3] = {"Flag raised", "No channels fired", "Excessive channels fired"};
-    //const char *error_labels[1] = {"CRC mismatch"};
-    //Warnings = new TH1I("Warnings", "Warnings", 3,  0, 3);
-    //for (int i = 1; i<4; i++) Warnings->GetXaxis()->SetBinLabel(i, warning_labels[i-1]);
-    //Errors   = new TH1I("Errors", "Critical errors", 1,  0, 1);
-    //for (int i = 1; i<2; i++) Errors->GetXaxis()->SetBinLabel(i, error_labels[i-1]);
+    const char *warning_labels[3] = {"Flag raised", "No channels fired", "Excessive channels fired"};
+    const char *error_labels[1] = {"CRC mismatch"};
+    Warnings = new TH1I("Warnings", "Warnings", 3,  0, 3);
+    for (int i = 1; i<4; i++) Warnings->GetXaxis()->SetBinLabel(i, warning_labels[i-1]);
+    Errors   = new TH1I("Errors", "Critical errors", 1,  0, 1);
+    for (int i = 1; i<2; i++) Errors->GetXaxis()->SetBinLabel(i, error_labels[i-1]);
 
     TDirectory * scandir = gDirectory->mkdir("Threshold_Scans");
     scandir->cd();
@@ -72,18 +68,16 @@ public:
     //b1010->Fill(vfat->b1010());
     //b1100->Fill(vfat->b1100());
     //b1110->Fill(vfat->b1110());
-    BC->Fill(orbitNumber*4095 + vfat->BC());
+    BC->Fill(vfat->BC());
     EC->Fill(vfat->EC());
     //Flag->Fill(vfat->Flag());
     Header->Fill(vfat->Header());
     //ChipID->Fill(vfat->ChipID());
     m_sn = std::stoi(m_HWID);
     crc->Fill(vfat->crc());
-    //setVFATBlockWords(vfat);
-    //crc_calc->Fill(checkCRC(vfatBlockWords));
-    //if (crc_diff) {
-    //  Errors->Fill(0);
-    //}
+    if (vfat->CRRCcheck()) {
+      Errors->Fill(0);
+    }
     SlotN->Fill(m_sn);
     uint16_t chan0xf = 0;
     int n_hits_fired = 0;
@@ -107,14 +101,14 @@ public:
     n_hits_per_event->Fill(n_hits_fired);
 
   }
-  //void fillWarnings(){
-  //  if (FiredChannels->GetEntries() == 0) {
-  //    Warnings->Fill(1);
-  //  }
-  //  else if (FiredChannels->GetEntries() > 64*b1010->GetEntries()) {
-  //    Warnings->Fill(2);
-  //  }
-  //}
+  void fillWarnings(){
+    if (FiredChannels->GetEntries() == 0) {
+      Warnings->Fill(1);
+    }
+    else if (FiredChannels->GetEntries() > 64*b1010->GetEntries()) {
+      Warnings->Fill(2);
+    }
+  }
   //!Fills the histograms for the Threshold Scans
   void fillScanHistograms(VFATdata * vfat, int runtype, int deltaV, int latency){
     bool channelFired = false;
@@ -184,8 +178,8 @@ private:
   TH1F* thresholdScanChip;
   TH2F* thresholdScanChip2D;
   TH1F* thresholdScan[NCHANNELS];
-  //TH1I* Warnings;
-  //TH1I* Errors;
+  TH1I* Warnings;
+  TH1I* Errors;
   int m_sn;
   int m_strip_map[128];
 
