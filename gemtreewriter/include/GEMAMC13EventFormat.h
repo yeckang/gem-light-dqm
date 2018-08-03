@@ -105,9 +105,15 @@ class GEBdata
 
     //GEM chamber header
 
+      //////////////////////////////////////////
+      // Currently the code below is substituted with zero suppressed words counter
       //!Zero Suppression Flags:24  (8 zeroes):8
       /*!Bitmask indicating if certain VFAT blocks have been zero suppressed*/
-      uint32_t m_ZeroSup;
+      //uint32_t m_ZeroSup;
+      ///////////////////////////////////////////
+
+      //!Zero suppressed words counter
+      uint16_t m_ZeroSupWordsCnt;
       //!Input ID:5    000:3
       /*!GLIB input ID (starting at 0)*/
       uint8_t m_InputID;   
@@ -135,28 +141,38 @@ class GEBdata
       uint8_t m_InFu;    
       //!(7 0's):7    Stuck data:1    
       /*!Input status (warning): Data in InFIFO or EvtFIFO when L1A FIFO was empty. Only resets with resync or reset*/
-		  uint8_t m_Stuckd; 
+      uint8_t m_Stuckd; 
+      //!OH BC, bits [31:20]
+      uint16_t m_OHBC;
+      //!OH EC, bits [19:0]
+      uint32_t m_OHEC;
 
   public:
     //!Empty constructor. Functions used to assign data members.
     GEBdata(){};
     //!Constrcutor requirng arguments.
-    GEBdata(const uint32_t &ZeroSup_, 
+    //GEBdata(const uint32_t &ZeroSup_, --> see comment at l109 of this file
+    GEBdata(const uint16_t &ZeroSupWordsCnt_, 
               const uint8_t &InputID_, 
               const uint16_t &Vwh_, 
               const uint16_t &ErrorC_, 
               const uint16_t &OHCRC_, 
               const uint16_t &Vwt_,
               const uint8_t &InFu_,
-              const uint8_t &Stuckd_) : 
-          m_ZeroSup(ZeroSup_),                                
+              const uint8_t &Stuckd_,
+              const uint16_t &OHBC_,
+              const uint32_t &OHEC_) : 
+          //m_ZeroSup(ZeroSup_), --> see comment at l109 of this file
+          m_ZeroSupWordsCnt(ZeroSupWordsCnt_),                                
           m_InputID(InputID_),
           m_Vwh(Vwh_),                                  
           m_ErrorC(ErrorC_),
           m_OHCRC(OHCRC_),                                    
           m_Vwt(Vwt_),                             
           m_InFu(InFu_),                                   
-          m_Stuckd(Stuckd_){}  
+          m_Stuckd(Stuckd_),
+          m_OHBC(OHBC_),
+          m_OHEC(OHEC_){}  
     //!Destructor for the class.
     ~GEBdata(){vfatd.clear();}
 
@@ -167,7 +183,8 @@ class GEBdata
      */
     void setChamberHeader(uint64_t word)
     {
-      m_ZeroSup = 0x00ffffff & (word >> 40);        /*!Zero Suppression*/
+      //m_ZeroSup = 0x00ffffff & (word >> 40);        /*!Zero Suppression --> see comment at l109 of this file*/
+      m_ZeroSupWordsCnt = 0x0fff & (word >> 40);        /*!Zero suppressed words counter*/
       m_InputID = 0b00011111 & (word >> 35);        /*!GLIB Input ID*/
       m_Vwh = 0x0fff & (word >> 23);                /*!VFAT word count*/
       m_ErrorC = 0b0001111111111111 & (word);    /*!Thirteen Flags*/
@@ -201,9 +218,12 @@ class GEBdata
       m_Vwt = 0x0fff & (word >> 36);  /*!VFAT word count*/
       m_InFu = 0x0f & (word >> 35);   /*!InFIFO underflow*/
       m_Stuckd = 0x01 & (word >> 34); /*!Stuck data*/
+      m_OHBC = 0x0fff & (word >> 20); /*!OH BC*/
+      m_OHEC = 0x000fffff & (word);   /*!OH EC*/
     }
 
-    uint32_t ZeroSup()  {return m_ZeroSup;}   ///<Returns Zero Suppression flags
+    //uint32_t ZeroSup()  {return m_ZeroSup;}   ///<Returns Zero Suppression flags --> see comment at l109 of this file
+    uint16_t ZeroSupWordsCnt()  {return m_ZeroSupWordsCnt;}   ///<Returns Zero suppression words counter
     uint8_t  InputID()  {return m_InputID;}   ///<Returns GLIB input ID
     uint16_t Vwh()      {return m_Vwh;}       ///<Returns VFAT word count (size of VFAT payload)
     uint16_t ErrorC()   {return m_ErrorC;}    ///<Returns thirteen flags in GEM Chamber Header
@@ -212,6 +232,8 @@ class GEBdata
     uint16_t Vwt()      {return m_Vwt;}       ///<Returns VFAT word count
     uint8_t  InFu()     {return m_InFu;}      ///<Returns InFIFO underflow flag
     uint8_t  Stuckd()   {return m_Stuckd;}    ///<Returns Stuck data flag
+    uint16_t  OHBC()    {return m_OHBC;}      ///<Returns Optohybrid BC
+    uint32_t  OHEC()    {return m_OHEC;}      ///<Returns Optohybrid EC
 
     //!Adds VFAT data to the vector
     void v_add(VFATdata v){vfatd.push_back(v);}
