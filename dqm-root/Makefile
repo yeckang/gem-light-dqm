@@ -3,7 +3,7 @@
 #
 BUILD_HOME:=$(shell pwd)/../..
 
-CC=g++-4.9.3
+CC=g++
 CCFLAGS=-O0 -g3 -fno-inline -Wall -fPIC -pthread -m64
 ADDFLAGS=-std=c++11
 RC=rootcint
