@@ -75,9 +75,10 @@ public:
     //ChipID->Fill(vfat->ChipID());
     m_sn = std::stoi(m_HWID);
     crc->Fill(vfat->crc());
-    if (vfat->CRRCcheck()) {
-      Errors->Fill(0);
-    }
+    // will be returned upon reimplementation of CRCCheck FIXME
+    //if (vfat->CRRCcheck()) {
+    //  Errors->Fill(0);
+    //}
     SlotN->Fill(m_sn);
     uint16_t chan0xf = 0;
     int n_hits_fired = 0;
@@ -105,9 +106,10 @@ public:
     if (FiredChannels->GetEntries() == 0) {
       Warnings->Fill(1);
     }
-    else if (FiredChannels->GetEntries() > 64*b1010->GetEntries()) {
-      Warnings->Fill(2);
-    }
+    // Comment out for the moment, revision is needed later FIXME
+    //else if (FiredChannels->GetEntries() > 64*b1010->GetEntries()) {
+    //  Warnings->Fill(2);
+    //}
   }
   //!Fills the histograms for the Threshold Scans
   void fillScanHistograms(VFATdata * vfat, int runtype, int deltaV, int latency){
