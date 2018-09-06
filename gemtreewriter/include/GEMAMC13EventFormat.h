@@ -144,8 +144,16 @@ class GEBdata
       uint8_t m_Stuckd; 
       //!OH BC, bits [31:20]
       uint16_t m_OHBC;
-      //!OH EC, bits [19:0]
-      uint32_t m_OHEC;
+      //!Optohybrid BC/EC FIFO underflow, bit [19:19]
+      uint8_t m_OHECBCUF; 
+      //!Optohybrid BC/EC FIFO had underflow, bit [18:18]
+      uint8_t m_OHECBCHUF; 
+      //!Optohybrid BC/EC FIFO had overflow, bit [17:17]
+      uint8_t m_OHECBCHOF;
+      //!BC0 is canceled by an L1A, bit [16:16]
+      uint8_t m_BC0Canc;
+      //!OH EC, bits [15:0]
+      uint16_t m_OHEC;
 
   public:
     //!Empty constructor. Functions used to assign data members.
@@ -161,7 +169,11 @@ class GEBdata
               const uint8_t &InFu_,
               const uint8_t &Stuckd_,
               const uint16_t &OHBC_,
-              const uint32_t &OHEC_) : 
+	      const uint8_t &OHECBCUF_,
+	      const uint8_t &OHECBCHUF_,
+	      const uint8_t &OHECBCHOF_,
+	      const uint8_t &BC0Canc_,
+	      const uint32_t &OHEC_) : 
           //m_ZeroSup(ZeroSup_), --> see comment at l109 of this file
           m_ZeroSupWordsCnt(ZeroSupWordsCnt_),                                
           m_InputID(InputID_),
@@ -172,6 +184,10 @@ class GEBdata
           m_InFu(InFu_),                                   
           m_Stuckd(Stuckd_),
           m_OHBC(OHBC_),
+	  m_OHECBCUF(OHECBCUF_),
+	  m_OHECBCHUF(OHECBCHUF_),
+	  m_OHECBCHOF(OHECBCHOF_),
+	  m_BC0Canc(BC0Canc_),
           m_OHEC(OHEC_){}  
     //!Destructor for the class.
     ~GEBdata(){vfatd.clear();}
@@ -219,7 +235,11 @@ class GEBdata
       m_InFu = 0x0f & (word >> 35);   /*!InFIFO underflow*/
       m_Stuckd = 0x01 & (word >> 34); /*!Stuck data*/
       m_OHBC = 0x0fff & (word >> 20); /*!OH BC*/
-      m_OHEC = 0x000fffff & (word);   /*!OH EC*/
+      m_OHECBCUF = 0x01 & (word >> 19); /*!Optohybrid EC/BC FIFO underflow*/
+      m_OHECBCHUF = 0x01 & (word >> 18); /*!Optohybrid EC/BC FIFO had underflow*/
+      m_OHECBCHOF = 0x01 & (word >> 17); /*!Optohybrid EC/BC FIFO had overflow*/
+      m_BC0Canc = 0x01 & (word >> 16); /*!BC0 cancelled by L1A*/
+      m_OHEC = 0x0000ffff & (word);   /*!OH EC*/
     }
 
     //uint32_t ZeroSup()  {return m_ZeroSup;}   ///<Returns Zero Suppression flags --> see comment at l109 of this file
@@ -233,6 +253,10 @@ class GEBdata
     uint8_t  InFu()     {return m_InFu;}      ///<Returns InFIFO underflow flag
     uint8_t  Stuckd()   {return m_Stuckd;}    ///<Returns Stuck data flag
     uint16_t  OHBC()    {return m_OHBC;}      ///<Returns Optohybrid BC
+    uint8_t  OHECBCUF()   {return m_OHECBCUF;}    ///<Returns OH EC/BC FIFO underflow flag
+    uint8_t  OHECBCHUF()   {return m_OHECBCHUF;}    ///<Returns OH EC/BC FIFO had underflow flag
+    uint8_t  OHECBCHOF()   {return m_OHECBCHOF;}    ///<Returns OH EC/BC FIFO had overflow flag
+    uint8_t  BC0Canc()   {return m_BC0Canc;}    ///<Returns BC0 cancelled by L1A flag
     uint32_t  OHEC()    {return m_OHEC;}      ///<Returns Optohybrid EC
 
     //!Adds VFAT data to the vector
