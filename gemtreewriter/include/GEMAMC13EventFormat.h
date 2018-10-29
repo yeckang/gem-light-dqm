@@ -187,7 +187,7 @@ class GEBdata
       m_ZeroSupWordsCnt = 0x0fff & (word >> 40);        /*!Zero suppressed words counter*/
       m_InputID = 0b00011111 & (word >> 35);        /*!GLIB Input ID*/
       m_Vwh = 0x0fff & (word >> 23);                /*!VFAT word count*/
-      m_ErrorC = 0b0001111111111111 & (word);    /*!Thirteen Flags*/
+      m_ErrorC = 0b0001111111111111 & (word >> 10);    /*!Thirteen Flags*/
       for(int i=0; i<13; ++i)
       {
         v_GEBflags.push_back(0x01 & (m_ErrorC >> i));
@@ -216,7 +216,7 @@ class GEBdata
     {
       m_OHCRC = word >> 48;           /*!OH CRC*/
       m_Vwt = 0x0fff & (word >> 36);  /*!VFAT word count*/
-      m_InFu = 0x0f & (word >> 35);   /*!InFIFO underflow*/
+      m_InFu = 0x01 & (word >> 35);   /*!InFIFO underflow*/
       m_Stuckd = 0x01 & (word >> 34); /*!Stuck data*/
       m_OHBC = 0x0fff & (word >> 20); /*!OH BC*/
       m_OHEC = 0x000fffff & (word);   /*!OH EC*/
