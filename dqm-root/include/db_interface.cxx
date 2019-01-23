@@ -1,7 +1,9 @@
 #define PORT 3306
-#define DEBUG 0
+#ifndef DEBUG
+  #define DEBUG 0
+#endif
 #include <mysql/mysql.h>
-#include <Python.h>
+//#include <Python.h>
 
 #include <iomanip> 
 #include <iostream>
@@ -33,7 +35,7 @@ MYSQL* connectDB()
 {
   MYSQL *Database;
   Database = mysql_init(0);
-  if (mysql_real_connect(Database,"gem904daq01.cern.ch","gemdaq","gemdaq","ldqm_test_db",PORT,0,CLIENT_COMPRESS) == 0) {
+  if (mysql_real_connect(Database,"gemvm-daqcc7.cms","ldqm_dbuser","clod4_Callow","ldqm_db",PORT,0,CLIENT_COMPRESS) == 0) {
     std::string message("Error connecting to database '");
     message += "' : ";
     message += mysql_error(Database);

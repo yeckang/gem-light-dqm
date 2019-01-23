@@ -40,27 +40,28 @@ class GEMUnpacker
      TTree GEMtree("GEMtree","A Tree with GEM Events");
      Event *ev = new Event(); 
      GEMtree.Branch("GEMEvents", &ev);
+     long long int n = 0;
 
      while (true){
         // read and print FEROL headers
         if (m_isFedKit == "ferol") {
           std::size_t sz = std::fread(&m_word, sizeof(uint64_t), 1, m_file);
           if (sz == 0 ) break;
-          //printf("%016llX\n", m_word);
+          printf("%016llX\n", m_word);
           std::fread(&m_word, sizeof(uint64_t), 1, m_file);
-          //printf("%016llX\n", m_word);
+          printf("%016llX\n", m_word);
           std::fread(&m_word, sizeof(uint64_t), 1, m_file);
-          //printf("%016llX\n", m_word);
+          printf("%016llX\n", m_word);
           // ferol headers read and printed, now read CDF header
-          std::fread(&m_word, sizeof(uint64_t), 1, m_file);
+          //std::fread(&m_word, sizeof(uint64_t), 1, m_file);
         } else {
           std::size_t sz = std::fread(&m_word, sizeof(uint64_t), 1, m_file);
           if (sz == 0 ) break;
+          //read and print "BADC0FFEEBADCAFE" and another artificial header
+          //printf("%016llX\n", m_word);
+          //std::fread(&m_word, sizeof(uint64_t), 1, m_file);
+          //printf("%016llX\n", m_word);
         }
-        // read and print "BADC0FFEEBADCAFE" and another artificial header
-        //printf("%016llX\n", m_word);
-        //std::fread(&m_word, sizeof(uint64_t), 1, m_file);
-        //printf("%016llX\n", m_word);
         m_AMC13Event = new AMC13Event();
         //std::fread(&m_word, sizeof(uint64_t), 1, m_file);
         //printf("%016llX\n", m_word);

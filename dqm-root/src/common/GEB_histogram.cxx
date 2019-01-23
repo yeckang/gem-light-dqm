@@ -1,13 +1,14 @@
 #include "VFAT_histogram.cxx"
-#include "GEMClusterization/GEMStrip.h"
-#include "GEMClusterization/GEMStripCollection.h"
-#include "GEMClusterization/GEMClusterContainer.h"
-#include "GEMClusterization/GEMClusterizer.h"
+#include "GEMClusterization/GEMStrip.cc"
+#include "GEMClusterization/GEMCluster.cc"
+#include "GEMClusterization/GEMClusterizer.cc"
+
+#include "TCanvas.h"
+#include "TGaxis.h"
 #include "TH1.h"
+#include "TH2.h"
+#include "TStyle.h"
 #define NETA 8
-// #include "gem/readout/GEMslotContents.h"
-// #include "db_interface.cxx"
-//#include "plotter.cxx"
 //!A class that creates histograms for GEB data
 class GEB_histogram: public Hardware_histogram
 {
@@ -19,6 +20,20 @@ public:
       delete[] m_vfatsH;
   }
 
+  TCanvas * newCanvas(TString title="", Int_t xdiv=1, Int_t ydiv =1,
+                      Int_t w=600, Int_t h=600)
+  {
+    TCanvas* c= new TCanvas;
+    c->SetWindowSize(w,h);
+    if (title != "") c->SetTitle(title);
+    if (xdiv*ydiv>1) {
+      c->Divide(xdiv,ydiv);
+      c->cd(1);
+    }
+    return c;
+  }
+
+
   //!Books histograms for GEB data
   /*!
     Books histograms for the following data: Zero Suppresion flags, GLIB input ID, VFAT word count (header), 
@@ -27,6 +42,9 @@ public:
   void bookHistograms()
   {
     m_vfatsH = new VFAT_histogram*[24];
+    for (unsigned int i = 0; i<24; i++){
+        m_vfatsH[i] = 0;
+    }
     m_dir->cd();
     //ZeroSup  = new TH1F("ZeroSup", "Zero Suppression", 0xffffff,  0x0 , 0xffffff);
     InputID  = new TH1F("InputID", "GLIB input ID", 31,  0x0 , 0b11111);      
@@ -48,17 +66,11 @@ public:
       ClusterSizeEta  [ie] = new TH1I(("ClusterSize"+std::to_string(static_cast <long long> (ie))).c_str(), "Cluster size", 384,  0, 384 );
     }
     SlotN   = new TH1I("VFATSlots", "VFAT Slots", 24,  0, 24);
-    Totalb1010 = new TH1F("Totalb1010", "Control Bit 1010", 15,  0x0 , 0xf);
-    Totalb1100 = new TH1F("Totalb1100", "Control Bit 1100", 15,  0x0 , 0xf);
-    Totalb1110 = new TH1F("Totalb1110", "Control Bit 1110", 15,  0x0 , 0xf);
-    TotalFlag  = new TH1F("TotalFlag", "Control Flags", 15,  0x0 , 0xf);
+    //Totalb1010 = new TH1F("Totalb1010", "Control Bit 1010", 15,  0x0 , 0xf);
+    //Totalb1100 = new TH1F("Totalb1100", "Control Bit 1100", 15,  0x0 , 0xf);
+    //Totalb1110 = new TH1F("Totalb1110", "Control Bit 1110", 15,  0x0 , 0xf);
+    //TotalFlag  = new TH1F("TotalFlag", "Control Flags", 15,  0x0 , 0xf);
     TotalCRC   = new TH1F("TotalCRC", "CRC Mismatches", 0xffff,-32768,32768);
-
-    cout << "Booking summary canvases" << endl;
-    Integrity_canvas = newCanvas("GEBIntegrity",3,2,2400,1200);
-    Occupancy_canvas = newCanvas("GEBOccupancy",3,3,1800,1800);
-    ClusterSize_canvas = newCanvas("GEBClusterSize",3,3,1800,1800);
-    ClusterMult_canvas = newCanvas("GEBClusterMult",3,3,1800,1800);
   }
 
 
@@ -72,7 +84,6 @@ public:
     //ZeroSup->Fill(geb->ZeroSup());
     InputID->Fill(geb->InputID());
     Vwh->Fill(geb->Vwh());
-    Errors->Fill(geb->ErrorC());
     //OHCRC->Fill(geb->OHCRC());
     Vwt->Fill(geb->Vwt());
     //InFu->Fill(geb->InFu());
@@ -95,7 +106,9 @@ public:
     v_vfat = geb->vfats();
     for (auto m_vfat = v_vfat.begin(); m_vfat!=v_vfat.end(); m_vfat++)
       {
-        m_sn = slot_map.find(m_vfat->ChipID())->second;
+        //m_sn = slot_map.find(m_vfat->ChipID())->second;
+        m_sn = m_vfat->Pos();
+        //if ( (m_sn == 6) || (m_sn == 7) || (m_sn == 8) || (m_sn == 14) || (m_sn == 15) || (m_sn == 19) || (m_sn == 22) || (m_sn == 23) ) continue;
 
         SlotN->Fill(m_sn);
         ofstream myfile;
@@ -107,13 +120,13 @@ public:
             if(chan0xf) {
               int m_i = (int) m_sn%8;
               int m_j = 127 - m_strip_map[chan] + ((int) m_sn/8)*128;
-              if (allstrips.find(m_i) == allstrips.end()){
-                GEMStripCollection strips;
-                allstrips[m_i]=strips;
-              }
+              //if (allstrips.find(m_i) == allstrips.end()){
+              //  GEMStripCollection strips;
+              //  allstrips[m_i]=strips;
+              //}
               // bx set to 0...
-              GEMStrip s(m_j,0);
-              allstrips[m_i].insert(s);
+              //GEMStrip s(m_j,0);
+              //allstrips[m_i].insert(s);
               BeamProfile->Fill(m_i,m_j);
             }
           } else {
@@ -121,13 +134,13 @@ public:
             if(chan0xf) {
               int m_i = (int) m_sn%8;
               int m_j = 127 - m_strip_map[chan] + ((int) m_sn/8)*128;
-              if (allstrips.find(m_i) == allstrips.end()){
-                GEMStripCollection strips;
-                allstrips[m_i]=strips;
-              }
+              //if (allstrips.find(m_i) == allstrips.end()){
+              //  GEMStripCollection strips;
+              //  allstrips[m_i]=strips;
+              //}
               // bx set to 0...
-              GEMStrip s(m_j,0);
-              allstrips[m_i].insert(s);
+              //GEMStrip s(m_j,0);
+              //allstrips[m_i].insert(s);
               BeamProfile->Fill(m_i,m_j);
             }
           }
@@ -150,44 +163,23 @@ public:
     ClusterMult->Fill(ncl);
   }
 
-#include "GEB_summaryCanvases.cxx"
-
-  void fillSummaryCanvases(TDirectory* onlineHistsDir,int amcnum,int gebnum)
+  void fillSummaryCanvases()
   {
     for(int vfat_index=0; vfat_index < 24; vfat_index++)
       {
   	VFAT_histogram *current_vfatH = vfatsH(vfat_index);
         try {
-          Totalb1010->Add(current_vfatH->getb1010());
-          Totalb1100->Add(current_vfatH->getb1100());
-          Totalb1110->Add(current_vfatH->getb1110());
-          TotalFlag ->Add(current_vfatH->getFlag());
-          TotalCRC  ->Add(current_vfatH->getCRC());
+          //Totalb1010->Add(current_vfatH->getb1010());
+          //Totalb1100->Add(current_vfatH->getb1100());
+          //Totalb1110->Add(current_vfatH->getb1110());
+          //TotalFlag ->Add(current_vfatH->getFlag());
+          //TotalCRC  ->Add(current_vfatH->getCRC());
         }
         catch(...) {
           std::cout << "No VFAT_histogram at index " << vfat_index;
         }
       }
-    fillGEBCanvases();
-    onlineHistsDir->cd();
-    string integrityName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_integrity";
-    string occupancyName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_occupancy";
-    string clusterSizeName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_clusterSize";
-    string clusterMultName = "AMC-"+to_string((long long int)amcnum)+"_GTX-"+to_string((long long int)gebnum)+"_clusterMult";
-
-    Integrity_canvas->SetName(integrityName.c_str());
-    Integrity_canvas->Write();
-    Occupancy_canvas->SetName(occupancyName.c_str());
-    Occupancy_canvas->Write();
-    ClusterSize_canvas->SetName(clusterSizeName.c_str());
-    ClusterSize_canvas->Write();
-    ClusterMult_canvas->SetName(clusterMultName.c_str());
-    ClusterMult_canvas->Write();
-    
   }
-  
-
-  
   
   //!Adds a VFAT_histogram object to the m_vfatH vector
   void addVFATH(VFAT_histogram* vfatH, int i){m_vfatsH[i]=vfatH;}
@@ -213,14 +205,9 @@ private:
   TH1F* Totalb1110;
   TH1F* TotalFlag;
   TH1F* TotalCRC;
-  TCanvas* Integrity_canvas;
-  TCanvas* Occupancy_canvas;
-  TCanvas* ClusterSize_canvas;
-  TCanvas* ClusterMult_canvas;
-  
   
   std::map<int, GEMStripCollection> allstrips;
-  //VFATdata * m_vfat;
+  VFATdata * m_vfat;
   std::vector<VFATdata> v_vfat;            ///Vector of VFATdata
   int m_sn;
   int *m_strip_map;

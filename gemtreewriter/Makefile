@@ -9,9 +9,10 @@ ROOTLIBS  =$(shell root-config --libs)
 ROOTGLIBS =$(shell root-config --glibs) 
 ROOTINC   =$(shell root-config --incdir)
 
+#CC=g++-4.9.3
 CC=g++
-CCFLAGS=-O2 -Wall -fPIC ${ROOTCFLAGS}
-ADDFLAGS=-g -std=c++0x
+CCFLAGS=-O0 -g3 -fno-inline -Wall -fPIC ${ROOTCFLAGS}
+ADDFLAGS=-std=c++0x
 RC=rootcint
 LBL=-shared -O2 -m64
 LS=ls -lartF
@@ -50,6 +51,7 @@ all:
 	mkdir -p $(BIN)
 	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/GEMUnpacker.cc $(LIB)/libEvent.so -o $(BIN)/unpacker
+	cp $(DIC)/EventDict_rdict.pcm $(LIB)
 
 
 event:
@@ -60,6 +62,7 @@ event:
 	$(CC) $(CCFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) -c $(DIC)/EventDict.cxx -o $(OBJ)/EventDict.o
 	mkdir -p $(LIB)
 	$(CC) $(LBL) $(Objects) -o $(LIB)/libEvent.so $(ROOTLIBS)
+	cp $(DIC)/EventDict_rdict.pcm $(LIB)
 
 unpacker:
 	mkdir -p $(BIN)

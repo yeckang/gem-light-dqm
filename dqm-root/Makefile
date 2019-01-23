@@ -3,9 +3,10 @@
 #
 BUILD_HOME:=$(shell pwd)/../..
 
+#CC=g++-4.9.3
 CC=g++
-CCFLAGS=-O2 -Wall -fPIC -pthread -m64
-ADDFLAGS=-g -std=c++0x
+CCFLAGS=-O0 -g3 -fno-inline -Wall -fPIC -pthread -m64
+ADDFLAGS=-std=c++11
 RC=rootcint
 LBL=-shared -O2 -m64
 LS=ls -lartF
@@ -33,6 +34,7 @@ IncludeDirs = /usr/include/root
 IncludeDirs+= /usr/local/include/root
 IncludeDirs+= $(BUILD_HOME)/$(Project)
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)
+IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)/src/common
 IncludeDirs+= $(BUILD_HOME)/$(Project)/$(Package)/include
 IncludeDirs+= $(BUILD_HOME)/$(Project)/gemtreewriter/include
 IncludeDirs+= ${BUILD_HOME}/${GEM_OS_PROJECT}/gemreadout/include
@@ -51,15 +53,14 @@ LIB=$(BUILD_HOME)/$(Project)/gemtreewriter/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
 all:
 	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/histogramLayeringExample.cxx $(LIB)/libEvent.so -o $(BIN)/layer
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/gtprinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/gtprinter
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/onlinePrinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/onlineprinter
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dqmMain.cxx $(LIB)/libEvent.so -o $(BIN)/dqm $(PYTHONLIBS) $(MYSQLLIBS)
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/gtprinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/gtprinter $(PYTHONLIBS) $(MYSQLLIBS)
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/onlinePrinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/onlineprinter $(PYTHONLIBS) $(MYSQLLIBS)
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dqmMain.cxx $(LIB)/libEvent.so -o $(BIN)/dqm $(PYTHONLIBS) $(MYSQLLIBS) -lProof -lProofPlayer -g
 	$(LS) $(BIN)
 
 dqm:  	#CURRENT VERSION
 	mkdir -p $(BIN)
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dqmMain.cxx $(LIB)/libEvent.so -o $(BIN)/dqm
-
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/dqmMain.cxx $(LIB)/libEvent.so -o $(BIN)/dqm $(PYTHONLIBS) $(MYSQLLIBS) -lProof -lProofPlayer
 
 merger:
 	mkdir -p $(BIN)
@@ -72,13 +73,13 @@ layer:
 
 printer:
 	mkdir -p $(BIN)
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/gtprinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/gtprinter
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/gtprinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/gtprinter $(PYTHONLIBS) $(MYSQLLIBS)
 	$(LS) $(BIN)
 
 
 onlineprinter:
 	mkdir -p $(BIN)
-	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/onlinePrinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/onlineprinter
+	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/onlinePrinterMain.cxx $(LIB)/libEvent.so -o $(BIN)/onlineprinter $(PYTHONLIBS) $(MYSQLLIBS)
 	$(LS) $(BIN)
 
 

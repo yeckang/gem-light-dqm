@@ -55,7 +55,7 @@ class logger{
       myfile << "Detector response inefficiency : " << setprecision(4) << responseInefficiency_ << "%\n" ;
       if (!badEventsList_.empty()) {
         std::string tmp = "{ ";
-        for (int it = 0; it < (badEventsList_.size() - 1); it++){
+        for (unsigned int it = 0; it < (badEventsList_.size() - 1); it++){
           std::stringstream ss;
           ss << badEventsList_.at(it);
           tmp += ss.str();

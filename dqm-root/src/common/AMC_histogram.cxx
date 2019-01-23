@@ -18,7 +18,10 @@ class AMC_histogram: public Hardware_histogram
     */
     void bookHistograms()
     {
-      m_gebsH = new GEB_histogram*[2];
+      m_gebsH = new GEB_histogram*[12];
+      for (unsigned int i = 0; i<12; i++){
+          m_gebsH[i] = 0;
+      }
       m_dir->cd();
       AMCnum     = new TH1F("AMCnum", "AMC number", 12,  0, 12);
       //L1A        = new TH1F("L1A", "L1A ID", 0xffffff,  0x0, 0xffffff);      
@@ -26,9 +29,9 @@ class AMC_histogram: public Hardware_histogram
       //Dlength    = new TH1F("Dlength", "Data Length", 0xfffff,  0x0, 0xfffff);
       FV         = new TH1F("FV", "Format Version", 15,  0x0, 0xf);
       Rtype      = new TH1F("Rtype", "Run Type", 15,  0x0, 0xf);
-      Param1     = new TH1F("Param1", "Run Param 1", 255,  0, 255);
-      Param2     = new TH1F("Param2", "Run Param 2", 255,  0, 255);
-      Param3     = new TH1F("Param3", "Run Param 3", 255,  0, 255);
+      Param1     = new TH1F("Param1", "Run Param 1", 256,  -0.5, 255.5);
+      Param2     = new TH1F("Param2", "Run Param 2", 256,  -0.5, 255.5);
+      Param3     = new TH1F("Param3", "Run Param 3", 256,  -0.5, 255.5);
       Onum       = new TH1F("Onum", "Orbit Number", 0xffff,  0, 0xffff);
       BID        = new TH1F("BID", "Board ID", 0xffff,  0, 0xffff);
       GEMDAV     = new TH1F("GEMDAV", "GEM DAV list", 24,  0, 24);
@@ -37,7 +40,8 @@ class AMC_histogram: public Hardware_histogram
       Tstate     = new TH1F("Tstate", "TTS state", 15,  0, 15);
       ChamT      = new TH1F("ChamT", "Chamber Timeout", 24, 0, 24);
       OOSG       = new TH1F("OOSG", "OOS GLIB", 1, 0, 1);
-      CRC        = new TH1D("CRC", "CRC", 4294967295, 0, 4294967295);// histogram overflow! Can't handle 32-bit number...
+      CRC        = new TH1D("CRC", "CRC", 0xffff, 0, 0xffff);// histogram overflow! Can't handle 32-bit number...
+      latencyBX2D = new TH2D("latencyBX2D", "Latency vs BX", 256,  -0.5, 255.5, 4096,  -0.5,4095.5);
       //L1AT       = new TH1F("L1AT", "L1AT", 0xffffff,  0x0, 0xffffff);
       //DlengthT   = new TH1F("DlengthT", "DlengthT", 0xffffff,  0x0, 0xffffff);
     }
@@ -62,6 +66,7 @@ class AMC_histogram: public Hardware_histogram
       Tstate->Fill(amc->Tstate());
       OOSG->Fill(amc->OOSG());
       CRC->Fill(amc->CRC());
+      latencyBX2D->Fill(amc->Param3(),amc->BX());
       //L1AT->Fill(amc->L1AT());
       //DlengthT->Fill(amc->DlengthT());
       uint8_t binFired = 0;
@@ -100,5 +105,6 @@ class AMC_histogram: public Hardware_histogram
     TH1D* CRC;                            ///<Histogram for CRC
     TH1F* L1AT;                           ///<Histogram for L1AT
     TH1F* DlengthT;                       ///<Histogram for Data Length (trailer)
+    TH2D* latencyBX2D;                    ///<Distribution of number of events per BX and latency bin
 };
 
