@@ -3,9 +3,13 @@ GEM light DQM code
 
 To compile: 
 ```bash
-> source settings.sh
+> cd /path/to/gem-light-dqm
+> export BUILD_HOME=$PWD/../
 > sh compile.sh
 ```
 Binary executables will be produced here:
-./gemtreewriter/bin/unpacker
-./dqm-root/bin/dqm
+```bash
+./gemtreewriter/bin/${XDAQ_OS}/${XDAQ_PLATFORM}/unpacker
+./dqm-root/bin/${XDAQ_OS}/${XDAQ_PLATFORM}/dqm
+```
+Guaranteed to work at CC7 CERN PCs
