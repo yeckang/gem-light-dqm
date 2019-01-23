@@ -132,7 +132,7 @@ int main(int argc, char** argv)
   TList * m_config = new TList();
   //m_config = getConfig(ifilename);
 
-  TProof::Open("workers=4");
+  TProof::Open("workers=2");
   //gProof->AddInput(m_config);
   gProof->AddInput(new TNamed("PROOF_OUTPUTFILE", ofilename.c_str()));
   gProof->GetInputList()->Print();

@@ -51,6 +51,7 @@ all:
 	mkdir -p $(BIN)
 	mkdir -p $(BIN)
 	$(CC) $(ADDFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) $(SRC)/GEMUnpacker.cc $(LIB)/libEvent.so -o $(BIN)/unpacker
+	cp $(DIC)/EventDict_rdict.pcm $(LIB)
 
 
 event:
@@ -61,6 +62,7 @@ event:
 	$(CC) $(CCFLAGS) $(ROOTLIBS) $($ROOTGLIBS) $(INC) -c $(DIC)/EventDict.cxx -o $(OBJ)/EventDict.o
 	mkdir -p $(LIB)
 	$(CC) $(LBL) $(Objects) -o $(LIB)/libEvent.so $(ROOTLIBS)
+	cp $(DIC)/EventDict_rdict.pcm $(LIB)
 
 unpacker:
 	mkdir -p $(BIN)
