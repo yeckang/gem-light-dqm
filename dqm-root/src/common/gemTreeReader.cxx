@@ -166,7 +166,7 @@ void gemTreeReader::SlaveBegin(TTree * /*tree*/)
   for (std::vector<int>::iterator iterAMC=vec_amcSlots.begin(); iterAMC != vec_amcSlots.end(); ++iterAMC){
     std::string strAMCName = "AMC-";
     strAMCName.append(to_string((*iterAMC)).c_str());
-    m_amcH = new AMC_histogram("preved", gDirectory->mkdir(strAMCName), to_string((*iterAMC)).c_str());
+    m_amcH = new AMC_histogram("preved", gDirectory->mkdir(strAMCName.c_str()), to_string((*iterAMC)).c_str());
     m_amcH->bookHistograms();
     for (int iGEB=0; iGEB<12; iGEB++){
       std::string strGEBName = "GEB-";
