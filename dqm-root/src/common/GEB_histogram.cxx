@@ -36,7 +36,7 @@ public:
 
   //!Books histograms for GEB data
   /*!
-    Books histograms for the following data: Zero Suppresion flags, GLIB input ID, VFAT word count (header), 
+    Books histograms for the following data: Zero Suppresion flags, GLIB input ID, VFAT word count (header),
     Errors and Warnings (Thirteen Flags, InFIFO underflow flag, Stuck data flag), OH CRC, VFAT word count (trailer)
   */
   void bookHistograms()
@@ -47,7 +47,7 @@ public:
     }
     m_dir->cd();
     //ZeroSup  = new TH1F("ZeroSup", "Zero Suppression", 0xffffff,  0x0 , 0xffffff);
-    InputID  = new TH1F("InputID", "GLIB input ID", 31,  0x0 , 0b11111);      
+    InputID  = new TH1F("InputID", "GLIB input ID", 31,  0x0 , 0b11111);
     Vwh      = new TH1F("Vwh", "VFAT word count", 4095,  0x0 , 0xfff);
     // Assing custom bin labels
     const char *error_flags[5] = {"Event Size Overflow", "L1AFIFO Full", "InFIFO Full", "Evt FIFO Full","InFIFO Underflow"};
@@ -76,7 +76,7 @@ public:
 
   //!Fills histograms for GEB data
   /*!
-    Fills the histograms for the following data: Zero Suppresion flags, GLIB input ID, VFAT word count (header), 
+    Fills the histograms for the following data: Zero Suppresion flags, GLIB input ID, VFAT word count (header),
     Errors and Warnings (Thirteen Flags, InFIFO underflow flag, Stuck data flag), OH CRC, VFAT word count (trailer)
   */
 
@@ -117,7 +117,7 @@ public:
         for (int chan = 0; chan < 128; ++chan) {
           if (chan < 64){
             chan0xf = ((m_vfat->lsData() >> chan) & 0x1);
-            if(chan0xf) {
+            /*if(chan0xf) {
               int m_i = (int) m_sn%8;
               int m_j = 127 - m_strip_map[chan] + ((int) m_sn/8)*128;
               //if (allstrips.find(m_i) == allstrips.end()){
@@ -128,12 +128,13 @@ public:
               //GEMStrip s(m_j,0);
               //allstrips[m_i].insert(s);
               BeamProfile->Fill(m_i,m_j);
-            }
+            }*/
           } else {
             chan0xf = ((m_vfat->msData() >> (chan-64)) & 0x1);
-            if(chan0xf) {
+            /* if(chan0xf) {
               int m_i = (int) m_sn%8;
-              int m_j = 127 - m_strip_map[chan] + ((int) m_sn/8)*128;
+              //int m_j = 127 - m_strip_map[chan] + ((int) m_sn/8)*128;
+              int m_j = chan;
               //if (allstrips.find(m_i) == allstrips.end()){
               //  GEMStripCollection strips;
               //  allstrips[m_i]=strips;
@@ -142,7 +143,7 @@ public:
               //GEMStrip s(m_j,0);
               //allstrips[m_i].insert(s);
               BeamProfile->Fill(m_i,m_j);
-            }
+            } */
           }
         }
       }
@@ -155,10 +156,10 @@ public:
       ncl+=cls.size();
       ncleta+=cls.size();
       for (GEMClusterContainer::iterator icl=cls.begin();icl!=cls.end();icl++){
-        ClusterSize->Fill(icl->clusterSize());    
-        ClusterSizeEta[NETA-1-ieta->first]->Fill(icl->clusterSize());   
+        ClusterSize->Fill(icl->clusterSize());
+        ClusterSizeEta[NETA-1-ieta->first]->Fill(icl->clusterSize());
       }
-      ClusterMultEta[NETA-1-ieta->first]->Fill(ncleta);   
+      ClusterMultEta[NETA-1-ieta->first]->Fill(ncleta);
     }
     ClusterMult->Fill(ncl);
   }
@@ -180,13 +181,13 @@ public:
         }
       }
   }
-  
+
   //!Adds a VFAT_histogram object to the m_vfatH vector
   void addVFATH(VFAT_histogram* vfatH, int i){m_vfatsH[i]=vfatH;}
   //!Returns the m_vfatsH vector
   VFAT_histogram * vfatsH(int i){return m_vfatsH[i];}
 private:
-  VFAT_histogram **m_vfatsH;    ///<A vector of VFAT_histogram 
+  VFAT_histogram **m_vfatsH;    ///<A vector of VFAT_histogram
   //TH1F* ZeroSup;                           ///<Histogram for Zero Suppression flags
   TH1F* InputID;                           ///<Histogram for GLIB input ID
   TH1F* Vwh;                               ///<Histogram for VFAT word count (header)
@@ -205,7 +206,7 @@ private:
   TH1F* Totalb1110;
   TH1F* TotalFlag;
   TH1F* TotalCRC;
-  
+
   std::map<int, GEMStripCollection> allstrips;
   VFATdata * m_vfat;
   std::vector<VFATdata> v_vfat;            ///Vector of VFATdata
