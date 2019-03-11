@@ -13,7 +13,7 @@
 #include <TTreeReaderArray.h>
 
 
-#include <iomanip> 
+#include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -29,7 +29,7 @@ class gemTreeReader: public TSelector {
 public :
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    TTreeReader     fReader;  //!the tree reader
-  
+
    // Readers to access the data (delete the ones you do not need).
    TTreeReaderValue<unsigned int> fUniqueID = {fReader, "fUniqueID"};
    TTreeReaderValue<unsigned int> fBits = {fReader, "fBits"};
@@ -122,7 +122,7 @@ void gemTreeReader::Begin(TTree * /*tree*/)
 
   if (DEBUG) std::cout << "MASTER BEGIN"<< std::endl;
   TString option = GetOption();
-} 
+}
 
 void gemTreeReader::SlaveBegin(TTree * /*tree*/)
 {
@@ -149,7 +149,7 @@ void gemTreeReader::SlaveBegin(TTree * /*tree*/)
                                     " instance is invalid!", fProofFile->GetName());
      Abort(amsg, kAbortProcess);
      return;
-  } 
+  }
   fFile->cd();
 
   //VFATMap = {{{0}}};
@@ -161,30 +161,36 @@ void gemTreeReader::SlaveBegin(TTree * /*tree*/)
   if (DEBUG) std::cout << "Slave Begin: retrieved config name " << config_s->GetName() << std::endl;
   if (DEBUG) std::cout << "Slave Begin: try to get config iterator"<< std::endl;
 
-  m_amcH = new AMC_histogram("preved", gDirectory->mkdir("AMC-5"), "5");
-  m_amcH->bookHistograms();
-  for (int j=0; j<12; j++){
-    std::string str0 = "GEB-";
-    str0.append(to_string(j).c_str());
-    m_gebH = new GEB_histogram("preved", gDirectory->mkdir(str0.c_str()), to_string(j).c_str());
-    m_gebH->bookHistograms();
-    for (int i=0; i<24; i++){
-      std::string str = "VFAT-";
-      str.append(to_string(i).c_str());
-      m_vfatH = new VFAT_histogram("preved", gDirectory->mkdir(str.c_str()), to_string(i).c_str());
-      m_vfatH->bookHistograms();
-      m_gebH->addVFATH(m_vfatH,i);
-      gDirectory->cd("..");   //moves back to previous directory
+  int iAMCSlots[] = {2,4,6}; //Change slots here
+  std::vector<int> vec_amcSlots(iAMCSlots, iAMCSlots + sizeof(iAMCSlots) / sizeof(int) );
+  for (std::vector<int>::iterator iterAMC=vec_amcSlots.begin(); iterAMC != vec_amcSlots.end(); ++iterAMC){
+    std::string strAMCName = "AMC-";
+    strAMCName.append(to_string((*iterAMC)).c_str());
+    m_amcH = new AMC_histogram("preved", gDirectory->mkdir(strAMCName), to_string((*iterAMC)).c_str());
+    m_amcH->bookHistograms();
+    for (int iGEB=0; iGEB<12; iGEB++){
+      std::string strGEBName = "GEB-";
+      strGEBName.append(to_string(iGEB).c_str());
+      m_gebH = new GEB_histogram("preved", gDirectory->mkdir(strGEBName.c_str()), to_string(iGEB).c_str());
+      m_gebH->bookHistograms();
+      for (int iVFAT=0; iVFAT<24; iVFAT++){
+        std::string strVFATName = "VFAT-";
+        strVFATName.append(to_string(iVFAT).c_str());
+        m_vfatH = new VFAT_histogram("preved", gDirectory->mkdir(strVFATName.c_str()), to_string(iVFAT).c_str());
+        m_vfatH->bookHistograms();
+        m_gebH->addVFATH(m_vfatH,iVFAT);
+        gDirectory->cd("..");   //moves back to previous directory
+      }
+      gDirectory->cd("..");     //moves back to previous directory
+      m_amcH->addGEBH(m_gebH,iGEB);
     }
-    gDirectory->cd("..");     //moves back to previous directory
-    m_amcH->addGEBH(m_gebH,j);
+    gDirectory->cd("..");       //moves back to previous directory
+    m_amc13H->addAMCH(m_amcH,(*iterAMC));
   }
-  gDirectory->cd("..");       //moves back to previous directory
-  m_amc13H->addAMCH(m_amcH, 5);
 
   //TIter nextamc(config_s);
   //TObject *amc;
-  //while ((amc = nextamc())) 
+  //while ((amc = nextamc()))
   //{
   //  std::cout << "Slave Begin: found object " << amc->GetName() << std::endl;
   //  TString a_slot_s = (TString) amc->GetName();
@@ -194,7 +200,7 @@ void gemTreeReader::SlaveBegin(TTree * /*tree*/)
   //  m_amcH->bookHistograms();
   //  TIter nextgeb((TList*)amc);
   //  TObject *geb;
-  //  while ((geb = nextgeb())) 
+  //  while ((geb = nextgeb()))
   //  {
   //    std::cout << "Slave Begin: found object " << geb->GetName() << std::endl;
   //    TString g_slot_s = (TString)geb->GetName();
@@ -208,7 +214,7 @@ void gemTreeReader::SlaveBegin(TTree * /*tree*/)
   //    m_gebH->bookHistograms();
   //    TMapIter nextvfat((TMap*)geb);
   //    TPair *vfat;
-  //    while ((vfat = (TPair*)nextvfat())) 
+  //    while ((vfat = (TPair*)nextvfat()))
   //    {
   //      //TObject *chipID_s = ((TPair*)geb->FindObject(vfat))->Value();
   //      TString v_slot_s = (TString)vfat->GetName();
