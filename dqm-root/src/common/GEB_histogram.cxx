@@ -58,7 +58,7 @@ public:
     for (int i = 1; i<11; i++) Warnings->GetXaxis()->SetBinLabel(i, warning_flags[i-1]);
     //OHCRC    = new TH1F("OHCRC", "OH CRC", 0xffff,  0x0 , 0xffff);
     Vwt      = new TH1F("Vwt", "VFAT word count", 4095,  0x0 , 0xfff);
-    BeamProfile      = new TH2I("BeamProfile", "2D Occupancy", 8, 0, 8, 384, 0, 384);
+    //BeamProfile      = new TH2I("BeamProfile", "2D Occupancy", 8, 0, 8, 384, 0, 384);
     ClusterMult      = new TH1I("ClusterMult", "Cluster multiplicity", 384,  0, 384 );
     ClusterSize      = new TH1I("ClusterSize", "Cluster size", 384,  0, 384 );
     for(int ie=0; ie < NETA; ie++){
@@ -66,11 +66,6 @@ public:
       ClusterSizeEta  [ie] = new TH1I(("ClusterSize"+std::to_string(static_cast <long long> (ie))).c_str(), "Cluster size", 384,  0, 384 );
     }
     SlotN   = new TH1I("VFATSlots", "VFAT Slots", 24,  0, 24);
-    //Totalb1010 = new TH1F("Totalb1010", "Control Bit 1010", 15,  0x0 , 0xf);
-    //Totalb1100 = new TH1F("Totalb1100", "Control Bit 1100", 15,  0x0 , 0xf);
-    //Totalb1110 = new TH1F("Totalb1110", "Control Bit 1110", 15,  0x0 , 0xf);
-    //TotalFlag  = new TH1F("TotalFlag", "Control Flags", 15,  0x0 , 0xf);
-    TotalCRC   = new TH1F("TotalCRC", "CRC Mismatches", 0xffff,-32768,32768);
   }
 
 
@@ -195,17 +190,12 @@ private:
   TH1I* Warnings;                          ///<Histogram for Warnings (InFIFO underflow, Stuck Data)
   //TH1F* OHCRC;                             ///<Histogram for OH CRC
   TH1F* Vwt;                               ///<Histogram for VFAT word count (trailer)
-  TH2I* BeamProfile;                       ///<Histogram for 2D BeamProfile
+  //TH2I* BeamProfile;                       ///<Histogram for 2D BeamProfile
   TH1I* ClusterMult;                       ///<Histogram for GEB cluster multiplicity
   TH1I* ClusterSize;                       ///<Histogram for GEB cluster size
   TH1I* ClusterMultEta[NETA];              ///<Histogram for GEB eta cluster multiplicity
   TH1I* ClusterSizeEta[NETA];              ///<Histogram for GEB eta cluster size
   TH1I* SlotN;                             ///<Histogram for VFAT slots
-  TH1F* Totalb1010;			     // Add all vfat control bit histograms
-  TH1F* Totalb1100;
-  TH1F* Totalb1110;
-  TH1F* TotalFlag;
-  TH1F* TotalCRC;
 
   std::map<int, GEMStripCollection> allstrips;
   VFATdata * m_vfat;
