@@ -28,37 +28,7 @@
 class gemTreeReader: public TSelector {
 public :
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
-   TTreeReader     fReader;  //!the tree reader
-
-   // Readers to access the data (delete the ones you do not need).
-   TTreeReaderValue<unsigned int> fUniqueID = {fReader, "fUniqueID"};
-   TTreeReaderValue<unsigned int> fBits = {fReader, "fBits"};
-   TTreeReaderValue<Int_t> fEvtHdr_fEvtNum = {fReader, "fEvtHdr.fEvtNum"};
-   TTreeReaderValue<Int_t> fEvtHdr_fRun = {fReader, "fEvtHdr.fRun"};
-   TTreeReaderValue<Int_t> fEvtHdr_fDate = {fReader, "fEvtHdr.fDate"};
-   TTreeReaderArray<UChar_t> famc13s_m_cb5 = {fReader, "famc13s.m_cb5"};
-   TTreeReaderArray<UChar_t> famc13s_m_Evt_ty = {fReader, "famc13s.m_Evt_ty"};
-   TTreeReaderArray<unsigned int> famc13s_m_LV1_id = {fReader, "famc13s.m_LV1_id"};
-   TTreeReaderArray<unsigned short> famc13s_m_BX_id = {fReader, "famc13s.m_BX_id"};
-   TTreeReaderArray<unsigned short> famc13s_m_Source_id = {fReader, "famc13s.m_Source_id"};
-   TTreeReaderArray<UChar_t> famc13s_m_CalTyp = {fReader, "famc13s.m_CalTyp"};
-   TTreeReaderArray<UChar_t> famc13s_m_nAMC = {fReader, "famc13s.m_nAMC"};
-   TTreeReaderArray<unsigned int> famc13s_m_OrN = {fReader, "famc13s.m_OrN"};
-   TTreeReaderArray<UChar_t> famc13s_m_cb0 = {fReader, "famc13s.m_cb0"};
-   TTreeReaderArray<vector<unsigned int>> famc13s_m_AMC_size = {fReader, "famc13s.m_AMC_size"};
-   TTreeReaderArray<vector<unsigned char>> famc13s_m_Blk_No = {fReader, "famc13s.m_Blk_No"};
-   TTreeReaderArray<vector<unsigned char>> famc13s_m_AMC_No = {fReader, "famc13s.m_AMC_No"};
-   TTreeReaderArray<vector<unsigned short>> famc13s_m_BoardID = {fReader, "famc13s.m_BoardID"};
-   TTreeReaderArray<vector<AMCdata>> famc13s_m_amcs = {fReader, "famc13s.m_amcs"};
-   TTreeReaderArray<unsigned int> famc13s_m_CRC_amc13 = {fReader, "famc13s.m_CRC_amc13"};
-   TTreeReaderArray<UChar_t> famc13s_m_Blk_NoT = {fReader, "famc13s.m_Blk_NoT"};
-   TTreeReaderArray<UChar_t> famc13s_m_LV1_idT = {fReader, "famc13s.m_LV1_idT"};
-   TTreeReaderArray<unsigned short> famc13s_m_BX_idT = {fReader, "famc13s.m_BX_idT"};
-   TTreeReaderArray<UChar_t> famc13s_m_cbA = {fReader, "famc13s.m_cbA"};
-   TTreeReaderArray<unsigned int> famc13s_m_EvtLength = {fReader, "famc13s.m_EvtLength"};
-   TTreeReaderArray<unsigned short> famc13s_m_CRC_cdf = {fReader, "famc13s.m_CRC_cdf"};
-   TTreeReaderValue<Bool_t> fisEventGood = {fReader, "fisEventGood"};
-
+  TTreeReader     fReader;  //!the tree reader
 
   // Declaration of leaf types
   Event           *GEMEvents;
@@ -80,8 +50,6 @@ public :
   virtual TList  *GetOutputList() const { return fOutput; }
   virtual void    SlaveTerminate();
   virtual void    Terminate();
-
-  //int slotFromMap(int a, int g, int cid);
 
   vector<AMC13Event> v_amc13;    ///<Vector of AMC13Event
   vector<AMCdata> v_amc;         ///<Vector of AMCdata
@@ -152,14 +120,9 @@ void gemTreeReader::SlaveBegin(TTree * /*tree*/)
   }
   fFile->cd();
 
-  //VFATMap = {{{0}}};
   TObjString * diramc13 = new TObjString("AMC13-1");
   m_amc13H = new AMC13_histogram("preved", gDirectory->mkdir(diramc13->String()), "1");
   m_amc13H->bookHistograms();
-  if (DEBUG) std::cout << "Slave Begin: try to get config "<< std::endl;
-  TList *config_s = (TList*)fInput->FindObject("config");
-  if (DEBUG) std::cout << "Slave Begin: retrieved config name " << config_s->GetName() << std::endl;
-  if (DEBUG) std::cout << "Slave Begin: try to get config iterator"<< std::endl;
 
   int iAMCSlots[] = {2,4,6}; //Change slots here
   std::vector<int> vec_amcSlots(iAMCSlots, iAMCSlots + sizeof(iAMCSlots) / sizeof(int) );
@@ -187,60 +150,6 @@ void gemTreeReader::SlaveBegin(TTree * /*tree*/)
     gDirectory->cd("..");       //moves back to previous directory
     m_amc13H->addAMCH(m_amcH,(*iterAMC));
   }
-
-  //TIter nextamc(config_s);
-  //TObject *amc;
-  //while ((amc = nextamc()))
-  //{
-  //  std::cout << "Slave Begin: found object " << amc->GetName() << std::endl;
-  //  TString a_slot_s = (TString) amc->GetName();
-  //  int a_slot = a_slot_s.Atoi(); // retrieve a_slot from the config somehow
-  //  a_slot_s.Insert(0,"AMC-");
-  //  m_amcH = new AMC_histogram("preved", gDirectory->mkdir(a_slot_s.Data()), amc->GetName());
-  //  m_amcH->bookHistograms();
-  //  TIter nextgeb((TList*)amc);
-  //  TObject *geb;
-  //  while ((geb = nextgeb()))
-  //  {
-  //    std::cout << "Slave Begin: found object " << geb->GetName() << std::endl;
-  //    TString g_slot_s = (TString)geb->GetName();
-  //    int g_slot = g_slot_s.Atoi(); // retrieve g_slot from the config somehow
-  //    // FIXME!!! Tmp plug to correct offset introduced in the DB
-  //    g_slot = g_slot -1;
-  //    g_slot_s.Form("%d",g_slot);
-  //    g_slot_s.Insert(0,"GTX-");
-  //    // end of FIXME
-  //    m_gebH = new GEB_histogram("preved", gDirectory->mkdir(g_slot_s.Data()), geb->GetName());
-  //    m_gebH->bookHistograms();
-  //    TMapIter nextvfat((TMap*)geb);
-  //    TPair *vfat;
-  //    while ((vfat = (TPair*)nextvfat()))
-  //    {
-  //      //TObject *chipID_s = ((TPair*)geb->FindObject(vfat))->Value();
-  //      TString v_slot_s = (TString)vfat->GetName();
-  //      //TString s_chipID_s = (TString)chipID_s->GetName();
-  //      //if (DEBUG) cout << "s_chipID_s " << s_chipID_s << endl;
-  //      //s_chipID_s = TString::BaseConvert(s_chipID_s, 16,10);
-  //      int v_slot = v_slot_s.Atoi(); // retrieve v_slot from the config somehow
-  //      //int i_chipID = s_chipID_s.Atoi();
-  //      //i_chipID = i_chipID & 0x0FFF;
-  //      //VFATMap[a_slot][g_slot][v_slot] = i_chipID;
-  //      //if (DEBUG) cout << "Insert chip ID " << i_chipID << " in place a,g,v: " << a_slot << ", " << g_slot << ", " << v_slot << endl;
-  //      v_slot_s.Insert(0,"VFAT-");
-  //      m_vfatH = new VFAT_histogram("preved", gDirectory->mkdir(v_slot_s.Data()), to_string(v_slot).c_str());
-  //      m_vfatH->bookHistograms();
-  //      m_gebH->addVFATH(m_vfatH,v_slot);
-  //      std::cout << "Slave Begin: add vfat " << v_slot << std::endl;
-  //      gDirectory->cd("..");   //moves back to previous directory
-  //    } /* END VFAT LOOP */
-  //    gDirectory->cd("..");     //moves back to previous directory
-  //    m_amcH->addGEBH(m_gebH,g_slot);
-  //    std::cout << "Slave Begin: add geb " << g_slot << std::endl;
-  //  } /* END GEB LOOP */
-  //  gDirectory->cd("..");       //moves back to previous directory
-  //  m_amc13H->addAMCH(m_amcH, a_slot);
-  //  std::cout << "Slave Begin: add amc " << a_slot << std::endl;
-  //} /* END AMC LOOP */
 
   gDirectory = savedir;
   if (DEBUG) std::cout << "SLAVE END"<< std::endl;
