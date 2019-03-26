@@ -27,7 +27,7 @@ public:
     Header     = new TH1F("Header", "Header", 32,  0x0 , 0xff);
     SlotN    = new TH1F("SlotN", "Slot Number", 24,  0, 24);
     FiredChannels = new TH1F("FiredChannels", "FiredChannels", 128, -0.5, 127.5);
-    latencyScan   = new TH1F("latencyScan",   "Latency Scan", 256,  -0.5, 255.5);
+    latencyScan   = new TH1F("latencyScan",   "Latency Scan", 1024,  -0.5, 1023.5);
     latencyScan2D = new TH2F("latencyScan2D", "Latency Scan: Chan Vs Latency", 1024, -0.5, 1023.5, NCHANNELS, -0.5, NCHANNELS-0.5);
     const char *warning_labels[3] = {"Flag raised", "No channels fired", "Excessive channels fired"};
     const char *error_labels[1] = {"CRC mismatch"};
