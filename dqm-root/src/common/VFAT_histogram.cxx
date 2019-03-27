@@ -27,8 +27,8 @@ public:
     Header     = new TH1F("Header", "Header", 32,  0x0 , 0xff);
     SlotN    = new TH1F("SlotN", "Slot Number", 24,  0, 24);
     FiredChannels = new TH1F("FiredChannels", "FiredChannels", 128, -0.5, 127.5);
-    //FiredStrips   = new TH1F("FiredStrips",   "FiredStrips",   128, -0.5, 127.5);
-    latencyScan   = new TH1F("latencyScan",   "Latency Scan", 256,  -0.5, 255.5);
+    latencyScan   = new TH1F("latencyScan",   "Latency Scan", 1024,  -0.5, 1023.5);
+    latencyScan2D = new TH2F("latencyScan2D", "Latency Scan: Chan Vs Latency", 1024, -0.5, 1023.5, NCHANNELS, -0.5, NCHANNELS-0.5);
     const char *warning_labels[3] = {"Flag raised", "No channels fired", "Excessive channels fired"};
     const char *error_labels[1] = {"CRC mismatch"};
     Warnings = new TH1I("Warnings", "Warnings", 3,  0, 3);
@@ -95,12 +95,14 @@ public:
 	    chan0xf = ((vfat->lsData() >> i) & 0x1);
 	    if(chan0xf) {
 	      channelFired = true;
+          latencyScan2D->Fill(latency,i);
           n_h_fired++;
 	    }
       } else {
 	    chan0xf = ((vfat->msData() >> (i-64)) & 0x1);
 	    if(chan0xf) {
 	      channelFired = true;
+          latencyScan2D->Fill(latency,i);
           n_h_fired++;
 	    }
       }
@@ -122,6 +124,7 @@ private:
   TH1F* FiredChannels;    ///<Histogram for Fired Channels (uses lsData and fmData)
   TH1F* SlotN;
   TH1F* latencyScan;
+  TH2F* latencyScan2D;
   TH1I* Warnings;
   TH1I* Errors;
   int m_sn;
