@@ -21,19 +21,21 @@ public:
   */
   void bookHistograms(){
     m_dir->cd();
-    n_hits_per_event    = new TH1F("n_hits_per_event", "n_hits_per_event", 129,  -0.5 , 128.5);
-    BC       = new TH1F("BC", "Bunch Crossing Number", 4096,  -0.5, 4095.5);
-    EC       = new TH1F("EC", "Event Counter", 255,  0x0 , 0xff);
-    Header     = new TH1F("Header", "Header", 32,  0x0 , 0xff);
-    SlotN    = new TH1F("SlotN", "Slot Number", 24,  0, 24);
-    FiredChannels = new TH1F("FiredChannels", "FiredChannels", 128, -0.5, 127.5);
-    latencyScan   = new TH1F("latencyScan",   "Latency Scan", 1024,  -0.5, 1023.5);
-    latencyScan2D = new TH2F("latencyScan2D", "Latency Scan: Chan Vs Latency", 1024, -0.5, 1023.5, NCHANNELS, -0.5, NCHANNELS-0.5);
+    n_hits_per_event = new TH1F("n_hits_per_event", "n_hits_per_event", 129,  -0.5 , 128.5);
+    BC       				 = new TH1F("BC", "Bunch Crossing Number", 4096,  -0.5, 4095.5);
+    BC_mismatch 		 = new TH1F("BC_mismatch", "Bunch Crossing VFAT-AMC (BX - BC ID) mismatch", 40,  -20.0, 20.0);
+    EC       				 = new TH1F("EC", "Event Counter", 255,  0x0 , 0xff);
+    EC_mismatch 		 = new TH1F("EC_mismatch", "Event Counter VFAT-AMC13 (event counter - LV1_idT) mismatch", 40,  -20.0, 20.0);
+    Header     			 = new TH1F("Header", "Header", 32,  0x0 , 0xff);
+    SlotN    				 = new TH1F("SlotN", "Slot Number", 24,  0, 24);
+    FiredChannels 	 = new TH1F("FiredChannels", "FiredChannels", 128, -0.5, 127.5);
+    latencyScan   	 = new TH1F("latencyScan",   "Latency Scan", 1024,  -0.5, 1023.5);
+    latencyScan2D 	 = new TH2F("latencyScan2D", "Latency Scan: Chan Vs Latency", 1024, -0.5, 1023.5, NCHANNELS, -0.5, NCHANNELS-0.5);
     const char *warning_labels[3] = {"Flag raised", "No channels fired", "Excessive channels fired"};
     const char *error_labels[1] = {"CRC mismatch"};
-    Warnings = new TH1I("Warnings", "Warnings", 3,  0, 3);
+    Warnings 				 = new TH1I("Warnings", "Warnings", 3,  0, 3);
     for (int i = 1; i<4; i++) Warnings->GetXaxis()->SetBinLabel(i, warning_labels[i-1]);
-    Errors   = new TH1I("Errors", "Critical errors", 1,  0, 1);
+    Errors   				 = new TH1I("Errors", "Critical errors", 1,  0, 1);
     for (int i = 1; i<2; i++) Errors->GetXaxis()->SetBinLabel(i, error_labels[i-1]);
 
     //get maps
@@ -45,9 +47,11 @@ public:
   /*!
     This fills histograms for the following data: Difference between crc and recalculated crc, Control Bit 1010, Control Bit 1100, Control Bit 1110, Bunch Crossing Number, Event Counter, Control Flags, and Chip ID, and Fired Channels
   */
-  void fillHistograms(VFATdata * vfat, long long int orbitNumber){
+  void fillHistograms(VFATdata * vfat, AMCdata *amc, AMC13Event *amc13, long long int orbitNumber){
     BC->Fill(vfat->BC());
+    BC_mismatch->Fill(vfat->BC() - amc->BX());
     EC->Fill(vfat->EC());
+    EC_mismatch->Fill(vfat->EC() - amc13->LV1_idT());
     Header->Fill(vfat->Header());
     m_sn = std::stoi(m_HWID);
     //crc->Fill(vfat->crc());
@@ -60,17 +64,17 @@ public:
     int n_hits_fired = 0;
     for (int chan = 0; chan < 128; ++chan) {
       if (chan < 64){
-	chan0xf = ((vfat->lsData() >> chan) & 0x1);
-	if(chan0xf) {
-      n_hits_fired++;
-	  FiredChannels->Fill(chan);
-	}
+				chan0xf = ((vfat->lsData() >> chan) & 0x1);
+				if(chan0xf) {
+      		n_hits_fired++;
+	  			FiredChannels->Fill(chan);
+				}
       } else {
-	chan0xf = ((vfat->msData() >> (chan-64)) & 0x1);
-	if(chan0xf) {
-      n_hits_fired++;
-	  FiredChannels->Fill(chan);
-	}
+				chan0xf = ((vfat->msData() >> (chan-64)) & 0x1);
+				if(chan0xf) {
+      		n_hits_fired++;
+	  			FiredChannels->Fill(chan);
+				}
       }
     }
     n_hits_per_event->Fill(n_hits_fired);
@@ -92,19 +96,19 @@ public:
     for (int i = 0; i < 128; i++){
       uint16_t chan0xf = 0;
       if (i < 64){
-	    chan0xf = ((vfat->lsData() >> i) & 0x1);
-	    if(chan0xf) {
-	      channelFired = true;
-          latencyScan2D->Fill(latency,i);
-          n_h_fired++;
-	    }
+	    	chan0xf = ((vfat->lsData() >> i) & 0x1);
+	    	if(chan0xf) {
+	      	channelFired = true;
+        	latencyScan2D->Fill(latency,i);
+        	n_h_fired++;
+	    	}
       } else {
-	    chan0xf = ((vfat->msData() >> (i-64)) & 0x1);
-	    if(chan0xf) {
-	      channelFired = true;
-          latencyScan2D->Fill(latency,i);
-          n_h_fired++;
-	    }
+	    	chan0xf = ((vfat->msData() >> (i-64)) & 0x1);
+	    	if(chan0xf) {
+	      	channelFired = true;
+        	latencyScan2D->Fill(latency,i);
+        	n_h_fired++;
+	    	}
       }
     }// end loop on channels
     if (channelFired) {
@@ -119,8 +123,10 @@ public:
 private:
   TH1F* n_hits_per_event;
   TH1F* BC;               ///<Histogram for Bunch Crossing Number
+  TH1F* BC_mismatch;			///<Histogram for Bunch Crossing Number mismatch between VFATs and AMC
   TH1F* EC;               ///<Histogram for Event Counter
-  TH1F* Header;             ///<Histogram for Control Flags
+  TH1F* EC_mismatch;			///<Histogram for Event Counter mismatch bewteen VFATs and AMC13
+  TH1F* Header;           ///<Histogram for Control Flags
   TH1F* FiredChannels;    ///<Histogram for Fired Channels (uses lsData and fmData)
   TH1F* SlotN;
   TH1F* latencyScan;
@@ -153,9 +159,9 @@ private:
   {
     uint16_t crc_fin = 0xffff;
     for (int i = 11; i >= 1; i--)
-      {
-	crc_fin = this->crc_cal(crc_fin, dataVFAT[i]);
-      }
+    {
+			crc_fin = this->crc_cal(crc_fin, dataVFAT[i]);
+    }
     return(crc_fin);
   }
   //!Called by checkCRC

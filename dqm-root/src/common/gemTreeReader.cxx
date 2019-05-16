@@ -181,7 +181,7 @@ Bool_t gemTreeReader::Process(Long64_t entry)
       a_c=a->AMCnum();
       v_amcH = m_amc13H->amcsH(a_c);
       if (DEBUG) cout << "Get AMC H "<< endl;
-      if (v_amcH) v_amcH->fillHistograms(&*a);
+      if (v_amcH) v_amcH->fillHistograms(&*a, &*a13);
       if (DEBUG) cout << "Fill AMC histograms"<< endl;
       m_RunType = a->Rtype();
       if (m_RunType){
@@ -216,7 +216,7 @@ Bool_t gemTreeReader::Process(Long64_t entry)
           //if ( (slot == 6) || (slot == 7) || (slot == 8) || (slot == 14) || (slot == 15) || (slot == 19) || (slot == 22) || (slot == 23) ) continue;
           if (slot>-1) {v_vfatH = v_gebH->vfatsH(slot);} else { continue;}
           if (v_vfatH) {
-            v_vfatH->fillHistograms(&*v, m_RelOrbitNumber);
+            v_vfatH->fillHistograms(&*v, &*a, &*a13, m_RelOrbitNumber);
             //if (m_RunType == 1 || m_RunType == 2 || m_RunType == 3){
             if (m_RunType == 3){
               v_vfatH->fillScanHistograms(&*v, m_RunType, m_deltaV, m_Latency);
@@ -310,5 +310,6 @@ Bool_t gemTreeReader::Notify()
 
    return kTRUE;
 }
+
 
 
