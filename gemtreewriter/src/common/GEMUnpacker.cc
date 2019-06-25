@@ -64,37 +64,54 @@ class GEMUnpacker
         m_AMC13Event = new AMC13Event();
         //std::fread(&m_word, sizeof(uint64_t), 1, m_file);
         //printf("%016llX\n", m_word);
+        
+        //HAD READ LINE 7 SOMEWHERE ABOVE.
         m_AMC13Event->setCDFHeader(m_word);
+         
+         
+        //READS LINE 8
         std::fread(&m_word, sizeof(uint64_t), 1, m_file);
         //printf("%016llX\n", m_word);
         m_AMC13Event->setAMC13header(m_word);
         //printf("%016llX\n", m_word);
         //std::cout << "n_AMC = " << m_AMC13Event->nAMC() << std::endl;
-        // Readout out AMC headers
+        
+         //FROM 9 to 15
+         //Readout out AMC headers
         for (unsigned short i = 0; i < m_AMC13Event->nAMC(); i++){
           std::fread(&m_word, sizeof(uint64_t), 1, m_file);
         //printf("%016llX\n", m_word);
           m_AMC13Event->addAMCheader(m_word);
         }
-        // Readout out AMC payloads
+         
+         
+        //FROM 16 to 29
+        //Readout out AMC payloads
         for (unsigned short i = 0; i < m_AMC13Event->nAMC(); i++){
           AMCdata * m_amcdata = new AMCdata();
+          //43
           std::fread(&m_word, sizeof(uint64_t), 1, m_file);
         //printf("AMC HEADER1\n");
         //printf("%016llX\n", m_word);
           m_amcdata->setAMCheader1(m_word);
+          //44
           std::fread(&m_word, sizeof(uint64_t), 1, m_file);
         //printf("AMC HEADER2\n");
         //printf("%016llX\n", m_word);
           m_amcdata->setAMCheader2(m_word);
+          //52
           std::fread(&m_word, sizeof(uint64_t), 1, m_file);
           m_amcdata->setGEMeventHeader(m_word);
         //printf("GEM EVENT HEADER\n");
         //printf("%016llX\n", m_word);
+           
+            
+          //FROM 53-62 (CHAMER PAYLOUT READOUT)
           // fill the geb data here
           //std::cout << "GDcount = " << m_amcdata->GDcount() << std::endl;
           for (unsigned short j = 0; j < m_amcdata->GDcount(); j++){
             GEBdata * m_gebdata = new GEBdata();
+            //FROM 68
             std::fread(&m_word, sizeof(uint64_t), 1, m_file);
             m_gebdata->setChamberHeader(m_word);
         //printf("GEM CHAMBER HEADER\n");
@@ -103,6 +120,10 @@ class GEMUnpacker
             //std::cout << "Number of VFAT words " << m_gebdata->Vwh() << std::endl;
             int m_nvb = m_gebdata->Vwh() / 3; // number of VFAT2 blocks. Eventually add here sanity check
             //printf("N vfat blocks %d\n",m_nvb);
+            
+            
+              
+            //FROM 69-70
             for (unsigned short k = 0; k < m_nvb; k++){
               VFATdata * m_vfatdata = new VFATdata();
               // read 3 vfat block words, totaly 192 bits
@@ -127,13 +148,16 @@ class GEMUnpacker
               m_gebdata->v_add(*m_vfatdata);
               delete m_vfatdata;
             }
+            //FROM 71
             std::fread(&m_word, sizeof(uint64_t), 1, m_file);
             m_gebdata->setChamberTrailer(m_word);
             m_amcdata->g_add(*m_gebdata);
             delete m_gebdata;
           }
+          //FROM 63
           std::fread(&m_word, sizeof(uint64_t), 1, m_file);
           m_amcdata->setGEMeventTrailer(m_word);
+          //FROM 47
           std::fread(&m_word, sizeof(uint64_t), 1, m_file);
         //printf("AMC TRALIER\n");
         //printf("%016llX\n", m_word);
@@ -141,8 +165,10 @@ class GEMUnpacker
           m_AMC13Event->addAMCpayload(*m_amcdata);
           delete m_amcdata;
         }
+        //FROM 30
         std::fread(&m_word, sizeof(uint64_t), 1, m_file);
         m_AMC13Event->setAMC13trailer(m_word);
+        //FROM 37
         std::fread(&m_word, sizeof(uint64_t), 1, m_file);
         m_AMC13Event->setCDFTrailer(m_word);
         ev->Build(true);
