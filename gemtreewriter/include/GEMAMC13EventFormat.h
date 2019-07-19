@@ -477,6 +477,7 @@ class AMC13Event
     uint32_t m_OrN;
     uint8_t m_cb0; // control bit, should be 0b0000
     // AMC headers
+    std::vector<uint8_t> m_AMC_errorStrip;
     std::vector<uint32_t> m_AMC_size;
     std::vector<uint8_t> m_Blk_No;
     std::vector<uint8_t> m_AMC_No;
@@ -544,6 +545,7 @@ class AMC13Event
     */
     void addAMCheader(uint64_t word)
     {
+      m_AMC_errorStrip.push_back(0b1000&(word>>56));
       m_AMC_size.push_back(0x00ffffff&(word>>32));
       m_Blk_No.push_back(0xff&(word>>20));
       m_AMC_No.push_back(0x0f&(word>>16));
