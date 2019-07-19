@@ -304,7 +304,8 @@ class AMCdata
       uint16_t m_BID;
       
 	
-      bool lengthErr=false;
+      bool Err=false;
+      uint8_t ErrCode=0x0;
 
     //GEM event header
 
@@ -459,7 +460,7 @@ class AMCdata
     uint8_t L1AT()    {return m_L1AT;}
     uint32_t DlengthT()    {return m_DlengthT;}
 
-    void LE(){lengthErr=true;}
+    void LE(uint8_t helper){Err=true;ErrCode=helper;}
 	
     //!Adds GEB data to vector
     void g_add(GEBdata g){gebd.push_back(g);}
@@ -579,12 +580,9 @@ class AMC13Event
       m_EvtLength = 0x00ffffff & (word >> 32);
       m_CRC_cdf = 0xffff & (word >> 16);
     }
-    bool LengthErrf(int i){
-	    return (m_AMC_errorStrip.at(i)>=0b1000000);
-    }
-    uint32_t LengthErrs(int i){
-	    return m_AMC_size;
-    }
+    bool Errgfint i){return (m_AMC_errorStrip.at(i)&0x40==0x40)||(m_AMC_errorStrip.at(i)&0b1==0b1)||(m_AMC_errorStrip.at(i)&0b10==0b10);}
+    uint8_t Errs(int i){return m_AMC_errorStrip.at(i);}
+    uint32_t Errt(int i){return m_AMC_size;}
 
 };
 
