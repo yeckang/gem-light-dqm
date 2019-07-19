@@ -574,6 +574,9 @@ class AMC13Event
       m_EvtLength = 0x00ffffff & (word >> 32);
       m_CRC_cdf = 0xffff & (word >> 16);
     }
+    bool LengthErr(int i){
+	    return (m_AMC_errorStrip.at(i)>=0b1000000);
+    }
 
 };
 
