@@ -89,7 +89,14 @@ class GEMUnpacker
         //Readout out AMC payloads
         for (unsigned short i = 0; i < m_AMC13Event->nAMC(); i++){
           AMCdata * m_amcdata = new AMCdata();
-          if(m_AMC13Event->LengthErr(i)){copydownalllines;m_AMC13Event->addAMCpayload(*m_amcdata);continue;}
+          if(m_AMC13Event->LengthErrf(i)){
+              m_acmdata->LE();
+              for(int j=0;j<int(m_AMC13Event->LengthErrs(i));j++){
+                  std::fread(&m_word, sizeof(uint64_t), 1, m_file);
+              }
+              m_AMC13Event->addAMCpayload(*m_amcdata);
+              continue;
+          }
           //43
           std::fread(&m_word, sizeof(uint64_t), 1, m_file);
         //printf("AMC HEADER1\n");
