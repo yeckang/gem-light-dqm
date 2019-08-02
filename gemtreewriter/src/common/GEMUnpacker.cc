@@ -53,7 +53,7 @@ class GEMUnpacker
           std::fread(&m_word, sizeof(uint64_t), 1, m_file);
           printf("%016llX\n", m_word);
           // ferol headers read and printed, now read CDF header
-          //std::fread(&m_word, sizeof(uint64_t), 1, m_file);
+          std::fread(&m_word, sizeof(uint64_t), 1, m_file);
         } else {
           std::size_t sz = std::fread(&m_word, sizeof(uint64_t), 1, m_file);
           if (sz == 0 ) break;
