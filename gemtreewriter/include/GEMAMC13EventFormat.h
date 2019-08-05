@@ -582,7 +582,7 @@ class AMC13Event
     }
     //bool Errgfint(int i){return (m_AMC_errorStrip.at(i)&0x40!=0x40)||(m_AMC_errorStrip.at(i)&0b1!=0b1)||(m_AMC_errorStrip.at(i)&0b10!=0b10);}
     //uint8_t Errs(int i){return m_AMC_errorStrip.at(i);}
-    uint32_t Errt(int i){return m_AMC_size;}
+    uint32_t Errt(int i){return m_AMC_size.at(i);}
 
 };
 
