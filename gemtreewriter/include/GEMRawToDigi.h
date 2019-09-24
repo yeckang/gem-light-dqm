@@ -12,15 +12,15 @@ public:
   /// Constructor
   GEMRawToDigi(){};
 
-  std::unique_ptr<gem::AMC13Event> convertWordToAMC13Event(const uint64_t* word);
+  gem::AMC13Event* convertWordToAMC13Event(const uint64_t* word);
 
 private:
 };
 
 using namespace gem;
 
-std::unique_ptr<AMC13Event> GEMRawToDigi::convertWordToAMC13Event(const uint64_t* word) {
-  auto amc13Event = std::make_unique<AMC13Event>();
+AMC13Event* GEMRawToDigi::convertWordToAMC13Event(const uint64_t* word) {
+  auto amc13Event = new AMC13Event();
 
   amc13Event->setCDFHeader(*word);
   amc13Event->setAMC13Header(*(++word));

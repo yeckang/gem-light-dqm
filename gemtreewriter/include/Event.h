@@ -28,6 +28,9 @@ typedef char __signed;
 #include "TBits.h"
 #include "TMath.h"
 #include "AMC13Event.h"
+#include "AMCdata.h"
+#include "GEBdata.h"
+#include "VFATdata.h"
 
 class eEventHeader {
 
@@ -52,7 +55,7 @@ class Event : public TObject {
     private:
         eEventHeader    fEvtHdr;
         
-        std::vector<AMC13Event> famc13s;      // 
+        std::vector<gem::AMC13Event> famc13s;      // 
 
         bool fisEventGood;
 
@@ -62,10 +65,10 @@ class Event : public TObject {
         void SetHeader(Int_t i, Int_t run, Int_t date);
         int GetEventNumber(){return fEvtHdr.GetEvtNum();}
         void Build(bool isEventGood_);
-        void addAMC13Event(const AMC13Event &amc13event){famc13s.push_back(amc13event);}
+        void addAMC13Event(const gem::AMC13Event &amc13event){famc13s.push_back(amc13event);}
         void Clear();
 
-        std::vector<AMC13Event> amc13s(){ return famc13s;}
+        std::vector<gem::AMC13Event> amc13s(){ return famc13s;}
 
         ClassDef(Event,1)               //Event structure
 };

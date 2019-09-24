@@ -70,18 +70,15 @@ namespace gem {
     ~AMCdata() { gebd_.clear(); }
 
     void setAMCheader1(uint64_t word) { amch1_ = word; }
-    void setAMCheader1(uint32_t dataLength, uint16_t bxID, uint32_t l1AID, uint8_t AMCnum);
     uint64_t getAMCheader1() const { return amch1_; }
 
     void setAMCheader2(uint64_t word) { amch2_ = word; }
-    void setAMCheader2(uint16_t boardID, uint16_t orbitNum, uint8_t runType);
     uint64_t getAMCheader2() const { return amch2_; }
 
     void setAMCTrailer(uint64_t word) { amct_ = word; }
     uint64_t getAMCTrailer() const { return amct_; }
 
     void setGEMeventHeader(uint64_t word) { eh_ = word; }
-    void setGEMeventHeader(uint8_t davCnt, uint32_t davList);
     uint64_t getGEMeventHeader() const { return eh_; }
 
     void setGEMeventTrailer(uint64_t word) { et_ = word; }
@@ -130,42 +127,4 @@ namespace gem {
     std::vector<GEBdata> gebd_;  ///<Vector of GEB data
   };
 }  // namespace gem
-
-using namespace gem;
-
-void AMCdata::setAMCheader1(uint32_t dataLength, uint16_t bxID, uint32_t l1AID, uint8_t AMCnum) {
-  AMCheader1 u{0};
-  u.dataLength = dataLength;
-  u.bxID = bxID;
-  u.l1AID = l1AID;
-  u.AMCnum = AMCnum;
-  amch1_ = u.word;
-
-  AMCTrailer ut{0};
-  ut.dataLength = dataLength;
-  ut.l1AIDT = l1AID;
-  amct_ = ut.word;
-}
-
-void AMCdata::setAMCheader2(uint16_t boardID, uint16_t orbitNum, uint8_t runType) {
-  AMCheader2 u{0};
-  u.boardID = boardID;
-  u.orbitNum = orbitNum;
-  u.runType = runType;
-  amch2_ = u.word;
-}
-
-void AMCdata::setGEMeventHeader(uint8_t davCnt, uint32_t davList) {
-  EventHeader u{0};
-  u.davCnt = davCnt;
-  u.davList = davList;
-  eh_ = u.word;
-
-  EventTrailer ut{0};
-  ut.BCL = 1;
-  ut.DR = 1;
-  ut.CL = 1;
-  ut.ML = 1;
-  et_ = ut.word;
-}
 #endif
