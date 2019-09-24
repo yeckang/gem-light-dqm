@@ -16,189 +16,78 @@
 class GEMUnpacker
 {
   public:
-    GEMUnpacker(const std::string & ifilename, const std::string & isFedKit)
-    {
-      try {
-        m_file = std::fopen(ifilename.c_str(), "rb");
-      }
-      catch (int e)
-      {
-        std::cout << "An exception occured. Exception code " << e << std::endl;
-      }
-      ofilename = ifilename.substr(0, ifilename.size()-4);
-      ofilename += ".raw.root";
-      m_isFedKit = isFedKit;
-    }
+    GEMUnpacker(const std::string & ifilename, const std::string & isFedKit);
     ~GEMUnpacker()
-    {
-      if (m_file != NULL) std::fclose(m_file);
-    }
-    
-    int freadwCare(uint32_t mc,uint32_t pc){//CHECKS IF GREATER THAN ORIGINAL
-        if(mc>pc){std::fread(&m_word, sizeof(uint64_t), 1, m_file); return (cc+=1);}
-        else{return cc;}
-    }
-    
-    //if(freadwCare(AMC13Event->Errt(i),cc)==cc){continue;}else{cc+=1;}
-    
-    void unpack()
-    {
-
-     TFile *hfile = new TFile(ofilename.c_str(),"RECREATE","GEM Raw ROOT");
-     TTree GEMtree("GEMtree","A Tree with GEM Events");
-     Event *ev = new Event(); 
-     GEMtree.Branch("GEMEvents", &ev);
-
-     while (true){
-        // read and print FEROL headers
-        if (m_isFedKit == "ferol") {
-          std::size_t sz = std::fread(&m_word, sizeof(uint64_t), 1, m_file);
-          if (sz == 0 ) break;
-          //printf("%016llX\n", m_word);
-          std::fread(&m_word, sizeof(uint64_t), 1, m_file);
-          //printf("%016llX\n", m_word);
-          std::fread(&m_word, sizeof(uint64_t), 1, m_file);
-          //printf("%016llX\n", m_word);
-          // ferol headers read and printed, now read CDF header
-          std::fread(&m_word, sizeof(uint64_t), 1, m_file);
-        } else {
-          std::size_t sz = std::fread(&m_word, sizeof(uint64_t), 1, m_file);
-          if (sz == 0 ) break;
-        }
-        // read and print "BADC0FFEEBADCAFE" and another artificial header
-        //printf("%016llX\n", m_word);
-        //std::fread(&m_word, sizeof(uint64_t), 1, m_file);
-        //printf("%016llX\n", m_word);
-        m_AMC13Event = new AMC13Event();
-        //std::fread(&m_word, sizeof(uint64_t), 1, m_file);
-        //printf("%016llX\n", m_word);
-        
-        //HAD READ LINE 7 SOMEWHERE ABOVE.
-        m_AMC13Event->setCDFHeader(m_word);
-         
-         
-        //READS LINE 8
-        std::fread(&m_word, sizeof(uint64_t), 1, m_file);
-        //printf("%016llX\n", m_word);
-        m_AMC13Event->setAMC13header(m_word);
-        //printf("%016llX\n", m_word);
-        //std::cout << "n_AMC = " << m_AMC13Event->nAMC() << std::endl;
-        
-         //FROM 9 to 15
-         //Readout out AMC headers
-        for (unsigned short i = 0; i < m_AMC13Event->nAMC(); i++){
-          std::fread(&m_word, sizeof(uint64_t), 1, m_file);
-        //printf("%016llX\n", m_word);
-          m_AMC13Event->addAMCheader(m_word);
-        }
-         
-         
-        //FROM 16 to 29
-        //Readout out AMC payloads
-        for (unsigned short i = 0; i < m_AMC13Event->nAMC(); i++){
-          help:
-          AMCdata * m_amcdata = new AMCdata();
-          uint32_t cc=0b0;
-          //43
-          if(freadwCare(AMC13Event->Errt(i),cc)==cc){m_AMC13Event->addAMCpayload(*m_amcdata);delete m_amcdata;continue;}else{cc+=0b1;}
-        //printf("AMC HEADER1\n");
-        //printf("%016llX\n", m_word);
-          m_amcdata->setAMCheader1(m_word);
-          //44
-          if(freadwCare(AMC13Event->Errt(i),cc)==cc){m_AMC13Event->addAMCpayload(*m_amcdata);delete m_amcdata;continue;}else{cc+=0b1;}
-        //printf("AMC HEADER2\n");
-        //printf("%016llX\n", m_word);
-          m_amcdata->setAMCheader2(m_word);
-          //52
-          if(freadwCare(AMC13Event->Errt(i),cc)==cc){m_AMC13Event->addAMCpayload(*m_amcdata);delete m_amcdata;continue;}else{cc+=0b1;}
-          m_amcdata->setGEMeventHeader(m_word);
-        //printf("GEM EVENT HEADER\n");
-        //printf("%016llX\n", m_word);
-           
-            
-          //FROM 53-62 (CHAMER PAYLOUT READOUT)
-          // fill the geb data here
-          //std::cout << "GDcount = " << m_amcdata->GDcount() << std::endl;
-          for (unsigned short j = 0; j < m_amcdata->GDcount(); j++){
-            GEBdata * m_gebdata = new GEBdata();
-            //FROM 68
-            if(freadwCare(AMC13Event->Errt(i),cc)==cc){m_amcdata->g_add(*m_gebdata);delete m_gebdata;m_AMC13Event->addAMCpayload(*m_amcdata);delete m_amcdata;goto help;}else{cc+=0b1;}
-            m_gebdata->setChamberHeader(m_word);
-        //printf("GEM CHAMBER HEADER\n");
-        //printf("%016llX\n", m_word);
-            // fill the vfat data here
-            //std::cout << "Number of VFAT words " << m_gebdata->Vwh() << std::endl;
-            int m_nvb = m_gebdata->Vwh() / 3; // number of VFAT2 blocks. Eventually add here sanity check
-            //printf("N vfat blocks %d\n",m_nvb);
-            
-            
-              
-            //FROM 69-70
-            for (unsigned short k = 0; k < m_nvb; k++){
-              VFATdata * m_vfatdata = new VFATdata();
-              // read 3 vfat block words, totaly 192 bits
-              if(freadwCare(AMC13Event->Errt(i),cc)==cc){m_gebdata->v_add(*m_vfatdata);delete m_vfatdata;m_amcdata->g_add(*m_gebdata);delete m_gebdata;m_AMC13Event->addAMCpayload(*m_amcdata);delete m_amcdata;goto help;}else{cc+=0b1;}
-        //printf("VFAT WORD 1\n");
-        //printf("%016llX\n", m_word);
-              m_vfatdata->read_fw(m_word);
-              if(freadwCare(AMC13Event->Errt(i),cc)==cc){m_gebdata->v_add(*m_vfatdata);delete m_vfatdata;m_amcdata->g_add(*m_gebdata);delete m_gebdata;m_AMC13Event->addAMCpayload(*m_amcdata);delete m_amcdata;goto help;}else{cc+=0b1;}
-        //printf("VFAT WORD 2\n");
-        //printf("%016llX\n", m_word);
-              m_vfatdata->read_sw(m_word);
-              if(freadwCare(AMC13Event->Errt(i),cc)==cc){m_gebdata->v_add(*m_vfatdata);delete m_vfatdata;m_amcdata->g_add(*m_gebdata);delete m_gebdata;m_AMC13Event->addAMCpayload(*m_amcdata);delete m_amcdata;goto help;}else{cc+=0b1;}
-        //printf("VFAT WORD 3\n");
-        //printf("%016llX\n", m_word);
-              m_vfatdata->read_tw(m_word);
-              //
-        //printf("VFAT MS Data 3\n");
-        //printf("%016llX\n", m_vfatdata->msData());
-        //printf("VFAT LS Data 3\n");
-        //printf("%016llX\n", m_vfatdata->lsData());
-              //
-              m_gebdata->v_add(*m_vfatdata);
-              delete m_vfatdata;
-            }
-            //FROM 71
-            if(freadwCare(AMC13Event->Errt(i),cc)==cc){m_amcdata->g_add(*m_gebdata);delete m_gebdata;m_AMC13Event->addAMCpayload(*m_amcdata);delete m_amcdata;goto help;}else{cc+=0b1;}
-            m_gebdata->setChamberTrailer(m_word);
-            m_amcdata->g_add(*m_gebdata);
-            delete m_gebdata;
-          }
-          //FROM 63
-          if(freadwCare(AMC13Event->Errt(i),cc)==cc){m_AMC13Event->addAMCpayload(*m_amcdata);delete m_amcdata;goto help;}else{cc+=0b1;}
-          m_amcdata->setGEMeventTrailer(m_word);
-          //FROM 47
-          if(freadwCare(AMC13Event->Errt(i),cc)==cc){m_AMC13Event->addAMCpayload(*m_amcdata);delete m_amcdata;goto help;}else{cc+=0b1;}
-        //printf("AMC TRALIER\n");
-        //printf("%016llX\n", m_word);
-          m_amcdata->setAMCTrailer(m_word);
-          m_AMC13Event->addAMCpayload(*m_amcdata);
-          delete m_amcdata;
-        }
-        //FROM 30
-        std::fread(&m_word, sizeof(uint64_t), 1, m_file);
-        m_AMC13Event->setAMC13trailer(m_word);
-        //FROM 37
-        std::fread(&m_word, sizeof(uint64_t), 1, m_file);
-        m_AMC13Event->setCDFTrailer(m_word);
-        ev->Build(true);
-        ev->SetHeader(m_AMC13Event->LV1_id(), 0, 0);
-        ev->addAMC13Event(*m_AMC13Event);
-        GEMtree.Fill();
-        ev->Clear();
-      }
-      hfile->Write();// Save file with tree
-    }
+    void unpack();
   private:
     std::FILE *m_file;
-    uint64_t m_word;
-    uint32_t m_word32;
-    bool type;
+    uint64_t* m_word;
+    uint64_t* begin;
+    uint64_t* end;
+    GEMRawToDigi rawToDigi;
     AMC13Event * m_AMC13Event;
     std::string ofilename;
     std::string m_isFedKit;
 };
+GEMUnpacker::GEMUnpacker(const std::string & ifilename, const std::string & isFedKit)
+{
+  try {
+    m_file = std::fopen(ifilename.c_str(), "rb");
+    vector<uint64_t> testWord;
+    uint64_t temp_word;
+    while (true){
+      std::size_t sz = std::fread(&temp_word, sizeof(uint64_t), 1, m_file);
+      if (sz == 0 ) break;
+      else testWord.push_back(temp_word);
+    }
+    uint64_t *word = new uint64_t[testWord.size()];
+    copy(testWord.begin(), testWord.end(), word);
+    begin = word;
+    end = word + testWord.size();
+  }
+  catch (int e)
+  {
+    std::cout << "An exception occured. Exception code " << e << std::endl;
+  }
+  ofilename = ifilename.substr(0, ifilename.size()-4);
+  ofilename += ".raw.root";
+  m_isFedKit = isFedKit;
+}
+
+GEMUnpacker::~GEMUnpacker()
+{
+  if (m_file != NULL) std::fclose(m_file);
+}
  
+void unpack()
+{
+  TFile *hfile = new TFile(ofilename.c_str(),"RECREATE","GEM Raw ROOT");
+  TTree GEMtree("GEMtree","A Tree with GEM Events");
+  Event *ev = new Event(); 
+  GEMtree.Branch("GEMEvents", &ev);
+
+  while(word != end) {
+    if (m_isFedKit == "ferol") word+=3;
+    auto amc13Event = rawToDigi.convertWordToAMC13Event(word);
+    
+    if (amc13Event == NULL) {
+      cout << "RAW FILE have error!!" << endl;
+      return 1;
+    }
+
+    for (auto amcHeader : *(amc13Event->getAMCheaders())) {
+      cout << "amcSize :: " << ((gem::AMCHeader{amcHeader}.amcSize)) << endl;
+    }
+    cout << "amc13Event length :: " << gem::CDFTrailer{amc13Event->getCDFTrailer()}.evtLength << endl;
+    word+= gem::CDFTrailer{amc13Event->getCDFTrailer()}.evtLength;
+    ev->Build(true);
+    ev->SetHeader(m_AMC13Event->LV1_id(), 0, 0);
+    ev->addAMC13Event(*m_AMC13Event);
+    GEMtree.Fill();
+    ev->Clear();
+  }
+  hfile->Write();// Save file with tree
+}
 int main (int argc, char** argv)
 {
   std::cout << "[GEMUnpacker]: ---> Main()" << std::endl;
@@ -210,7 +99,6 @@ int main (int argc, char** argv)
   }
   std::string ifile   = argv[1];
   std::string isFedKit = argv[2];
-
   GEMUnpacker * m_unpacker = new GEMUnpacker(ifile, isFedKit);
   m_unpacker->unpack();
   delete m_unpacker;
