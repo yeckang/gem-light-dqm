@@ -37,7 +37,7 @@
 //  The Event class is a naive/simple example of a GEM event structure.
 //
 //    private:
-//        EventHeader    fEvtHdr;
+//        eEventHeader    fEvtHdr;
 //        
 //        //uint64_t header1;             // AmcNo:4      0000:4     LV1ID:24   BXID:12     DataLgth:20 
 //        uint8_t AmcNo;
@@ -65,7 +65,7 @@
 //        uint8_t b0000T;
 //        uint32_t DataLgthT;
 //  
-//  The EventHeader class has 3 data members (integers):
+//  The eEventHeader class has 3 data members (integers):
 //     public:
 //        Int_t          fEvtNum;
 //        Int_t          fRun;
@@ -81,7 +81,7 @@
 
 #include "Event.h"
 
-ClassImp(EventHeader)
+ClassImp(eEventHeader)
 ClassImp(Event)
 
 Event::Event()
