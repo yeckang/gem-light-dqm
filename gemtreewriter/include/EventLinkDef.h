@@ -4,7 +4,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class EventHeader+;
+#pragma link C++ class eEventHeader+;
 #pragma link C++ class Event+;
 #pragma link C++ class VFATdata+;
 #pragma link C++ class GEBdata+;

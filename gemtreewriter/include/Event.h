@@ -27,9 +27,9 @@ typedef char __signed;
 #include "TH1.h"
 #include "TBits.h"
 #include "TMath.h"
-#include "GEMAMC13EventFormat.h"
+#include "AMC13Event.h"
 
-class EventHeader {
+class eEventHeader {
 
     private:
        Int_t   fEvtNum;
@@ -37,20 +37,20 @@ class EventHeader {
        Int_t   fDate;
     
     public:
-       EventHeader() : fEvtNum(0), fRun(0), fDate(0) { }
-       virtual ~EventHeader() { }
+       eEventHeader() : fEvtNum(0), fRun(0), fDate(0) { }
+       virtual ~eEventHeader() { }
        void   Set(Int_t i, Int_t r, Int_t d) { fEvtNum = i; fRun = r; fDate = d; }
        Int_t  GetEvtNum() const { return fEvtNum; }
        Int_t  GetRun() const { return fRun; }
        Int_t  GetDate() const { return fDate; }
     
-       ClassDef(EventHeader,1)              //Event Header
+       ClassDef(eEventHeader,1)              //Event Header
 };
 
 class Event : public TObject {
 
     private:
-        EventHeader    fEvtHdr;
+        eEventHeader    fEvtHdr;
         
         std::vector<AMC13Event> famc13s;      // 
 
